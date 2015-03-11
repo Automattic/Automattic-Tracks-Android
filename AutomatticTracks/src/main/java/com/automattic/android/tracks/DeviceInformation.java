@@ -3,6 +3,7 @@ package com.automattic.android.tracks;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -31,24 +32,21 @@ import java.lang.reflect.Method;
     private final Boolean mHasNFC;
     private final Boolean mHasTelephony;
     private final DisplayMetrics mDisplayMetrics;
+    private final String mAppName;
     private final String mAppVersionName;
     private final Integer mAppVersionCode;
-    private final String mOs;
-    private final String mOSVersion;
-    private final String mManufacturer;
-    private final String mBrand;
-    private final String mModel;
+
 
     private final JSONObject mImmutableDeviceInfoJSON;
 
     public DeviceInformation(Context context) {
         mContext = context;
 
-        mOs = "Android";
-        mOSVersion = Build.VERSION.RELEASE == null ? "UNKNOWN" : Build.VERSION.RELEASE;
-        mManufacturer = Build.MANUFACTURER == null ? "UNKNOWN" : Build.MANUFACTURER;
-        mBrand = Build.BRAND == null ? "UNKNOWN" : Build.BRAND;
-        mModel = Build.MODEL == null ? "UNKNOWN" : Build.MODEL;
+        final String mOs = "Android";
+        final String mOSVersion = Build.VERSION.RELEASE == null ? "UNKNOWN" : Build.VERSION.RELEASE;
+        final String mManufacturer = Build.MANUFACTURER == null ? "UNKNOWN" : Build.MANUFACTURER;
+        final String mBrand = Build.BRAND == null ? "UNKNOWN" : Build.BRAND;
+        final String mModel = Build.MODEL == null ? "UNKNOWN" : Build.MODEL;
 
         PackageManager packageManager = mContext.getPackageManager();
 
@@ -62,6 +60,14 @@ import java.lang.reflect.Method;
             Log.w(LOGTAG, "System information constructed with a context that apparently doesn't exist.");
         }
 
+        ApplicationInfo applicationInfo = null;
+        try {
+            applicationInfo = packageManager.getApplicationInfo(mContext.getApplicationInfo().packageName, 0);
+        } catch (final NameNotFoundException e) {
+            Log.w(LOGTAG, "System information constructed with a context that apparently doesn't exist.");
+        }
+
+        mAppName =  (applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo).toString() : "Unknown");
         mAppVersionName = foundAppVersionName;
         mAppVersionCode = foundAppVersionCode;
 
@@ -104,6 +110,7 @@ import java.lang.reflect.Method;
             mImmutableDeviceInfoJSON.put("manufacturer", mManufacturer);
             mImmutableDeviceInfoJSON.put("brand", mBrand);
             mImmutableDeviceInfoJSON.put("model", mModel);
+            mImmutableDeviceInfoJSON.put("app_name", getAppName());
             mImmutableDeviceInfoJSON.put("app_version", getAppVersionName());
             mImmutableDeviceInfoJSON.put("app_version_code", Integer.toString(getAppVersionCode()));
         } catch (final JSONException e) {
@@ -159,7 +166,7 @@ import java.lang.reflect.Method;
         return mImmutableDeviceInfoJSON;
     }
 
-
+    public String getAppName() { return mAppName; }
 
     public String getAppVersionName() { return mAppVersionName; }
 

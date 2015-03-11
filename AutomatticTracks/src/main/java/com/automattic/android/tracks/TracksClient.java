@@ -1,6 +1,7 @@
 package com.automattic.android.tracks;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -60,8 +61,15 @@ public class TracksClient {
     // This is the main queue of Events.
     private final LinkedList<Event> mMainEventsQueue = new LinkedList();
 
+    public static TracksClient getClient(Context ctx) {
+        if (null == ctx || !checkBasicConfiguration(ctx)) {
+            return null;
+        }
 
-    public TracksClient(Context ctx) {
+        return new TracksClient(ctx);
+    }
+
+    private TracksClient(Context ctx) {
         mContext = ctx;
 
         mQueue = Volley.newRequestQueue(ctx);
@@ -84,6 +92,27 @@ public class TracksClient {
                 }
             }
         }).start();
+    }
+
+    private static boolean checkBasicConfiguration(Context context) {
+        final PackageManager packageManager = context.getPackageManager();
+        final String packageName = context.getPackageName();
+
+        if (PackageManager.PERMISSION_GRANTED != packageManager.checkPermission("android.permission.INTERNET", packageName)) {
+            Log.w(LOGTAG, "Package does not have permission android.permission.INTERNET - Nosara Client will not work at all!");
+            Log.i(LOGTAG, "You can fix this by adding the following to your AndroidManifest.xml file:\n" +
+                    "<uses-permission android:name=\"android.permission.INTERNET\" />");
+            return false;
+        }
+
+        if (PackageManager.PERMISSION_GRANTED != packageManager.checkPermission("android.permission.ACCESS_NETWORK_STATE", packageName)) {
+            Log.w(LOGTAG, "Package does not have permission android.permission.ACCESS_NETWORK_STATE - Nosara Client will not work at all!");
+            Log.i(LOGTAG, "You can fix this by adding the following to your AndroidManifest.xml file:\n" +
+                    "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />");
+            return false;
+        }
+
+        return true;
     }
 
     public void registerUserProperties(JSONObject props) {
