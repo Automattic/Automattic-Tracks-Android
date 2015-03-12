@@ -13,6 +13,7 @@ import com.android.volley.Response.Listener;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.automattic.android.tracks.Exceptions.EventNameException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -187,13 +188,19 @@ public class TracksClient {
     }
 
     public void track(String eventName, JSONObject customProps, String user, NosaraUserType userType) {
-        Event event = new Event(
-                eventName,
-                user,
-                userType,
-                getUserAgent(),
-                System.currentTimeMillis()
-        );
+        Event event = null;
+        try {
+            event = new Event(
+                    eventName,
+                    user,
+                    userType,
+                    getUserAgent(),
+                    System.currentTimeMillis()
+            );
+        } catch (EventNameException e) {
+            Log.e(LOGTAG, "Cannot create the event " +eventName, e);
+            return;
+        }
 
         JSONObject deviceInfo = deviceInformation.getMutableDeviceInfo();
         if (deviceInfo != null && deviceInfo.length() > 0) {

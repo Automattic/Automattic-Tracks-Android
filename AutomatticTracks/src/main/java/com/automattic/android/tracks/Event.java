@@ -2,6 +2,8 @@ package com.automattic.android.tracks;
 
 import android.util.Log;
 
+import com.automattic.android.tracks.Exceptions.EventNameException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,12 +25,29 @@ public class Event implements Serializable {
     private JSONObject mDeviceInfo;
     private JSONObject mCustomEventProps;
 
-    public Event(String mEventName, String userID, TracksClient.NosaraUserType uType, String userAgent, long timeStamp) {
+    public Event(String mEventName, String userID, TracksClient.NosaraUserType uType,
+                 String userAgent, long timeStamp) throws EventNameException {
+        checkEventName(mEventName);
         this.mEventName = mEventName;
         this.mUser = userID;
         this.mUserType = uType;
         this.mUserAgent = userAgent;
         this.mTimeStamp = timeStamp;
+    }
+
+    private void checkEventName(String name) throws EventNameException {
+        if (name.contains("-")) {
+            String errorMessage = "Event name must not contains dashes.";
+            throw new EventNameException(errorMessage);
+        }
+
+        if (StringUtils.containsWhiteSpace(name)) {
+            throw new EventNameException("Event name must not contains whitespace.");
+        }
+
+        if (!name.matches("^[a-z_][a-z0-9_]*$")) {
+            throw new EventNameException("Event name must match: ^[a-z_][a-z0-9_]*$");
+        }
     }
 
     public String getEventName() {
