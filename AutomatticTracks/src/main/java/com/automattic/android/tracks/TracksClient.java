@@ -27,6 +27,8 @@ public class TracksClient {
     public static final String LIB_VERSION = "0.0.1";
     protected static final String DEFAULT_USER_AGENT = "Nosara Client for Android";
     protected static final String NOSARA_REST_API_ENDPOINT_URL_V1_1 = "https://public-api.wordpress.com/rest/v1.1/";
+    protected static final int DEFAULT_EVENTS_QUEUE_THREESHOLD = 10;
+
 
     public static enum NosaraUserType {ANON, WPCOM}
 
@@ -59,7 +61,7 @@ public class TracksClient {
     private JSONObject mUserProperties = new JSONObject();
 
     // This is the main queue of Events.
-    private final LinkedList<Event> mMainEventsQueue = new LinkedList();
+    private final LinkedList<Event> mMainEventsQueue = new LinkedList<>();
 
     public static TracksClient getClient(Context ctx) {
         if (null == ctx || !checkBasicConfiguration(ctx)) {
@@ -78,11 +80,12 @@ public class TracksClient {
 
         new Thread(new Runnable() {
             public void run() {
+
                 synchronized (mMainEventsQueue) {
                     while (true) {
                         try {
                             mMainEventsQueue.wait();
-                            if (mMainEventsQueue.size() > 5 && NetworkUtils.isNetworkAvailable(mContext)) {
+                            if (mMainEventsQueue.size() > DEFAULT_EVENTS_QUEUE_THREESHOLD && NetworkUtils.isNetworkAvailable(mContext)) {
                                 sendRequests();
                             }
                         } catch (InterruptedException err) {
