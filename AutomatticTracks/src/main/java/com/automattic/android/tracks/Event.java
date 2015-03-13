@@ -8,10 +8,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Event implements Serializable {
 
     public static final String LOGTAG = "NosaraEvent";
+    private static final String EVENT_NAME_REGEXP = "^[a-z_][a-z0-9_]*$";
+    private static final Pattern eventNameRegExpPattern = Pattern.compile(EVENT_NAME_REGEXP);
 
     private final String mEventName;
     private final String mUser;
@@ -45,7 +49,8 @@ public class Event implements Serializable {
             throw new EventNameException("Event name must not contains whitespace.");
         }
 
-        if (!name.matches("^[a-z_][a-z0-9_]*$")) {
+        Matcher matcher = eventNameRegExpPattern.matcher(name);
+        if (!matcher.matches()) {
             throw new EventNameException("Event name must match: ^[a-z_][a-z0-9_]*$");
         }
     }
