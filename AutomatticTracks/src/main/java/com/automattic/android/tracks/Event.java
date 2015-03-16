@@ -40,6 +40,11 @@ public class Event implements Serializable {
     }
 
     private void checkEventName(String name) throws EventNameException {
+        if (name.equals(MessageBuilder.ALIAS_USER_EVENT_NAME)) {
+            // "_aliasUser is a special case. No validation on it.
+            return;
+        }
+
         if (name.contains("-")) {
             String errorMessage = "Event name must not contains dashes.";
             throw new EventNameException(errorMessage);
@@ -51,7 +56,7 @@ public class Event implements Serializable {
 
         Matcher matcher = eventNameRegExpPattern.matcher(name);
         if (!matcher.matches()) {
-            throw new EventNameException("Event name must match: ^[a-z_][a-z0-9_]*$");
+            throw new EventNameException("Event name must match: " + EVENT_NAME_REGEXP);
         }
     }
 
@@ -121,6 +126,18 @@ public class Event implements Serializable {
             Log.e(LOGTAG, "Cannot add the property: " + key + " to the event. It's a reserved keyword.");
             return false;
         }
+
+        if (getEventName().equals(MessageBuilder.ALIAS_USER_EVENT_NAME) &&
+                key.equals(MessageBuilder.ALIAS_USER_ANONID_PROP_NAME)) {
+            // We need to exclude the validation on the property "anonId" for the event "_aliasUser".
+        } else {
+            Matcher matcher = eventNameRegExpPattern.matcher(key);
+            if (!matcher.matches()) {
+                Log.e(LOGTAG, "Cannot add the property: " + key + " to the event. Property name must match: " + EVENT_NAME_REGEXP);
+                return false;
+            }
+        }
+
         try {
             String valueString;
             if (value != null) {

@@ -21,6 +21,7 @@ class MessageBuilder {
     private static final String USER_LOGIN_NAME_KEY = "_ul";
 
     public static final String ALIAS_USER_EVENT_NAME = "_aliasUser";
+    public static final String ALIAS_USER_ANONID_PROP_NAME = "anonId";
 
     public static synchronized boolean isReservedKeyword(String keyToTest) {
         String keyToTestLowercase = keyToTest.toLowerCase();
@@ -74,9 +75,9 @@ class MessageBuilder {
             // FIXME: Property names should also be lowercase and use underscores instead of dashes
             // but for a particular event/prop this is not the case
             if (event.getEventName().equals(ALIAS_USER_EVENT_NAME)) {
-                String anonID = eventJSON.getString("anonid");
-                eventJSON.put("anonId", anonID);
-                eventJSON.remove("anonid");
+                String anonID = eventJSON.getString(ALIAS_USER_ANONID_PROP_NAME.toLowerCase());
+                eventJSON.put(ALIAS_USER_ANONID_PROP_NAME, anonID);
+                eventJSON.remove(ALIAS_USER_ANONID_PROP_NAME.toLowerCase());
             }
 
            return eventJSON;
