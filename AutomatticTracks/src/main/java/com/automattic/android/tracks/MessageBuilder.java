@@ -53,6 +53,7 @@ class MessageBuilder {
     }
 
     public static synchronized JSONObject createEventJSONObject(Event event, JSONObject commonProps) {
+        //TODO: check event timestamp and see if it's still valid? See TracksCleint.isStillValid
         try {
             JSONObject eventJSON = new JSONObject();
             eventJSON.put(EVENT_NAME_KEY, event.getEventName());

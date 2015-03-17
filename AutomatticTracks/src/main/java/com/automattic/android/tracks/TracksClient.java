@@ -14,6 +14,8 @@ import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.automattic.android.tracks.Exceptions.EventNameException;
+import com.automattic.android.tracks.datasets.EventTable;
+import com.automattic.android.tracks.datasets.TracksDatabaseHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +23,7 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 public class TracksClient {
     public static final String LOGTAG = "NosaraClient";
@@ -57,12 +60,13 @@ public class TracksClient {
 
     private String mUserAgent = TracksClient.DEFAULT_USER_AGENT;
     private final RequestQueue mQueue;
+    private final TracksDatabaseHelper mDatabaseHelper;
     private String mRestApiEndpointURL;
     private DeviceInformation deviceInformation;
     private JSONObject mUserProperties = new JSONObject();
 
-    // This is the main queue of Events.
-    private final LinkedList<Event> mMainEventsQueue = new LinkedList<>();
+    // This is the main queue Events lock.
+    private final Object mMainEventsQueueLock = new Object();
 
     public static TracksClient getClient(Context ctx) {
         if (null == ctx || !checkBasicConfiguration(ctx)) {
@@ -74,7 +78,7 @@ public class TracksClient {
 
     private TracksClient(Context ctx) {
         mContext = ctx;
-
+        mDatabaseHelper = TracksDatabaseHelper.getDatabase(ctx);
         mQueue = Volley.newRequestQueue(ctx);
         mRestApiEndpointURL = NOSARA_REST_API_ENDPOINT_URL_V1_1;
         deviceInformation = new DeviceInformation(ctx);
@@ -82,11 +86,11 @@ public class TracksClient {
         new Thread(new Runnable() {
             public void run() {
 
-                synchronized (mMainEventsQueue) {
+                synchronized (mMainEventsQueueLock) {
                     while (true) {
                         try {
-                            mMainEventsQueue.wait();
-                            if (mMainEventsQueue.size() > DEFAULT_EVENTS_QUEUE_THREESHOLD && NetworkUtils.isNetworkAvailable(mContext)) {
+                            mMainEventsQueueLock.wait();
+                            if (EventTable.getEventsCount(mContext) > DEFAULT_EVENTS_QUEUE_THREESHOLD && NetworkUtils.isNetworkAvailable(mContext)) {
                                 sendRequests();
                             }
                         } catch (InterruptedException err) {
@@ -138,8 +142,8 @@ public class TracksClient {
         if (!NetworkUtils.isNetworkAvailable(mContext)) {
             return;
         }
-        synchronized (mMainEventsQueue) {
-            if (mMainEventsQueue.size() == 0) {
+        synchronized (mMainEventsQueueLock) {
+            if (!EventTable.hasEvents(mContext)) {
                 return;
             }
             try {
@@ -149,8 +153,10 @@ public class TracksClient {
                 // Create common props here. Then check later at "single event" layer if one of these props changed.
                 JSONObject commonProps = MessageBuilder.createRequestCommonPropsJSONObject(deviceInformation, mUserProperties);
 
+                List<Event> newEventsList = EventTable.getAndDeleteEvents(mContext, 0);
+
                 // Create single event obj here
-                for (Event singleEvent : mMainEventsQueue) {
+                for (Event singleEvent : newEventsList) {
                     JSONObject singleEventJSON = MessageBuilder.createEventJSONObject(singleEvent, commonProps);
                     if (singleEventJSON != null) {
                         events.put(singleEventJSON);
@@ -171,8 +177,9 @@ public class TracksClient {
             } catch (JSONException err) {
                 Log.e(LOGTAG, "Exception creating the request JSON object", err);
                 return;
+            } catch (Exception e) {
+                Log.e(LOGTAG, "Exception creating the request JSON object", e);
             }
-            mMainEventsQueue.clear(); // remove events from the queue
         }
     }
 
@@ -198,7 +205,7 @@ public class TracksClient {
                     System.currentTimeMillis()
             );
         } catch (EventNameException e) {
-            Log.e(LOGTAG, "Cannot create the event " +eventName, e);
+            Log.e(LOGTAG, "Cannot create the event: " +eventName, e);
             return;
         }
 
@@ -224,9 +231,9 @@ public class TracksClient {
             }
         }
 
-        synchronized (mMainEventsQueue) {
-            mMainEventsQueue.add(event);
-            mMainEventsQueue.notify();
+        synchronized (mMainEventsQueueLock) {
+            EventTable.insertEvent(mContext, event);
+            mMainEventsQueueLock.notify();
         }
     }
 
@@ -326,9 +333,11 @@ public class TracksClient {
                 }
             }
             if (mustKeepEventsList.size() > 0) {
-                synchronized (mMainEventsQueue) {
-                    mMainEventsQueue.addAll(mustKeepEventsList);
-                    mMainEventsQueue.notify();
+                synchronized (mMainEventsQueueLock) {
+                    for(Event event: mustKeepEventsList) {
+                        EventTable.insertEvent(mContext, event);
+                    }
+                    mMainEventsQueueLock.notify();
                 }
             }
         }

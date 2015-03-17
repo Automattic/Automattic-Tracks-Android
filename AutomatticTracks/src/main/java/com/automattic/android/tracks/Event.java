@@ -152,4 +152,8 @@ public class Event implements Serializable {
         }
         return true;
     }
+
+    public void setCustomProperties(JSONObject customProperties) {
+        this.mCustomEventProps = customProperties;
+    }
 }
