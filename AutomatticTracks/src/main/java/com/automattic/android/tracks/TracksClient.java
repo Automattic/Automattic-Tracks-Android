@@ -65,8 +65,13 @@ public class TracksClient {
     private DeviceInformation deviceInformation;
     private JSONObject mUserProperties = new JSONObject();
 
-    // This is the main queue Events lock.
-    private final Object mMainEventsQueueLock = new Object();
+    // This is the main queue of events we need to lazy-write to the database
+    private final LinkedList<Event> mInsertEventsQueue = new LinkedList<>();
+    // Database monitor
+    private final static Object mDbLock = new Object();
+
+    private boolean mPendingFlush = false;
+
 
     public static TracksClient getClient(Context ctx) {
         if (null == ctx || !checkBasicConfiguration(ctx)) {
@@ -83,23 +88,60 @@ public class TracksClient {
         mRestApiEndpointURL = NOSARA_REST_API_ENDPOINT_URL_V1_1;
         deviceInformation = new DeviceInformation(ctx);
 
-        new Thread(new Runnable() {
+        // This is the thread that read from the "fast" input events queue and actually write data to the DB.
+        Thread bufferCopyThread = new Thread(new Runnable() {
             public void run() {
-
-                synchronized (mMainEventsQueueLock) {
-                    while (true) {
+                LinkedList<Event> shadowCopyEventList = new LinkedList<>();
+                while (true) {
+                    // 1. copy events from the input queue to a temporary queue and release the lock over the input queue.
+                    synchronized (mInsertEventsQueue) {
                         try {
-                            mMainEventsQueueLock.wait();
-                            if (EventTable.getEventsCount(mContext) > DEFAULT_EVENTS_QUEUE_THREESHOLD && NetworkUtils.isNetworkAvailable(mContext)) {
+                            if (mInsertEventsQueue.size() == 0) {
+                                mInsertEventsQueue.wait();
+                            }
+                            // copy the events and release the lock asap
+                            shadowCopyEventList.addAll(mInsertEventsQueue);
+                            mInsertEventsQueue.clear();
+                        } catch (InterruptedException err) {
+                            Log.e(LOGTAG, "Something went wrong while waiting on the input queue of events", err);
+                        }
+                    }
+                    if (shadowCopyEventList.size() > 0) {
+                        //2.  get the lock over the DB and write data
+                        synchronized (mDbLock) {
+                            for (Event currentEvent : shadowCopyEventList) {
+                                EventTable.insertEvent(mContext, currentEvent);
+                            }
+                            mDbLock.notifyAll();
+                        }
+                        shadowCopyEventList.clear();
+                    }
+                }
+            }
+        });
+        bufferCopyThread.setPriority(Thread.MIN_PRIORITY);
+        bufferCopyThread.start();
+
+        // This is the thread that read from the DB and enqueue the request to Volley
+        Thread sendToWireThread = new Thread(new Runnable() {
+            public void run() {
+                while (true) {
+                    synchronized (mDbLock) {
+                        try {
+                            if ((mPendingFlush || EventTable.getEventsCount(mContext) > DEFAULT_EVENTS_QUEUE_THREESHOLD)
+                                    && NetworkUtils.isNetworkAvailable(mContext)) {
                                 sendRequests();
                             }
+                            mDbLock.wait();
                         } catch (InterruptedException err) {
-                            Log.e(LOGTAG, "Something went wrong while waiting on the queue of events", err);
+                            Log.e(LOGTAG, "Something went wrong while waiting on the database lock", err);
                         }
                     }
                 }
             }
-        }).start();
+        });
+        sendToWireThread.setPriority(Thread.MIN_PRIORITY);
+        sendToWireThread.start();
     }
 
     private static boolean checkBasicConfiguration(Context context) {
@@ -132,17 +174,26 @@ public class TracksClient {
     }
 
     public void flush() {
-        if (!NetworkUtils.isNetworkAvailable(mContext)) {
-            return;
-        }
-        sendRequests();
+        // we need to get the lock over the DB to awake the writing thread, and to be sure the flush is done asap.
+        // Since we need the lock over the DB is better to do that in a thread. Otherwise the caller should wait until the DB is ready.
+        Thread flushingThread = new Thread(new Runnable() {
+            public void run() {
+                synchronized (mDbLock) {
+                    mPendingFlush = true;
+                    mDbLock.notifyAll();
+                }
+            }
+        });
+        flushingThread.setPriority(Thread.MIN_PRIORITY);
+        flushingThread.start();
     }
 
     private void sendRequests() {
         if (!NetworkUtils.isNetworkAvailable(mContext)) {
             return;
         }
-        synchronized (mMainEventsQueueLock) {
+        synchronized (mDbLock) {
+            mPendingFlush = false; // We can remove the flushing flag now.
             if (!EventTable.hasEvents(mContext)) {
                 return;
             }
@@ -231,9 +282,10 @@ public class TracksClient {
             }
         }
 
-        synchronized (mMainEventsQueueLock) {
-            EventTable.insertEvent(mContext, event);
-            mMainEventsQueueLock.notify();
+        // Write in the insertEventQueue and notify the thread that actually write the data to the DB
+        synchronized (mInsertEventsQueue) {
+            mInsertEventsQueue.add(event);
+            mInsertEventsQueue.notify();
         }
     }
 
@@ -333,11 +385,9 @@ public class TracksClient {
                 }
             }
             if (mustKeepEventsList.size() > 0) {
-                synchronized (mMainEventsQueueLock) {
-                    for(Event event: mustKeepEventsList) {
-                        EventTable.insertEvent(mContext, event);
-                    }
-                    mMainEventsQueueLock.notify();
+                synchronized (mInsertEventsQueue) {
+                    mInsertEventsQueue.addAll(mustKeepEventsList);
+                    mInsertEventsQueue.notifyAll();
                 }
             }
         }
