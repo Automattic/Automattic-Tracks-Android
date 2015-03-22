@@ -201,10 +201,10 @@ public class TracksClient {
                 JSONArray events = new JSONArray();
                 LinkedList<Event> currentEventsList = new LinkedList<>(); // events we're sending on the wire
 
-                // Create common props here. Then check later at "single event" layer if one of these props changed.
-                JSONObject commonProps = MessageBuilder.createRequestCommonPropsJSONObject(deviceInformation, mUserProperties);
-
                 List<Event> newEventsList = EventTable.getAndDeleteEvents(mContext, 0);
+
+                // Create common props here. Then check later at "single event" layer if one of these props changed in that event.
+                JSONObject commonProps = MessageBuilder.createRequestCommonPropsJSONObject(deviceInformation, mUserProperties);
 
                 // Create single event obj here
                 for (Event singleEvent : newEventsList) {

@@ -14,7 +14,8 @@ class MessageBuilder {
 
     private static final String EVENT_NAME_KEY = "_en";
     private static final String USER_AGENT_NAME_KEY = "_via_ua";
-    private static final String TIMESTAMP_KEY = "_ts";
+    private static final String EVENT_TIMESTAMP_KEY = "_ts";
+    private static final String REQUEST_TIMESTAMP_KEY = "_rt";
     private static final String USER_TYPE_KEY = "_ut";
     private static final String USER_TYPE_ANON= "anon";
     private static final String USER_ID_KEY = "_ui";
@@ -27,7 +28,8 @@ class MessageBuilder {
         String keyToTestLowercase = keyToTest.toLowerCase();
         if (keyToTestLowercase.equals(EVENT_NAME_KEY) ||
                 keyToTestLowercase.equals(USER_AGENT_NAME_KEY) ||
-                keyToTestLowercase.equals(TIMESTAMP_KEY) ||
+                keyToTestLowercase.equals(EVENT_TIMESTAMP_KEY) ||
+                keyToTestLowercase.equals(REQUEST_TIMESTAMP_KEY) ||
                 keyToTestLowercase.equals(USER_TYPE_KEY) ||
                 keyToTestLowercase.equals(USER_ID_KEY) ||
                 keyToTestLowercase.equals(USER_LOGIN_NAME_KEY)
@@ -49,6 +51,12 @@ class MessageBuilder {
         unfolderProperties(deviceInformation.getImmutableDeviceInfo(), DEVICE_INFO_PREFIX, commonProps);
         unfolderProperties(deviceInformation.getMutableDeviceInfo(), DEVICE_INFO_PREFIX, commonProps);
         unfolderProperties(userProperties, USER_INFO_PREFIX, commonProps);
+        try {
+            commonProps.put(REQUEST_TIMESTAMP_KEY, System.currentTimeMillis());
+        } catch (JSONException e) {
+            Log.e(TracksClient.LOGTAG, "Cannot add the _rt property to the request." +
+                    " It will be discarded on the server side", e);
+        }
         return commonProps;
     }
 
@@ -59,14 +67,14 @@ class MessageBuilder {
             eventJSON.put(EVENT_NAME_KEY, event.getEventName());
 
             eventJSON.put(USER_AGENT_NAME_KEY, event.getUserAgent());
-            eventJSON.put(TIMESTAMP_KEY, event.getTimeStamp());
+            eventJSON.put(EVENT_TIMESTAMP_KEY, event.getTimeStamp());
 
             if (event.getUserType() == TracksClient.NosaraUserType.ANON) {
                 eventJSON.put(USER_TYPE_KEY, USER_TYPE_ANON);
                 eventJSON.put(USER_ID_KEY, event.getUser());
             } else {
                 eventJSON.put(USER_LOGIN_NAME_KEY, event.getUser());
-                // no need to put the user type key here. default wpcom is used on the server.
+                // no need to put the user type key here. default wpcom is used on the server. 'wpcom:user_id'
             }
 
             unfolderPropertiesNotAvailableInCommon(event.getUserProperties(), USER_INFO_PREFIX, eventJSON, commonProps);
@@ -83,7 +91,7 @@ class MessageBuilder {
 
            return eventJSON;
         } catch (JSONException err) {
-            Log.e(TracksClient.LOGTAG, "Cannot write the JSON representation of this object", err);
+            Log.e(TracksClient.LOGTAG, "Cannot write the JSON representation of the event object", err);
             return null;
         }
     }
@@ -129,7 +137,7 @@ class MessageBuilder {
                 }
             } catch (JSONException e) {
                 // Something went wrong!
-                Log.e(TracksClient.LOGTAG, "Cannot write the flatten JSON representation of this object", e);
+                Log.e(TracksClient.LOGTAG, "Cannot write the flatten JSON representation of the JSON object", e);
             }
         }
     }
