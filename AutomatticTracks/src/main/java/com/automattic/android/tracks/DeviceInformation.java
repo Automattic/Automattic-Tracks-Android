@@ -132,10 +132,8 @@ import java.util.Locale;
         try {
             DisplayMetrics dMetrics = getDisplayMetrics();
             mImmutableDeviceInfoJSON.put("display_density_dpi", dMetrics.densityDpi);
-            mImmutableDeviceInfoJSON.put("display_width_px", dMetrics.widthPixels);
-            mImmutableDeviceInfoJSON.put("display_height_px", dMetrics.heightPixels);
         } catch (final JSONException e) {
-            Log.e(LOGTAG, "Exception writing DisplayMetrics values in JSON object", e);
+            Log.e(LOGTAG, "Exception writing display_density_dpi value in JSON object", e);
         }
         try {
             mImmutableDeviceInfoJSON.put("bluetooth_version", getBluetoothVersion());
