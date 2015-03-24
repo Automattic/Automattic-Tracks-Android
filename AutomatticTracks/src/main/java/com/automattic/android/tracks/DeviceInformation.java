@@ -256,4 +256,12 @@ import java.lang.reflect.Method;
         }
         return bluetoothVersion;
     }
+
+    public int getDeviceWidthPixels() {
+        return getDisplayMetrics().widthPixels;
+    }
+
+    public int getDeviceHeightPixels() {
+        return getDisplayMetrics().heightPixels;
+    }
 }
