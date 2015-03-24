@@ -21,6 +21,7 @@ import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Locale;
 
 
 /* package */ class DeviceInformation {
@@ -35,7 +36,7 @@ import java.lang.reflect.Method;
     private final String mAppName;
     private final String mAppVersionName;
     private final Integer mAppVersionCode;
-
+    private final String mDeviceLanguage;
 
     private final JSONObject mImmutableDeviceInfoJSON;
 
@@ -70,6 +71,8 @@ import java.lang.reflect.Method;
         mAppName =  (applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo).toString() : "Unknown");
         mAppVersionName = foundAppVersionName;
         mAppVersionCode = foundAppVersionCode;
+        // We're caching device's language here, even if the user can change it while the app is running.
+        mDeviceLanguage =  Locale.getDefault().toString();
 
         // We can't count on these features being available, since we need to
         // run on old devices. Thus, the reflection fandango below...
@@ -263,5 +266,9 @@ import java.lang.reflect.Method;
 
     public int getDeviceHeightPixels() {
         return getDisplayMetrics().heightPixels;
+    }
+
+    public String getDeviceLanguage() {
+        return mDeviceLanguage;
     }
 }

@@ -22,6 +22,7 @@ class MessageBuilder {
     private static final String USER_LOGIN_NAME_KEY = "_ul";
     private static final String DEVICE_HEIGHT_PIXELS_KEY = "_ht";
     private static final String DEVICE_WIDTH_PIXELS_KEY = "_wd";
+    private static final String DEVICE_LANG_KEY = "_lg";
 
     public static final String ALIAS_USER_EVENT_NAME = "_aliasUser";
     public static final String ALIAS_USER_ANONID_PROP_NAME = "anonId";
@@ -36,6 +37,7 @@ class MessageBuilder {
                 keyToTestLowercase.equals(USER_ID_KEY) ||
                 keyToTestLowercase.equals(DEVICE_WIDTH_PIXELS_KEY) ||
                 keyToTestLowercase.equals(DEVICE_HEIGHT_PIXELS_KEY) ||
+                keyToTestLowercase.equals(DEVICE_LANG_KEY) ||
                 keyToTestLowercase.equals(USER_LOGIN_NAME_KEY)
                 ) {
             return true;
@@ -66,6 +68,12 @@ class MessageBuilder {
             Log.e(TracksClient.LOGTAG, "Cannot add the device width/height properties to request commons.");
         }
 
+        try {
+            commonProps.put(DEVICE_LANG_KEY, deviceInformation.getDeviceLanguage());
+        } catch (JSONException e) {
+            Log.e(TracksClient.LOGTAG, "Cannot add the device language property to request commons.");
+        }
+
         unfolderProperties(deviceInformation.getImmutableDeviceInfo(), DEVICE_INFO_PREFIX, commonProps);
         unfolderProperties(deviceInformation.getMutableDeviceInfo(), DEVICE_INFO_PREFIX, commonProps);
         unfolderProperties(userProperties, USER_INFO_PREFIX, commonProps);
@@ -73,7 +81,7 @@ class MessageBuilder {
             commonProps.put(REQUEST_TIMESTAMP_KEY, System.currentTimeMillis());
         } catch (JSONException e) {
             Log.e(TracksClient.LOGTAG, "Cannot add the _rt property to the request." +
-                    " It will be discarded on the server side", e);
+                    " Current batch request will be discarded on the server side", e);
         }
         return commonProps;
     }
