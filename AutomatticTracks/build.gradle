@@ -20,8 +20,6 @@ dependencies {
 }
 
 android {
-    publishNonDefault true
-
     compileSdkVersion 19
     buildToolsVersion "21.1.2"
 
@@ -38,11 +36,55 @@ android {
 }
 
 version android.defaultConfig.versionName
-group = "com.automattic."
+group = "com.automattic"
+archivesBaseName = "tracks"
 
 signing {
     required {
         has("release") && project.properties.containsKey("signing.keyId") && project.properties.containsKey("signing.secretKeyRingFile")
     }
     sign configurations.archives
+}
+
+// http://central.sonatype.org/pages/gradle.html
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: project.properties.ossrhUsername, password: project.properties.ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: project.properties.ossrhUsername, password: project.properties.ossrhPassword)
+            }
+
+            pom.project {
+                name 'Automattic-Tracks-Android'
+                packaging 'aar'
+                description 'Android client for Nosara tracks (event tracking and analytics)'
+                url 'https://github.com/Automattic/Automattic-Tracks-Android'
+                scm {
+                     connection 'scm:git:https://github.com/wordpress-mobile/PersistentEditText.git'
+                     developerConnection 'scm:git:https://github.com/wordpress-mobile/PersistentEditText.git'
+                     url 'https://github.com/wordpress-mobile/PersistentEditText'
+                 }
+                 licenses {
+                     license {
+                         name 'The GPLv2 License'
+                         url 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.html'
+                     }
+                 }
+                developers {
+                    developer {
+                        id 'daniloercoli'
+                        name 'Danilo Ercoli'
+                        email 'danilo@automattic.com'
+                    }
+                }
+            }
+        }
+    }
 }
