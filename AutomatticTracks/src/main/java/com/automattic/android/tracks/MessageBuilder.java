@@ -111,7 +111,7 @@ class MessageBuilder {
             unfolderPropertiesNotAvailableInCommon(event.getDeviceInfo(), DEVICE_INFO_PREFIX, eventJSON, commonProps);
             unfolderProperties(event.getCustomEventProperties(), "", eventJSON);
 
-            // FIXME: Property names should also be lowercase and use underscores instead of dashes
+            // Property names need to be lowercase and use underscores instead of dashes,
             // but for a particular event/prop this is not the case
             if (event.getEventName().equals(ALIAS_USER_EVENT_NAME)) {
                 String anonID = eventJSON.getString(ALIAS_USER_ANONID_PROP_NAME.toLowerCase());
