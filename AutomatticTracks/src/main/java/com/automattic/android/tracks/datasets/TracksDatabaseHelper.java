@@ -51,13 +51,14 @@ public class TracksDatabaseHelper extends SQLiteOpenHelper {
     public static SQLiteDatabase getWritableDb(Context ctx) {
         return getDatabase(ctx).getWritableDatabase();
     }
-/*
+
     @Override
     public void onOpen(SQLiteDatabase db) {
         super.onOpen(db);
-        copyDatabase(db);
+        // Used during development to copy database to external storage and read its content.
+        // copyDatabase(db);
     }
-*/
+
     /*
      * drop & recreate all tables (essentially clears the db of all data)
      */
@@ -103,6 +104,7 @@ public class TracksDatabaseHelper extends SQLiteOpenHelper {
     /*
      * used during development to copy database to external storage so we can access it via DDMS
     */
+    @SuppressWarnings("unused")
     private void copyDatabase(SQLiteDatabase db) {
         String copyFrom = db.getPath();
         String copyTo = mContext.getExternalFilesDir(null).getAbsolutePath() + "/" + DB_NAME;
