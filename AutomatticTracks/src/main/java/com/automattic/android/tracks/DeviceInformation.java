@@ -21,6 +21,7 @@ import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Locale;
 
 
 /* package */ class DeviceInformation {
@@ -35,7 +36,7 @@ import java.lang.reflect.Method;
     private final String mAppName;
     private final String mAppVersionName;
     private final Integer mAppVersionCode;
-
+    private final String mDeviceLanguage;
 
     private final JSONObject mImmutableDeviceInfoJSON;
 
@@ -70,6 +71,8 @@ import java.lang.reflect.Method;
         mAppName =  (applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo).toString() : "Unknown");
         mAppVersionName = foundAppVersionName;
         mAppVersionCode = foundAppVersionCode;
+        // We're caching device's language here, even if the user can change it while the app is running.
+        mDeviceLanguage =  Locale.getDefault().toString();
 
         // We can't count on these features being available, since we need to
         // run on old devices. Thus, the reflection fandango below...
@@ -129,10 +132,8 @@ import java.lang.reflect.Method;
         try {
             DisplayMetrics dMetrics = getDisplayMetrics();
             mImmutableDeviceInfoJSON.put("display_density_dpi", dMetrics.densityDpi);
-            mImmutableDeviceInfoJSON.put("display_width_px", dMetrics.widthPixels);
-            mImmutableDeviceInfoJSON.put("display_height_px", dMetrics.heightPixels);
         } catch (final JSONException e) {
-            Log.e(LOGTAG, "Exception writing DisplayMetrics values in JSON object", e);
+            Log.e(LOGTAG, "Exception writing display_density_dpi value in JSON object", e);
         }
         try {
             mImmutableDeviceInfoJSON.put("bluetooth_version", getBluetoothVersion());
@@ -184,16 +185,16 @@ import java.lang.reflect.Method;
         TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         if (null != telephonyManager) {
             switch(telephonyManager.getPhoneType()) {
-            case 0x00000000: // TelephonyManager.PHONE_TYPE_NONE
+            case TelephonyManager.PHONE_TYPE_NONE:
                 ret = "none";
                 break;
-            case 0x00000001: // TelephonyManager.PHONE_TYPE_GSM
+            case TelephonyManager.PHONE_TYPE_GSM:
                 ret = "gsm";
                 break;
-            case 0x00000002: // TelephonyManager.PHONE_TYPE_CDMA
+            case TelephonyManager.PHONE_TYPE_CDMA:
                 ret = "cdma";
                 break;
-            case 0x00000003: // TelephonyManager.PHONE_TYPE_SIP
+                case TelephonyManager.PHONE_TYPE_SIP:
                 ret = "sip";
                 break;
             default:
@@ -255,5 +256,17 @@ import java.lang.reflect.Method;
             }
         }
         return bluetoothVersion;
+    }
+
+    public int getDeviceWidthPixels() {
+        return getDisplayMetrics().widthPixels;
+    }
+
+    public int getDeviceHeightPixels() {
+        return getDisplayMetrics().heightPixels;
+    }
+
+    public String getDeviceLanguage() {
+        return mDeviceLanguage;
     }
 }

@@ -28,8 +28,8 @@ import java.util.List;
 public class TracksClient {
     public static final String LOGTAG = "NosaraClient";
 
-    public static final String LIB_VERSION = "0.0.1";
-    protected static final String DEFAULT_USER_AGENT = "Nosara Client for Android";
+    public static final String LIB_VERSION = BuildConfig.VERSION_NAME;
+    protected static final String DEFAULT_USER_AGENT = "Nosara Client for Android" + "/" + LIB_VERSION;
     protected static final String NOSARA_REST_API_ENDPOINT_URL_V1_1 = "https://public-api.wordpress.com/rest/v1.1/";
     protected static final int DEFAULT_EVENTS_QUEUE_THREESHOLD = 10;
 
@@ -204,7 +204,8 @@ public class TracksClient {
                 List<Event> newEventsList = EventTable.getAndDeleteEvents(mContext, 0);
 
                 // Create common props here. Then check later at "single event" layer if one of these props changed in that event.
-                JSONObject commonProps = MessageBuilder.createRequestCommonPropsJSONObject(deviceInformation, mUserProperties);
+                JSONObject commonProps = MessageBuilder.createRequestCommonPropsJSONObject(deviceInformation,
+                        mUserProperties, getUserAgent());
 
                 // Create single event obj here
                 for (Event singleEvent : newEventsList) {
@@ -233,13 +234,6 @@ public class TracksClient {
             }
         }
     }
-
-    /*
-    public NosaraClient(Context ctx, String endpointURL) {
-        this(ctx);
-        mRestApiEndpointURL = endpointURL;
-    }
-*/
 
     public void track(String eventName, String user, NosaraUserType userType) {
         this.track(eventName, null, user, userType);

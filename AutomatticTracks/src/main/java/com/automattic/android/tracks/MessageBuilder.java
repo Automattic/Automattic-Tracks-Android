@@ -20,6 +20,9 @@ class MessageBuilder {
     private static final String USER_TYPE_ANON= "anon";
     private static final String USER_ID_KEY = "_ui";
     private static final String USER_LOGIN_NAME_KEY = "_ul";
+    private static final String DEVICE_HEIGHT_PIXELS_KEY = "_ht";
+    private static final String DEVICE_WIDTH_PIXELS_KEY = "_wd";
+    private static final String DEVICE_LANG_KEY = "_lg";
 
     public static final String ALIAS_USER_EVENT_NAME = "_aliasUser";
     public static final String ALIAS_USER_ANONID_PROP_NAME = "anonId";
@@ -32,6 +35,9 @@ class MessageBuilder {
                 keyToTestLowercase.equals(REQUEST_TIMESTAMP_KEY) ||
                 keyToTestLowercase.equals(USER_TYPE_KEY) ||
                 keyToTestLowercase.equals(USER_ID_KEY) ||
+                keyToTestLowercase.equals(DEVICE_WIDTH_PIXELS_KEY) ||
+                keyToTestLowercase.equals(DEVICE_HEIGHT_PIXELS_KEY) ||
+                keyToTestLowercase.equals(DEVICE_LANG_KEY) ||
                 keyToTestLowercase.equals(USER_LOGIN_NAME_KEY)
                 ) {
             return true;
@@ -46,8 +52,28 @@ class MessageBuilder {
     }
 
     public static synchronized JSONObject createRequestCommonPropsJSONObject(DeviceInformation deviceInformation,
-                                                                             JSONObject userProperties) {
+                                                                             JSONObject userProperties,
+                                                                             String userAgent) {
         JSONObject commonProps = new JSONObject();
+        try {
+            commonProps.put(USER_AGENT_NAME_KEY, userAgent);
+        } catch (JSONException e) {
+            Log.e(TracksClient.LOGTAG, "Cannot add the "+  USER_AGENT_NAME_KEY + " property to request commons.");
+        }
+
+        try {
+            commonProps.put(DEVICE_WIDTH_PIXELS_KEY, deviceInformation.getDeviceWidthPixels());
+            commonProps.put(DEVICE_HEIGHT_PIXELS_KEY, deviceInformation.getDeviceHeightPixels());
+        } catch (JSONException e) {
+            Log.e(TracksClient.LOGTAG, "Cannot add the device width/height properties to request commons.");
+        }
+
+        try {
+            commonProps.put(DEVICE_LANG_KEY, deviceInformation.getDeviceLanguage());
+        } catch (JSONException e) {
+            Log.e(TracksClient.LOGTAG, "Cannot add the device language property to request commons.");
+        }
+
         unfolderProperties(deviceInformation.getImmutableDeviceInfo(), DEVICE_INFO_PREFIX, commonProps);
         unfolderProperties(deviceInformation.getMutableDeviceInfo(), DEVICE_INFO_PREFIX, commonProps);
         unfolderProperties(userProperties, USER_INFO_PREFIX, commonProps);
@@ -55,7 +81,7 @@ class MessageBuilder {
             commonProps.put(REQUEST_TIMESTAMP_KEY, System.currentTimeMillis());
         } catch (JSONException e) {
             Log.e(TracksClient.LOGTAG, "Cannot add the _rt property to the request." +
-                    " It will be discarded on the server side", e);
+                    " Current batch request will be discarded on the server side", e);
         }
         return commonProps;
     }
@@ -66,7 +92,11 @@ class MessageBuilder {
             JSONObject eventJSON = new JSONObject();
             eventJSON.put(EVENT_NAME_KEY, event.getEventName());
 
-            eventJSON.put(USER_AGENT_NAME_KEY, event.getUserAgent());
+            if (!commonProps.has(USER_AGENT_NAME_KEY) ||
+                    !commonProps.getString(USER_AGENT_NAME_KEY).equals(event.getUserAgent())) {
+                eventJSON.put(USER_AGENT_NAME_KEY, event.getUserAgent());
+            }
+
             eventJSON.put(EVENT_TIMESTAMP_KEY, event.getTimeStamp());
 
             if (event.getUserType() == TracksClient.NosaraUserType.ANON) {
@@ -81,7 +111,7 @@ class MessageBuilder {
             unfolderPropertiesNotAvailableInCommon(event.getDeviceInfo(), DEVICE_INFO_PREFIX, eventJSON, commonProps);
             unfolderProperties(event.getCustomEventProperties(), "", eventJSON);
 
-            // FIXME: Property names should also be lowercase and use underscores instead of dashes
+            // Property names need to be lowercase and use underscores instead of dashes,
             // but for a particular event/prop this is not the case
             if (event.getEventName().equals(ALIAS_USER_EVENT_NAME)) {
                 String anonID = eventJSON.getString(ALIAS_USER_ANONID_PROP_NAME.toLowerCase());
