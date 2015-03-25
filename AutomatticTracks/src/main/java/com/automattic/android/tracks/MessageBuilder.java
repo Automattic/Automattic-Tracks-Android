@@ -14,21 +14,30 @@ class MessageBuilder {
 
     private static final String EVENT_NAME_KEY = "_en";
     private static final String USER_AGENT_NAME_KEY = "_via_ua";
-    private static final String TIMESTAMP_KEY = "_ts";
+    private static final String EVENT_TIMESTAMP_KEY = "_ts";
+    private static final String REQUEST_TIMESTAMP_KEY = "_rt";
     private static final String USER_TYPE_KEY = "_ut";
     private static final String USER_TYPE_ANON= "anon";
     private static final String USER_ID_KEY = "_ui";
     private static final String USER_LOGIN_NAME_KEY = "_ul";
+    private static final String DEVICE_HEIGHT_PIXELS_KEY = "_ht";
+    private static final String DEVICE_WIDTH_PIXELS_KEY = "_wd";
+    private static final String DEVICE_LANG_KEY = "_lg";
 
     public static final String ALIAS_USER_EVENT_NAME = "_aliasUser";
+    public static final String ALIAS_USER_ANONID_PROP_NAME = "anonId";
 
     public static synchronized boolean isReservedKeyword(String keyToTest) {
         String keyToTestLowercase = keyToTest.toLowerCase();
         if (keyToTestLowercase.equals(EVENT_NAME_KEY) ||
                 keyToTestLowercase.equals(USER_AGENT_NAME_KEY) ||
-                keyToTestLowercase.equals(TIMESTAMP_KEY) ||
+                keyToTestLowercase.equals(EVENT_TIMESTAMP_KEY) ||
+                keyToTestLowercase.equals(REQUEST_TIMESTAMP_KEY) ||
                 keyToTestLowercase.equals(USER_TYPE_KEY) ||
                 keyToTestLowercase.equals(USER_ID_KEY) ||
+                keyToTestLowercase.equals(DEVICE_WIDTH_PIXELS_KEY) ||
+                keyToTestLowercase.equals(DEVICE_HEIGHT_PIXELS_KEY) ||
+                keyToTestLowercase.equals(DEVICE_LANG_KEY) ||
                 keyToTestLowercase.equals(USER_LOGIN_NAME_KEY)
                 ) {
             return true;
@@ -43,28 +52,59 @@ class MessageBuilder {
     }
 
     public static synchronized JSONObject createRequestCommonPropsJSONObject(DeviceInformation deviceInformation,
-                                                                             JSONObject userProperties) {
+                                                                             JSONObject userProperties,
+                                                                             String userAgent) {
         JSONObject commonProps = new JSONObject();
+        try {
+            commonProps.put(USER_AGENT_NAME_KEY, userAgent);
+        } catch (JSONException e) {
+            Log.e(TracksClient.LOGTAG, "Cannot add the "+  USER_AGENT_NAME_KEY + " property to request commons.");
+        }
+
+        try {
+            commonProps.put(DEVICE_WIDTH_PIXELS_KEY, deviceInformation.getDeviceWidthPixels());
+            commonProps.put(DEVICE_HEIGHT_PIXELS_KEY, deviceInformation.getDeviceHeightPixels());
+        } catch (JSONException e) {
+            Log.e(TracksClient.LOGTAG, "Cannot add the device width/height properties to request commons.");
+        }
+
+        try {
+            commonProps.put(DEVICE_LANG_KEY, deviceInformation.getDeviceLanguage());
+        } catch (JSONException e) {
+            Log.e(TracksClient.LOGTAG, "Cannot add the device language property to request commons.");
+        }
+
         unfolderProperties(deviceInformation.getImmutableDeviceInfo(), DEVICE_INFO_PREFIX, commonProps);
         unfolderProperties(deviceInformation.getMutableDeviceInfo(), DEVICE_INFO_PREFIX, commonProps);
         unfolderProperties(userProperties, USER_INFO_PREFIX, commonProps);
+        try {
+            commonProps.put(REQUEST_TIMESTAMP_KEY, System.currentTimeMillis());
+        } catch (JSONException e) {
+            Log.e(TracksClient.LOGTAG, "Cannot add the _rt property to the request." +
+                    " Current batch request will be discarded on the server side", e);
+        }
         return commonProps;
     }
 
     public static synchronized JSONObject createEventJSONObject(Event event, JSONObject commonProps) {
+        //TODO: check event timestamp and see if it's still valid? See TracksCleint.isStillValid
         try {
             JSONObject eventJSON = new JSONObject();
             eventJSON.put(EVENT_NAME_KEY, event.getEventName());
 
-            eventJSON.put(USER_AGENT_NAME_KEY, event.getUserAgent());
-            eventJSON.put(TIMESTAMP_KEY, event.getTimeStamp());
+            if (!commonProps.has(USER_AGENT_NAME_KEY) ||
+                    !commonProps.getString(USER_AGENT_NAME_KEY).equals(event.getUserAgent())) {
+                eventJSON.put(USER_AGENT_NAME_KEY, event.getUserAgent());
+            }
+
+            eventJSON.put(EVENT_TIMESTAMP_KEY, event.getTimeStamp());
 
             if (event.getUserType() == TracksClient.NosaraUserType.ANON) {
                 eventJSON.put(USER_TYPE_KEY, USER_TYPE_ANON);
                 eventJSON.put(USER_ID_KEY, event.getUser());
             } else {
                 eventJSON.put(USER_LOGIN_NAME_KEY, event.getUser());
-                // no need to put the user type key here. default wpcom is used on the server.
+                // no need to put the user type key here. default wpcom is used on the server. 'wpcom:user_id'
             }
 
             unfolderPropertiesNotAvailableInCommon(event.getUserProperties(), USER_INFO_PREFIX, eventJSON, commonProps);
@@ -74,14 +114,14 @@ class MessageBuilder {
             // FIXME: Property names should also be lowercase and use underscores instead of dashes
             // but for a particular event/prop this is not the case
             if (event.getEventName().equals(ALIAS_USER_EVENT_NAME)) {
-                String anonID = eventJSON.getString("anonid");
-                eventJSON.put("anonId", anonID);
-                eventJSON.remove("anonid");
+                String anonID = eventJSON.getString(ALIAS_USER_ANONID_PROP_NAME.toLowerCase());
+                eventJSON.put(ALIAS_USER_ANONID_PROP_NAME, anonID);
+                eventJSON.remove(ALIAS_USER_ANONID_PROP_NAME.toLowerCase());
             }
 
            return eventJSON;
         } catch (JSONException err) {
-            Log.e(TracksClient.LOGTAG, "Cannot write the JSON representation of this object", err);
+            Log.e(TracksClient.LOGTAG, "Cannot write the JSON representation of the event object", err);
             return null;
         }
     }
@@ -127,7 +167,7 @@ class MessageBuilder {
                 }
             } catch (JSONException e) {
                 // Something went wrong!
-                Log.e(TracksClient.LOGTAG, "Cannot write the flatten JSON representation of this object", e);
+                Log.e(TracksClient.LOGTAG, "Cannot write the flatten JSON representation of the JSON object", e);
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.automattic.android.tracks;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -12,6 +13,9 @@ import com.android.volley.Response.Listener;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.automattic.android.tracks.Exceptions.EventNameException;
+import com.automattic.android.tracks.datasets.EventTable;
+import com.automattic.android.tracks.datasets.TracksDatabaseHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,6 +23,7 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 public class TracksClient {
     public static final String LOGTAG = "NosaraClient";
@@ -26,6 +31,8 @@ public class TracksClient {
     public static final String LIB_VERSION = "0.0.1";
     protected static final String DEFAULT_USER_AGENT = "Nosara Client for Android";
     protected static final String NOSARA_REST_API_ENDPOINT_URL_V1_1 = "https://public-api.wordpress.com/rest/v1.1/";
+    protected static final int DEFAULT_EVENTS_QUEUE_THREESHOLD = 10;
+
 
     public static enum NosaraUserType {ANON, WPCOM}
 
@@ -53,37 +60,109 @@ public class TracksClient {
 
     private String mUserAgent = TracksClient.DEFAULT_USER_AGENT;
     private final RequestQueue mQueue;
+    private final TracksDatabaseHelper mDatabaseHelper;
     private String mRestApiEndpointURL;
     private DeviceInformation deviceInformation;
     private JSONObject mUserProperties = new JSONObject();
 
-    // This is the main queue of Events.
-    private final LinkedList<Event> mMainEventsQueue = new LinkedList();
+    // This is the main queue of events we need to lazy-write to the database
+    private final LinkedList<Event> mInsertEventsQueue = new LinkedList<>();
+    // Database monitor
+    private final static Object mDbLock = new Object();
+
+    private boolean mPendingFlush = false;
 
 
-    public TracksClient(Context ctx) {
+    public static TracksClient getClient(Context ctx) {
+        if (null == ctx || !checkBasicConfiguration(ctx)) {
+            return null;
+        }
+
+        return new TracksClient(ctx);
+    }
+
+    private TracksClient(Context ctx) {
         mContext = ctx;
-
+        mDatabaseHelper = TracksDatabaseHelper.getDatabase(ctx);
         mQueue = Volley.newRequestQueue(ctx);
         mRestApiEndpointURL = NOSARA_REST_API_ENDPOINT_URL_V1_1;
         deviceInformation = new DeviceInformation(ctx);
 
-        new Thread(new Runnable() {
+        // This is the thread that read from the "fast" input events queue and actually write data to the DB.
+        Thread bufferCopyThread = new Thread(new Runnable() {
             public void run() {
-                synchronized (mMainEventsQueue) {
-                    while (true) {
+                LinkedList<Event> shadowCopyEventList = new LinkedList<>();
+                while (true) {
+                    // 1. copy events from the input queue to a temporary queue and release the lock over the input queue.
+                    synchronized (mInsertEventsQueue) {
                         try {
-                            mMainEventsQueue.wait();
-                            if (mMainEventsQueue.size() > 5 && NetworkUtils.isNetworkAvailable(mContext)) {
+                            if (mInsertEventsQueue.size() == 0) {
+                                mInsertEventsQueue.wait();
+                            }
+                            // copy the events and release the lock asap
+                            shadowCopyEventList.addAll(mInsertEventsQueue);
+                            mInsertEventsQueue.clear();
+                        } catch (InterruptedException err) {
+                            Log.e(LOGTAG, "Something went wrong while waiting on the input queue of events", err);
+                        }
+                    }
+                    if (shadowCopyEventList.size() > 0) {
+                        //2.  get the lock over the DB and write data
+                        synchronized (mDbLock) {
+                            for (Event currentEvent : shadowCopyEventList) {
+                                EventTable.insertEvent(mContext, currentEvent);
+                            }
+                            mDbLock.notifyAll();
+                        }
+                        shadowCopyEventList.clear();
+                    }
+                }
+            }
+        });
+        bufferCopyThread.setPriority(Thread.MIN_PRIORITY);
+        bufferCopyThread.start();
+
+        // This is the thread that read from the DB and enqueue the request to Volley
+        Thread sendToWireThread = new Thread(new Runnable() {
+            public void run() {
+                while (true) {
+                    synchronized (mDbLock) {
+                        try {
+                            if ((mPendingFlush || EventTable.getEventsCount(mContext) > DEFAULT_EVENTS_QUEUE_THREESHOLD)
+                                    && NetworkUtils.isNetworkAvailable(mContext)) {
                                 sendRequests();
                             }
+                            mDbLock.wait();
                         } catch (InterruptedException err) {
-                            Log.e(LOGTAG, "Something went wrong while waiting on the queue of events", err);
+                            Log.e(LOGTAG, "Something went wrong while waiting on the database lock", err);
                         }
                     }
                 }
             }
-        }).start();
+        });
+        sendToWireThread.setPriority(Thread.MIN_PRIORITY);
+        sendToWireThread.start();
+    }
+
+    private static boolean checkBasicConfiguration(Context context) {
+        final PackageManager packageManager = context.getPackageManager();
+        final String packageName = context.getPackageName();
+
+        if (PackageManager.PERMISSION_GRANTED != packageManager.checkPermission("android.permission.INTERNET", packageName)) {
+            Log.w(LOGTAG, "Package does not have permission android.permission.INTERNET - Nosara Client will not work at all!");
+            Log.i(LOGTAG, "You can fix this by adding the following to your AndroidManifest.xml file:\n" +
+                    "<uses-permission android:name=\"android.permission.INTERNET\" />");
+            return false;
+        }
+
+        if (PackageManager.PERMISSION_GRANTED != packageManager.checkPermission("android.permission.ACCESS_NETWORK_STATE", packageName)) {
+            Log.w(LOGTAG, "Package does not have permission android.permission.ACCESS_NETWORK_STATE - Nosara Client will not work at all!");
+            Log.i(LOGTAG, "You can fix this by adding the following to your AndroidManifest.xml file:\n" +
+                    "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />");
+            return false;
+        }
+
+        return true;
     }
 
     public void registerUserProperties(JSONObject props) {
@@ -95,29 +174,41 @@ public class TracksClient {
     }
 
     public void flush() {
-        if (!NetworkUtils.isNetworkAvailable(mContext)) {
-            return;
-        }
-        sendRequests();
+        // we need to get the lock over the DB to awake the writing thread, and to be sure the flush is done asap.
+        // Since we need the lock over the DB is better to do that in a thread. Otherwise the caller should wait until the DB is ready.
+        Thread flushingThread = new Thread(new Runnable() {
+            public void run() {
+                synchronized (mDbLock) {
+                    mPendingFlush = true;
+                    mDbLock.notifyAll();
+                }
+            }
+        });
+        flushingThread.setPriority(Thread.MIN_PRIORITY);
+        flushingThread.start();
     }
 
     private void sendRequests() {
         if (!NetworkUtils.isNetworkAvailable(mContext)) {
             return;
         }
-        synchronized (mMainEventsQueue) {
-            if (mMainEventsQueue.size() == 0) {
+        synchronized (mDbLock) {
+            mPendingFlush = false; // We can remove the flushing flag now.
+            if (!EventTable.hasEvents(mContext)) {
                 return;
             }
             try {
                 JSONArray events = new JSONArray();
                 LinkedList<Event> currentEventsList = new LinkedList<>(); // events we're sending on the wire
 
-                // Create common props here. Then check later at "single event" layer if one of these props changed.
-                JSONObject commonProps = MessageBuilder.createRequestCommonPropsJSONObject(deviceInformation, mUserProperties);
+                List<Event> newEventsList = EventTable.getAndDeleteEvents(mContext, 0);
+
+                // Create common props here. Then check later at "single event" layer if one of these props changed in that event.
+                JSONObject commonProps = MessageBuilder.createRequestCommonPropsJSONObject(deviceInformation,
+                        mUserProperties, getUserAgent());
 
                 // Create single event obj here
-                for (Event singleEvent : mMainEventsQueue) {
+                for (Event singleEvent : newEventsList) {
                     JSONObject singleEventJSON = MessageBuilder.createEventJSONObject(singleEvent, commonProps);
                     if (singleEventJSON != null) {
                         events.put(singleEventJSON);
@@ -138,8 +229,9 @@ public class TracksClient {
             } catch (JSONException err) {
                 Log.e(LOGTAG, "Exception creating the request JSON object", err);
                 return;
+            } catch (Exception e) {
+                Log.e(LOGTAG, "Exception creating the request JSON object", e);
             }
-            mMainEventsQueue.clear(); // remove events from the queue
         }
     }
 
@@ -155,13 +247,19 @@ public class TracksClient {
     }
 
     public void track(String eventName, JSONObject customProps, String user, NosaraUserType userType) {
-        Event event = new Event(
-                eventName,
-                user,
-                userType,
-                getUserAgent(),
-                System.currentTimeMillis()
-        );
+        Event event = null;
+        try {
+            event = new Event(
+                    eventName,
+                    user,
+                    userType,
+                    getUserAgent(),
+                    System.currentTimeMillis()
+            );
+        } catch (EventNameException e) {
+            Log.e(LOGTAG, "Cannot create the event: " +eventName, e);
+            return;
+        }
 
         JSONObject deviceInfo = deviceInformation.getMutableDeviceInfo();
         if (deviceInfo != null && deviceInfo.length() > 0) {
@@ -185,9 +283,10 @@ public class TracksClient {
             }
         }
 
-        synchronized (mMainEventsQueue) {
-            mMainEventsQueue.add(event);
-            mMainEventsQueue.notify();
+        // Write in the insertEventQueue and notify the thread that actually write the data to the DB
+        synchronized (mInsertEventsQueue) {
+            mInsertEventsQueue.add(event);
+            mInsertEventsQueue.notify();
         }
     }
 
@@ -287,9 +386,9 @@ public class TracksClient {
                 }
             }
             if (mustKeepEventsList.size() > 0) {
-                synchronized (mMainEventsQueue) {
-                    mMainEventsQueue.addAll(mustKeepEventsList);
-                    mMainEventsQueue.notify();
+                synchronized (mInsertEventsQueue) {
+                    mInsertEventsQueue.addAll(mustKeepEventsList);
+                    mInsertEventsQueue.notifyAll();
                 }
             }
         }

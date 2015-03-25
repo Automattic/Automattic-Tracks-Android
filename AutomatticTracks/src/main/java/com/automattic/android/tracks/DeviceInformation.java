@@ -3,6 +3,7 @@ package com.automattic.android.tracks;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -20,6 +21,7 @@ import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Locale;
 
 
 /* package */ class DeviceInformation {
@@ -31,24 +33,21 @@ import java.lang.reflect.Method;
     private final Boolean mHasNFC;
     private final Boolean mHasTelephony;
     private final DisplayMetrics mDisplayMetrics;
+    private final String mAppName;
     private final String mAppVersionName;
     private final Integer mAppVersionCode;
-    private final String mOs;
-    private final String mOSVersion;
-    private final String mManufacturer;
-    private final String mBrand;
-    private final String mModel;
+    private final String mDeviceLanguage;
 
     private final JSONObject mImmutableDeviceInfoJSON;
 
     public DeviceInformation(Context context) {
         mContext = context;
 
-        mOs = "Android";
-        mOSVersion = Build.VERSION.RELEASE == null ? "UNKNOWN" : Build.VERSION.RELEASE;
-        mManufacturer = Build.MANUFACTURER == null ? "UNKNOWN" : Build.MANUFACTURER;
-        mBrand = Build.BRAND == null ? "UNKNOWN" : Build.BRAND;
-        mModel = Build.MODEL == null ? "UNKNOWN" : Build.MODEL;
+        final String mOs = "Android";
+        final String mOSVersion = Build.VERSION.RELEASE == null ? "UNKNOWN" : Build.VERSION.RELEASE;
+        final String mManufacturer = Build.MANUFACTURER == null ? "UNKNOWN" : Build.MANUFACTURER;
+        final String mBrand = Build.BRAND == null ? "UNKNOWN" : Build.BRAND;
+        final String mModel = Build.MODEL == null ? "UNKNOWN" : Build.MODEL;
 
         PackageManager packageManager = mContext.getPackageManager();
 
@@ -62,8 +61,18 @@ import java.lang.reflect.Method;
             Log.w(LOGTAG, "System information constructed with a context that apparently doesn't exist.");
         }
 
+        ApplicationInfo applicationInfo = null;
+        try {
+            applicationInfo = packageManager.getApplicationInfo(mContext.getApplicationInfo().packageName, 0);
+        } catch (final NameNotFoundException e) {
+            Log.w(LOGTAG, "System information constructed with a context that apparently doesn't exist.");
+        }
+
+        mAppName =  (applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo).toString() : "Unknown");
         mAppVersionName = foundAppVersionName;
         mAppVersionCode = foundAppVersionCode;
+        // We're caching device's language here, even if the user can change it while the app is running.
+        mDeviceLanguage =  Locale.getDefault().toString();
 
         // We can't count on these features being available, since we need to
         // run on old devices. Thus, the reflection fandango below...
@@ -104,6 +113,7 @@ import java.lang.reflect.Method;
             mImmutableDeviceInfoJSON.put("manufacturer", mManufacturer);
             mImmutableDeviceInfoJSON.put("brand", mBrand);
             mImmutableDeviceInfoJSON.put("model", mModel);
+            mImmutableDeviceInfoJSON.put("app_name", getAppName());
             mImmutableDeviceInfoJSON.put("app_version", getAppVersionName());
             mImmutableDeviceInfoJSON.put("app_version_code", Integer.toString(getAppVersionCode()));
         } catch (final JSONException e) {
@@ -122,10 +132,8 @@ import java.lang.reflect.Method;
         try {
             DisplayMetrics dMetrics = getDisplayMetrics();
             mImmutableDeviceInfoJSON.put("display_density_dpi", dMetrics.densityDpi);
-            mImmutableDeviceInfoJSON.put("display_width_px", dMetrics.widthPixels);
-            mImmutableDeviceInfoJSON.put("display_height_px", dMetrics.heightPixels);
         } catch (final JSONException e) {
-            Log.e(LOGTAG, "Exception writing DisplayMetrics values in JSON object", e);
+            Log.e(LOGTAG, "Exception writing display_density_dpi value in JSON object", e);
         }
         try {
             mImmutableDeviceInfoJSON.put("bluetooth_version", getBluetoothVersion());
@@ -159,7 +167,7 @@ import java.lang.reflect.Method;
         return mImmutableDeviceInfoJSON;
     }
 
-
+    public String getAppName() { return mAppName; }
 
     public String getAppVersionName() { return mAppVersionName; }
 
@@ -248,5 +256,17 @@ import java.lang.reflect.Method;
             }
         }
         return bluetoothVersion;
+    }
+
+    public int getDeviceWidthPixels() {
+        return getDisplayMetrics().widthPixels;
+    }
+
+    public int getDeviceHeightPixels() {
+        return getDisplayMetrics().heightPixels;
+    }
+
+    public String getDeviceLanguage() {
+        return mDeviceLanguage;
     }
 }

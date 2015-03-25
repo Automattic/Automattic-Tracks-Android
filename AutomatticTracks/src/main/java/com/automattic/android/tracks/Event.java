@@ -2,14 +2,20 @@ package com.automattic.android.tracks;
 
 import android.util.Log;
 
+import com.automattic.android.tracks.Exceptions.EventNameException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Event implements Serializable {
 
     public static final String LOGTAG = "NosaraEvent";
+    private static final String EVENT_NAME_REGEXP = "^[a-z_][a-z0-9_]*$";
+    private static final Pattern eventNameRegExpPattern = Pattern.compile(EVENT_NAME_REGEXP);
 
     private final String mEventName;
     private final String mUser;
@@ -23,12 +29,35 @@ public class Event implements Serializable {
     private JSONObject mDeviceInfo;
     private JSONObject mCustomEventProps;
 
-    public Event(String mEventName, String userID, TracksClient.NosaraUserType uType, String userAgent, long timeStamp) {
+    public Event(String mEventName, String userID, TracksClient.NosaraUserType uType,
+                 String userAgent, long timeStamp) throws EventNameException {
+        checkEventName(mEventName);
         this.mEventName = mEventName;
         this.mUser = userID;
         this.mUserType = uType;
         this.mUserAgent = userAgent;
         this.mTimeStamp = timeStamp;
+    }
+
+    private void checkEventName(String name) throws EventNameException {
+        if (name.equals(MessageBuilder.ALIAS_USER_EVENT_NAME)) {
+            // "_aliasUser is a special case. No validation on it.
+            return;
+        }
+
+        if (name.contains("-")) {
+            String errorMessage = "Event name must not contains dashes.";
+            throw new EventNameException(errorMessage);
+        }
+
+        if (StringUtils.containsWhiteSpace(name)) {
+            throw new EventNameException("Event name must not contains whitespace.");
+        }
+
+        Matcher matcher = eventNameRegExpPattern.matcher(name);
+        if (!matcher.matches()) {
+            throw new EventNameException("Event name must match: " + EVENT_NAME_REGEXP);
+        }
     }
 
     public String getEventName() {
@@ -97,6 +126,18 @@ public class Event implements Serializable {
             Log.e(LOGTAG, "Cannot add the property: " + key + " to the event. It's a reserved keyword.");
             return false;
         }
+
+        if (getEventName().equals(MessageBuilder.ALIAS_USER_EVENT_NAME) &&
+                key.equals(MessageBuilder.ALIAS_USER_ANONID_PROP_NAME)) {
+            // We need to exclude the validation on the property "anonId" for the event "_aliasUser".
+        } else {
+            Matcher matcher = eventNameRegExpPattern.matcher(key);
+            if (!matcher.matches()) {
+                Log.e(LOGTAG, "Cannot add the property: " + key + " to the event. Property name must match: " + EVENT_NAME_REGEXP);
+                return false;
+            }
+        }
+
         try {
             String valueString;
             if (value != null) {
@@ -110,5 +151,9 @@ public class Event implements Serializable {
             return false;
         }
         return true;
+    }
+
+    public void setCustomProperties(JSONObject customProperties) {
+        this.mCustomEventProps = customProperties;
     }
 }
