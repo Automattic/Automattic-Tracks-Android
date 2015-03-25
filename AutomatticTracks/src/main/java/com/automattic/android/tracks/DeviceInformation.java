@@ -185,16 +185,16 @@ import java.util.Locale;
         TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         if (null != telephonyManager) {
             switch(telephonyManager.getPhoneType()) {
-            case 0x00000000: // TelephonyManager.PHONE_TYPE_NONE
+            case TelephonyManager.PHONE_TYPE_NONE:
                 ret = "none";
                 break;
-            case 0x00000001: // TelephonyManager.PHONE_TYPE_GSM
+            case TelephonyManager.PHONE_TYPE_GSM:
                 ret = "gsm";
                 break;
-            case 0x00000002: // TelephonyManager.PHONE_TYPE_CDMA
+            case TelephonyManager.PHONE_TYPE_CDMA:
                 ret = "cdma";
                 break;
-            case 0x00000003: // TelephonyManager.PHONE_TYPE_SIP
+                case TelephonyManager.PHONE_TYPE_SIP:
                 ret = "sip";
                 break;
             default:
