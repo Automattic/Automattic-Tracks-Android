@@ -30,3 +30,6 @@ proguard/
 *.ipr
 *.iws
 .idea/
+
+# private config file
+AutomatticTracks/gradle.properties
