@@ -235,13 +235,6 @@ public class TracksClient {
         }
     }
 
-    /*
-    public NosaraClient(Context ctx, String endpointURL) {
-        this(ctx);
-        mRestApiEndpointURL = endpointURL;
-    }
-*/
-
     public void track(String eventName, String user, NosaraUserType userType) {
         this.track(eventName, null, user, userType);
     }
