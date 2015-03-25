@@ -67,9 +67,9 @@ uploadArchives {
                 description 'Android client for Nosara tracks (event tracking and analytics)'
                 url 'https://github.com/Automattic/Automattic-Tracks-Android'
                 scm {
-                     connection 'scm:git:https://github.com/wordpress-mobile/PersistentEditText.git'
-                     developerConnection 'scm:git:https://github.com/wordpress-mobile/PersistentEditText.git'
-                     url 'https://github.com/wordpress-mobile/PersistentEditText'
+                     connection 'scm:git:https://github.com/Automattic/Automattic-Tracks-Android.git'
+                     developerConnection 'scm:git:https://github.com/Automattic/Automattic-Tracks-Android.git'
+                     url 'https://github.com/Automattic/Automattic-Tracks-Android'
                  }
                  licenses {
                      license {
