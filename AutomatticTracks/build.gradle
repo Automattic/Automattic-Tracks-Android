@@ -20,6 +20,8 @@ dependencies {
 }
 
 android {
+    publishNonDefault true
+
     compileSdkVersion 19
     buildToolsVersion "21.1.2"
 
