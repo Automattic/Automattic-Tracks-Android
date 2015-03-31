@@ -10,9 +10,6 @@ import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 
-/**
- * Created by daniloercoli on 05/03/15.
- */
 public class VolleyErrorHelper {
 
     public static synchronized void logVolleyErrorDetails(final VolleyError volleyError) {

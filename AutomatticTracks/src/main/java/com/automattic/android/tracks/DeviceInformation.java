@@ -23,6 +23,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
+/**
+ * Some of the code below is from Mixpanel's SystemInformation class, but it's heavily modified to
+ * adapt it to our needs. Mostly performance improvements.
+ *
+ * Original code available here:
+ * https://github.com/mixpanel/mixpanel-android/blob/4c3405f33e483fd0d184e9cef524f6aee1f36a1f/src/main/java/com/mixpanel/android/mpmetrics/SystemInformation.java
+ *
+ */
+
 
 /* package */ class DeviceInformation {
     public static final String LOGTAG = "NosaraDeviceInformation";
