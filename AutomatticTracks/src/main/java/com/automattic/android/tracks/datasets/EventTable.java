@@ -116,7 +116,7 @@ public class EventTable {
             return null;
         }
 
-        String sql = "SELECT * FROM tbl_events ORDER BY tbl_events.event_id DESC";
+        String sql = "SELECT * FROM tbl_events ORDER BY tbl_events.event_id ASC";
 
         if (maxEvents > 0) {
             sql += " LIMIT " + Integer.toString(maxEvents);
