@@ -4,11 +4,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
 import com.automattic.android.tracks.Exceptions.EventNameException;
 import com.automattic.android.tracks.datasets.EventTable;
-import com.automattic.android.tracks.datasets.TracksDatabaseHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,8 +46,6 @@ public class TracksClient {
 
     private final Context mContext;
     private String mUserAgent = TracksClient.DEFAULT_USER_AGENT;
-    private final RequestQueue mQueue;
-    private final TracksDatabaseHelper mDatabaseHelper;
     private String mRestApiEndpointURL;
     private final String mTracksRestEndpointURL;
     private DeviceInformation deviceInformation;
@@ -79,8 +74,6 @@ public class TracksClient {
 
     private TracksClient(Context ctx) {
         mContext = ctx;
-        mDatabaseHelper = TracksDatabaseHelper.getDatabase(ctx);
-        mQueue = Volley.newRequestQueue(ctx);
         mRestApiEndpointURL = NOSARA_REST_API_ENDPOINT_URL_V1_1;
         mTracksRestEndpointURL = getAbsoluteURL("tracks/record");
         deviceInformation = new DeviceInformation(ctx);
