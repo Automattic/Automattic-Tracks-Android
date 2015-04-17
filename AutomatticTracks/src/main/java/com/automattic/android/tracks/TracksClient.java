@@ -378,7 +378,7 @@ public class TracksClient {
     public void trackAliasUser(String user, String anonUser) {
         JSONObject customProps = new JSONObject();
         try {
-            customProps.put("anonId", anonUser);
+            customProps.put(MessageBuilder.ALIAS_USER_ANONID_PROP_NAME, anonUser);
         } catch (JSONException e) {
             Log.e(LOGTAG, "Cannot track _aliasUser with the following anonUser " + anonUser);
             return;
