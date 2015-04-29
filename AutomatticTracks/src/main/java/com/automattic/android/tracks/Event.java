@@ -14,8 +14,11 @@ import java.util.regex.Pattern;
 public class Event implements Serializable {
 
     public static final String LOGTAG = "NosaraEvent";
-    private static final String EVENT_NAME_REGEXP = "^[a-z_][a-z0-9_]*$";
+    private static final String EVENT_NAME_REGEXP = "^(([a-z0-9]+)_){2}([a-z0-9_]+)$";
     private static final Pattern eventNameRegExpPattern = Pattern.compile(EVENT_NAME_REGEXP);
+
+    private static final String PROPERTY_NAME_REGEXP = "^[a-z_][a-z0-9_]*$";
+    private static final Pattern propertyNameRegExpPattern = Pattern.compile(PROPERTY_NAME_REGEXP);
 
     private final String mEventName;
     private final String mUser;
@@ -122,6 +125,11 @@ public class Event implements Serializable {
             Log.w(LOGTAG, "Properties should have lowercase name: "+ key);
         }
 
+        if (key.startsWith("_")) {
+            Log.e(LOGTAG, "Cannot add the property: " + key + " to the event. Leading underscores are reserved.");
+            return false;
+        }
+
         if (MessageBuilder.isReservedKeyword(key)) {
             Log.e(LOGTAG, "Cannot add the property: " + key + " to the event. It's a reserved keyword.");
             return false;
@@ -131,9 +139,9 @@ public class Event implements Serializable {
                 key.equals(MessageBuilder.ALIAS_USER_ANONID_PROP_NAME)) {
             // We need to exclude the validation on the property "anonId" for the event "_aliasUser".
         } else {
-            Matcher matcher = eventNameRegExpPattern.matcher(key);
+            Matcher matcher = propertyNameRegExpPattern.matcher(key);
             if (!matcher.matches()) {
-                Log.e(LOGTAG, "Cannot add the property: " + key + " to the event. Property name must match: " + EVENT_NAME_REGEXP);
+                Log.e(LOGTAG, "Cannot add the property: " + key + " to the event. Property name must match: " + PROPERTY_NAME_REGEXP);
                 return false;
             }
         }
