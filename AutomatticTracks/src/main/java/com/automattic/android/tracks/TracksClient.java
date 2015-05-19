@@ -129,7 +129,9 @@ public class TracksClient {
 
                                     if (eventsList != null && eventsList.size() > 0) {
                                         // Create common props here. Then check later at "single event" layer if one of these props changed in that event.
-                                        JSONObject commonProps = MessageBuilder.createRequestCommonPropsJSONObject(deviceInformation,
+                                        JSONObject commonProps = MessageBuilder.createRequestCommonPropsJSONObject(
+                                                mContext,
+                                                deviceInformation,
                                                 mUserProperties, getUserAgent());
 
                                         // Create single event obj here

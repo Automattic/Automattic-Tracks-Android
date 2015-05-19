@@ -1,5 +1,6 @@
 package com.automattic.android.tracks;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -19,10 +20,10 @@ class MessageBuilder {
     private static final String USER_TYPE_KEY = "_ut";
     private static final String USER_TYPE_ANON= "anon";
     private static final String USER_ID_KEY = "_ui";
+    private static final String USER_LANG_KEY = "_lg";
     private static final String USER_LOGIN_NAME_KEY = "_ul";
     private static final String DEVICE_HEIGHT_PIXELS_KEY = "_ht";
     private static final String DEVICE_WIDTH_PIXELS_KEY = "_wd";
-    private static final String DEVICE_LANG_KEY = "_lg";
 
     public static final String ALIAS_USER_EVENT_NAME = "_aliasUser";
     public static final String ALIAS_USER_ANONID_PROP_NAME = "anonId";
@@ -37,7 +38,7 @@ class MessageBuilder {
                 keyToTestLowercase.equals(USER_ID_KEY) ||
                 keyToTestLowercase.equals(DEVICE_WIDTH_PIXELS_KEY) ||
                 keyToTestLowercase.equals(DEVICE_HEIGHT_PIXELS_KEY) ||
-                keyToTestLowercase.equals(DEVICE_LANG_KEY) ||
+                keyToTestLowercase.equals(USER_LANG_KEY) ||
                 keyToTestLowercase.equals(USER_LOGIN_NAME_KEY)
                 ) {
             return true;
@@ -51,7 +52,8 @@ class MessageBuilder {
         return false;
     }
 
-    public static synchronized JSONObject createRequestCommonPropsJSONObject(DeviceInformation deviceInformation,
+    public static synchronized JSONObject createRequestCommonPropsJSONObject(Context ctx,
+                                                                             DeviceInformation deviceInformation,
                                                                              JSONObject userProperties,
                                                                              String userAgent) {
         JSONObject commonProps = new JSONObject();
@@ -69,7 +71,7 @@ class MessageBuilder {
         }
 
         try {
-            commonProps.put(DEVICE_LANG_KEY, deviceInformation.getDeviceLanguage());
+            commonProps.put(USER_LANG_KEY, ctx.getResources().getConfiguration().locale.toString());
         } catch (JSONException e) {
             Log.e(TracksClient.LOGTAG, "Cannot add the device language property to request commons.");
         }
