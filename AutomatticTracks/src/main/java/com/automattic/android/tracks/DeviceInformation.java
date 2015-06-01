@@ -125,6 +125,7 @@ import java.util.Locale;
             mImmutableDeviceInfoJSON.put("app_name", getAppName());
             mImmutableDeviceInfoJSON.put("app_version", getAppVersionName());
             mImmutableDeviceInfoJSON.put("app_version_code", Integer.toString(getAppVersionCode()));
+            mImmutableDeviceInfoJSON.put("language", getDeviceLanguage());
         } catch (final JSONException e) {
             Log.e(LOGTAG, "Exception writing basic device info values in JSON object", e);
         }
