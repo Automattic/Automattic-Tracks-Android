@@ -62,7 +62,8 @@ public class TracksClient {
 
 
     private boolean mPendingFlush = false;
-
+    private static long WAIT_PERIOD_NETWORK_CONNECTION = 2 * 60 * 1000 ; // 2 Minutes
+    private long mLastNetworkErrorTimestamp = 0L;
 
     public static TracksClient getClient(Context ctx) {
         if (null == ctx || !checkBasicConfiguration(ctx)) {
@@ -119,7 +120,11 @@ public class TracksClient {
                     NetworkRequestObject req = null;
                     synchronized (mDbLock) {
                         try {
-                            if ((mPendingFlush || EventTable.getEventsCount(mContext) > DEFAULT_EVENTS_QUEUE_THREESHOLD)
+                            //  Make sure to NOT contact the server immediately if it was a previous network connection.
+                            // For now there is a fixed time, maybe we can add Exponential backoff later.
+                            boolean shouldWait = mLastNetworkErrorTimestamp > 0L
+                                    && (Math.abs(System.currentTimeMillis() - mLastNetworkErrorTimestamp) < WAIT_PERIOD_NETWORK_CONNECTION);
+                            if ((mPendingFlush || (!shouldWait && EventTable.getEventsCount(mContext) > DEFAULT_EVENTS_QUEUE_THREESHOLD))
                                     && NetworkUtils.isNetworkAvailable(mContext)) {
 
                                 mPendingFlush = false; // We can remove the flushing flag now.
@@ -176,6 +181,7 @@ public class TracksClient {
         // This is the thread that sends the request to the server and wait for the response.
         // single network connection model.
         Thread networkThread = new Thread(new Runnable() {
+
             public void run() {
 
                 while (true) {
@@ -253,6 +259,7 @@ public class TracksClient {
                             } catch (Exception e){
                             }
                             if (isErrorResponse) {
+                                mLastNetworkErrorTimestamp = System.currentTimeMillis();
                                 // Loop on events and keep those events that we must re-enqueue
                                 LinkedList<Event> mustKeepEventsList = new LinkedList<>(); // events we're re-enqueuing
                                 for (Event singleEvent : currentRequest.src) {
@@ -267,6 +274,8 @@ public class TracksClient {
                                         mInsertEventsQueue.notifyAll();
                                     }
                                 }
+                            } else {
+                                mLastNetworkErrorTimestamp = 0L;
                             }
                         }
                     }
