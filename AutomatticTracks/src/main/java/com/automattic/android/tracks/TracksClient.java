@@ -29,7 +29,7 @@ public class TracksClient {
     public static final String LIB_VERSION = BuildConfig.VERSION_NAME;
     protected static final String DEFAULT_USER_AGENT = "Nosara Client for Android" + "/" + LIB_VERSION;
     protected static final String NOSARA_REST_API_ENDPOINT_URL_V1_1 = "https://public-api.wordpress.com/rest/v1.1/";
-    protected static final int DEFAULT_EVENTS_QUEUE_THREESHOLD = 10;
+    protected static final int DEFAULT_EVENTS_QUEUE_THREESHOLD = 5;
 
     public static enum NosaraUserType {ANON, WPCOM}
 
