@@ -2,6 +2,7 @@ package com.automattic.android.tracks;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.util.Log;
 
 import com.automattic.android.tracks.Exceptions.EventNameException;
@@ -23,6 +24,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+
+
 public class TracksClient {
     public static final String LOGTAG = "NosaraClient";
 
@@ -30,6 +33,7 @@ public class TracksClient {
     protected static final String DEFAULT_USER_AGENT = "Nosara Client for Android" + "/" + LIB_VERSION;
     protected static final String NOSARA_REST_API_ENDPOINT_URL_V1_1 = "https://public-api.wordpress.com/rest/v1.1/";
     protected static final int DEFAULT_EVENTS_QUEUE_THREESHOLD = 5;
+    protected static final int DEFAULT_EVENTS_COUNTDOWN_TIMER_MS = 30000;
 
     public static enum NosaraUserType {ANON, WPCOM}
 
@@ -60,10 +64,13 @@ public class TracksClient {
     // This is the queue of events we're sending on the wire
     private final LinkedList<NetworkRequestObject> mNetworkQueue = new LinkedList<>();
 
-
     private boolean mPendingFlush = false;
     private static long WAIT_PERIOD_NETWORK_CONNECTION = 2 * 60 * 1000 ; // 2 Minutes
     private long mLastNetworkErrorTimestamp = 0L;
+
+    // The Handler that ensures events are sent to the server when the app is left opened with no actions.
+    // This helps on sending events to the server more often, and keep data fresh.
+    Handler mHandler = new Handler();
 
     public static TracksClient getClient(Context ctx) {
         if (null == ctx || !checkBasicConfiguration(ctx)) {
@@ -127,6 +134,7 @@ public class TracksClient {
                             if ((mPendingFlush || (!shouldWait && EventTable.getEventsCount(mContext) > DEFAULT_EVENTS_QUEUE_THREESHOLD))
                                     && NetworkUtils.isNetworkAvailable(mContext)) {
 
+                                mHandler.removeCallbacks(mEventsCountdownRunnable); // we can remove the delay updater now.
                                 mPendingFlush = false; // We can remove the flushing flag now.
                                 try {
                                     JSONArray events = new JSONArray();
@@ -159,6 +167,7 @@ public class TracksClient {
                                     Log.e(LOGTAG, "Exception creating the request JSON object", err);
                                 }
                             } else {
+                                mHandler.postDelayed(mEventsCountdownRunnable, DEFAULT_EVENTS_COUNTDOWN_TIMER_MS);
                                 mDbLock.wait();
                             }
                         } catch (InterruptedException err) {
@@ -321,13 +330,18 @@ public class TracksClient {
     }
 
     public void flush() {
+        if (!NetworkUtils.isNetworkAvailable(mContext)) {
+            return;
+        }
         // we need to get the lock over the DB to awake the writing thread, and to be sure the flush is done asap.
         // Since we need the lock over the DB is better to do that in a thread. Otherwise the caller should wait until the DB is ready.
         Thread flushingThread = new Thread(new Runnable() {
             public void run() {
                 synchronized (mDbLock) {
-                    mPendingFlush = true;
-                    mDbLock.notifyAll();
+                    if (EventTable.getEventsCount(mContext) > 0) {
+                        mPendingFlush = true;
+                        mDbLock.notifyAll();
+                    }
                 }
             }
         });
@@ -335,7 +349,12 @@ public class TracksClient {
         flushingThread.start();
     }
 
-
+    private Runnable mEventsCountdownRunnable = new Runnable() {
+        @Override
+        public void run() {
+            flush();
+        }
+    };
 
     public void track(String eventName, String user, NosaraUserType userType) {
         this.track(eventName, null, user, userType);
