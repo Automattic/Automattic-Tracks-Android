@@ -2,6 +2,7 @@ package com.automattic.android.tracks;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.util.Log;
 
 import com.automattic.android.tracks.Exceptions.EventNameException;
@@ -23,13 +24,16 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+
+
 public class TracksClient {
     public static final String LOGTAG = "NosaraClient";
 
     public static final String LIB_VERSION = BuildConfig.VERSION_NAME;
     protected static final String DEFAULT_USER_AGENT = "Nosara Client for Android" + "/" + LIB_VERSION;
     protected static final String NOSARA_REST_API_ENDPOINT_URL_V1_1 = "https://public-api.wordpress.com/rest/v1.1/";
-    protected static final int DEFAULT_EVENTS_QUEUE_THREESHOLD = 10;
+    protected static final int DEFAULT_EVENTS_QUEUE_THRESHOLD = 9;
+    protected static final int DEFAULT_EVENTS_QUEUE_TIMER_MS = 30000;
 
     public static enum NosaraUserType {ANON, WPCOM}
 
@@ -60,10 +64,13 @@ public class TracksClient {
     // This is the queue of events we're sending on the wire
     private final LinkedList<NetworkRequestObject> mNetworkQueue = new LinkedList<>();
 
-
     private boolean mPendingFlush = false;
-    private static long WAIT_PERIOD_NETWORK_CONNECTION = 2 * 60 * 1000 ; // 2 Minutes
+    private static long WAIT_PERIOD_NETWORK_CONNECTION = 2 * 60 * 1000 ; // 2 Minutes timeout in case of network error
     private long mLastNetworkErrorTimestamp = 0L;
+
+    // The Handler that ensures events are sent to the server when the app is left opened with no actions.
+    // This helps on sending events to the server more often, and keep data fresh.
+    Handler mHandler = new Handler();
 
     public static TracksClient getClient(Context ctx) {
         if (null == ctx || !checkBasicConfiguration(ctx)) {
@@ -120,13 +127,15 @@ public class TracksClient {
                     NetworkRequestObject req = null;
                     synchronized (mDbLock) {
                         try {
+
+                            mHandler.removeCallbacks(mEventsCountdownRunnable); // we can remove any pending updates
+
                             //  Make sure to NOT contact the server immediately if it was a previous network connection.
                             // For now there is a fixed time, maybe we can add Exponential backoff later.
                             boolean shouldWait = mLastNetworkErrorTimestamp > 0L
                                     && (Math.abs(System.currentTimeMillis() - mLastNetworkErrorTimestamp) < WAIT_PERIOD_NETWORK_CONNECTION);
-                            if ((mPendingFlush || (!shouldWait && EventTable.getEventsCount(mContext) > DEFAULT_EVENTS_QUEUE_THREESHOLD))
+                            if ((mPendingFlush || (!shouldWait && EventTable.getEventsCount(mContext) > DEFAULT_EVENTS_QUEUE_THRESHOLD))
                                     && NetworkUtils.isNetworkAvailable(mContext)) {
-
                                 mPendingFlush = false; // We can remove the flushing flag now.
                                 try {
                                     JSONArray events = new JSONArray();
@@ -159,6 +168,7 @@ public class TracksClient {
                                     Log.e(LOGTAG, "Exception creating the request JSON object", err);
                                 }
                             } else {
+                                mHandler.postDelayed(mEventsCountdownRunnable, DEFAULT_EVENTS_QUEUE_TIMER_MS);
                                 mDbLock.wait();
                             }
                         } catch (InterruptedException err) {
@@ -189,22 +199,18 @@ public class TracksClient {
                     // 1. copy request from the networkQueue queue to a temporary queue and release the lock over the network queue.
                     synchronized (mNetworkQueue) {
                         try {
-                            if (mNetworkQueue.size() == 0) {
+                            while (mNetworkQueue.size() == 0) {
                                 mNetworkQueue.wait();
                             }
-                            // copy the request and release the lock asap
-                            if (mNetworkQueue.size() > 0) {
-                                currentRequest = mNetworkQueue.removeFirst();
-                            }
+                            currentRequest = mNetworkQueue.removeFirst();
                         } catch (InterruptedException err) {
                             Log.e(LOGTAG, "Something went wrong while waiting on the network queue", err);
                         }
                     }
 
-                    if (currentRequest != null) {
-                        boolean isErrorResponse = false;
-                        // send the request
-
+                    boolean isErrorResponse = false;
+                    // send the request if the network is available
+                    if (NetworkUtils.isNetworkAvailable(mContext)) {
                         HttpURLConnection conn = null;
                         try {
                             URL requestURL = new URL(mTracksRestEndpointURL);
@@ -220,21 +226,21 @@ public class TracksClient {
                             conn.setDoOutput(true);
 
                             //Send request
-                            OutputStream wr = conn.getOutputStream ();
+                            OutputStream wr = conn.getOutputStream();
                             wr.write(currentRequest.requestObj.toString().getBytes(PROTOCOL_CHARSET));
                             wr.flush();
-                            wr.close ();
+                            wr.close();
 
                             // Read the request
                             int respCode = conn.getResponseCode();
-                            if (respCode!= HttpURLConnection.HTTP_OK && respCode != HttpURLConnection.HTTP_ACCEPTED) {
+                            if (respCode != HttpURLConnection.HTTP_OK && respCode != HttpURLConnection.HTTP_ACCEPTED) {
                                 isErrorResponse = true;
                                 // read the response of the server in case of errors
                                 InputStream is = conn.getInputStream();
                                 BufferedReader rd = new BufferedReader(new InputStreamReader(is));
                                 String line;
                                 StringBuffer response = new StringBuffer();
-                                while((line = rd.readLine()) != null) {
+                                while ((line = rd.readLine()) != null) {
                                     response.append(line);
                                     response.append('\r');
                                 }
@@ -256,30 +262,37 @@ public class TracksClient {
                                 if (conn != null) {
                                     conn.disconnect();
                                 }
-                            } catch (Exception e){
+                            } catch (Exception e) {
                             }
                             if (isErrorResponse) {
-                                mLastNetworkErrorTimestamp = System.currentTimeMillis();
-                                // Loop on events and keep those events that we must re-enqueue
-                                LinkedList<Event> mustKeepEventsList = new LinkedList<>(); // events we're re-enqueuing
-                                for (Event singleEvent : currentRequest.src) {
-                                    if (isStillValid(singleEvent)) {
-                                        singleEvent.addRetryCount();
-                                        mustKeepEventsList.add(singleEvent);
-                                    }
-                                }
-                                if (mustKeepEventsList.size() > 0) {
-                                    synchronized (mInsertEventsQueue) {
-                                        mInsertEventsQueue.addAll(mustKeepEventsList);
-                                        mInsertEventsQueue.notifyAll();
-                                    }
-                                }
+                                reEnqueueEventsAndSetError(currentRequest);
                             } else {
                                 mLastNetworkErrorTimestamp = 0L;
                             }
                         }
+                    } else {
+                        // No network connection
+                        reEnqueueEventsAndSetError(currentRequest);
                     }
                 } // end-while
+            }
+
+            private void reEnqueueEventsAndSetError(NetworkRequestObject request) {
+                mLastNetworkErrorTimestamp = System.currentTimeMillis();
+                // Loop on events and keep those events that we must re-enqueue
+                LinkedList<Event> mustKeepEventsList = new LinkedList<>(); // events we're re-enqueuing
+                for (Event singleEvent : request.src) {
+                    if (isStillValid(singleEvent)) {
+                        singleEvent.addRetryCount();
+                        mustKeepEventsList.add(singleEvent);
+                    }
+                }
+                if (mustKeepEventsList.size() > 0) {
+                    synchronized (mInsertEventsQueue) {
+                        mInsertEventsQueue.addAll(mustKeepEventsList);
+                        mInsertEventsQueue.notifyAll();
+                    }
+                }
             }
         });
         networkThread.setPriority(Thread.NORM_PRIORITY);
@@ -326,8 +339,10 @@ public class TracksClient {
         Thread flushingThread = new Thread(new Runnable() {
             public void run() {
                 synchronized (mDbLock) {
-                    mPendingFlush = true;
-                    mDbLock.notifyAll();
+                    if (EventTable.getEventsCount(mContext) > 0) {
+                        mPendingFlush = true;
+                        mDbLock.notifyAll();
+                    }
                 }
             }
         });
@@ -335,7 +350,12 @@ public class TracksClient {
         flushingThread.start();
     }
 
-
+    private Runnable mEventsCountdownRunnable = new Runnable() {
+        @Override
+        public void run() {
+            flush();
+        }
+    };
 
     public void track(String eventName, String user, NosaraUserType userType) {
         this.track(eventName, null, user, userType);
