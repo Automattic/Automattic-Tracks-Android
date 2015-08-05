@@ -190,7 +190,7 @@ public class TracksClient {
 
         // This is the thread that sends the request to the server and wait for the response.
         // single network connection model.
-        final Thread networkThread = new Thread(new Runnable() {
+        Thread networkThread = new Thread(new Runnable() {
 
             public void run() {
 
