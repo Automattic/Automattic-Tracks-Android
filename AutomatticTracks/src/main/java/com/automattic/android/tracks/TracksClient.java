@@ -32,7 +32,7 @@ public class TracksClient {
     public static final String LIB_VERSION = BuildConfig.VERSION_NAME;
     protected static final String DEFAULT_USER_AGENT = "Nosara Client for Android" + "/" + LIB_VERSION;
     protected static final String NOSARA_REST_API_ENDPOINT_URL_V1_1 = "https://public-api.wordpress.com/rest/v1.1/";
-    protected static final int DEFAULT_EVENTS_QUEUE_THREESHOLD = 9;
+    protected static final int DEFAULT_EVENTS_QUEUE_THRESHOLD = 9;
     protected static final int DEFAULT_EVENTS_QUEUE_TIMER_MS = 30000;
 
     public static enum NosaraUserType {ANON, WPCOM}
@@ -134,7 +134,7 @@ public class TracksClient {
                             // For now there is a fixed time, maybe we can add Exponential backoff later.
                             boolean shouldWait = mLastNetworkErrorTimestamp > 0L
                                     && (Math.abs(System.currentTimeMillis() - mLastNetworkErrorTimestamp) < WAIT_PERIOD_NETWORK_CONNECTION);
-                            if ((mPendingFlush || (!shouldWait && EventTable.getEventsCount(mContext) > DEFAULT_EVENTS_QUEUE_THREESHOLD))
+                            if ((mPendingFlush || (!shouldWait && EventTable.getEventsCount(mContext) > DEFAULT_EVENTS_QUEUE_THRESHOLD))
                                     && NetworkUtils.isNetworkAvailable(mContext)) {
                                 mPendingFlush = false; // We can remove the flushing flag now.
                                 try {
