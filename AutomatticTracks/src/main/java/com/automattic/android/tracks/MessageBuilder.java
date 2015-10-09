@@ -105,8 +105,8 @@ class MessageBuilder {
                 eventJSON.put(USER_TYPE_KEY, USER_TYPE_ANON);
                 eventJSON.put(USER_ID_KEY, event.getUser());
             } else {
+                eventJSON.put(USER_TYPE_KEY, event.getUserType().name().toLowerCase());
                 eventJSON.put(USER_LOGIN_NAME_KEY, event.getUser());
-                // no need to put the user type key here. default wpcom is used on the server. 'wpcom:user_id'
             }
 
             unfolderPropertiesNotAvailableInCommon(event.getUserProperties(), USER_INFO_PREFIX, eventJSON, commonProps);
