@@ -102,16 +102,18 @@ class MessageBuilder {
             }
 
             eventJSON.put(EVENT_TIMESTAMP_KEY, event.getTimeStamp());
-            eventJSON.put(USER_ID_KEY, event.getUser());
 
             switch (event.getUserType()) {
                 case ANON:
+                    eventJSON.put(USER_ID_KEY, event.getUser());
                     eventJSON.put(USER_TYPE_KEY, USER_TYPE_ANON);
                     break;
                 case WPCOM:
+                    eventJSON.put(USER_LOGIN_NAME_KEY, event.getUser());
                     eventJSON.put(USER_TYPE_KEY, USER_TYPE_WPCOM);
                     break;
                 case SIMPLENOTE:
+                    eventJSON.put(USER_LOGIN_NAME_KEY, event.getUser());
                     eventJSON.put(USER_TYPE_KEY, USER_TYPE_SIMPLENOTE);
             }
 
