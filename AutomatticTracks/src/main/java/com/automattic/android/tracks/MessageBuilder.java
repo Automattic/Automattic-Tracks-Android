@@ -19,8 +19,8 @@ class MessageBuilder {
     private static final String REQUEST_TIMESTAMP_KEY = "_rt";
     private static final String USER_TYPE_KEY = "_ut";
     private static final String USER_TYPE_ANON = "anon";
-    private static final String USER_TYPE_WPCOM = "wpcom:user:id";
-    private static final String USER_TYPE_SIMPLENOTE = "simplenote";
+    private static final String USER_TYPE_WPCOM = "wpcom:user_id";
+    private static final String USER_TYPE_SIMPLENOTE = "simplenote:user_id";
     private static final String USER_ID_KEY = "_ui";
     private static final String USER_LANG_KEY = "_lg";
     private static final String USER_LOGIN_NAME_KEY = "_ul";
