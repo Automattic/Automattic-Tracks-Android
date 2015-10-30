@@ -18,7 +18,9 @@ class MessageBuilder {
     private static final String EVENT_TIMESTAMP_KEY = "_ts";
     private static final String REQUEST_TIMESTAMP_KEY = "_rt";
     private static final String USER_TYPE_KEY = "_ut";
-    private static final String USER_TYPE_ANON= "anon";
+    private static final String USER_TYPE_ANON = "anon";
+    private static final String USER_TYPE_WPCOM = "wpcom:user_id";
+    private static final String USER_TYPE_SIMPLENOTE = "simplenote:user_id";
     private static final String USER_ID_KEY = "_ui";
     private static final String USER_LANG_KEY = "_lg";
     private static final String USER_LOGIN_NAME_KEY = "_ul";
@@ -101,12 +103,18 @@ class MessageBuilder {
 
             eventJSON.put(EVENT_TIMESTAMP_KEY, event.getTimeStamp());
 
-            if (event.getUserType() == TracksClient.NosaraUserType.ANON) {
-                eventJSON.put(USER_TYPE_KEY, USER_TYPE_ANON);
-                eventJSON.put(USER_ID_KEY, event.getUser());
-            } else {
-                eventJSON.put(USER_LOGIN_NAME_KEY, event.getUser());
-                // no need to put the user type key here. default wpcom is used on the server. 'wpcom:user_id'
+            switch (event.getUserType()) {
+                case ANON:
+                    eventJSON.put(USER_ID_KEY, event.getUser());
+                    eventJSON.put(USER_TYPE_KEY, USER_TYPE_ANON);
+                    break;
+                case WPCOM:
+                    eventJSON.put(USER_LOGIN_NAME_KEY, event.getUser());
+                    eventJSON.put(USER_TYPE_KEY, USER_TYPE_WPCOM);
+                    break;
+                case SIMPLENOTE:
+                    eventJSON.put(USER_LOGIN_NAME_KEY, event.getUser());
+                    eventJSON.put(USER_TYPE_KEY, USER_TYPE_SIMPLENOTE);
             }
 
             unfolderPropertiesNotAvailableInCommon(event.getUserProperties(), USER_INFO_PREFIX, eventJSON, commonProps);

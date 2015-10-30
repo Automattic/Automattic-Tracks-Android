@@ -35,7 +35,7 @@ public class TracksClient {
     protected static final int DEFAULT_EVENTS_QUEUE_THRESHOLD = 9;
     protected static final int DEFAULT_EVENTS_QUEUE_TIMER_MS = 30000;
 
-    public static enum NosaraUserType {ANON, WPCOM}
+    public static enum NosaraUserType {ANON, WPCOM, SIMPLENOTE}
 
     /**
      * Socket timeout in milliseconds for rest requests
