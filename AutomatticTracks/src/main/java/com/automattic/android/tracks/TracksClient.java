@@ -405,8 +405,7 @@ public class TracksClient {
         }
     }
 
-
-    public void trackAliasUser(String user, String anonUser) {
+    public void trackAliasUser(String user, String anonUser, NosaraUserType userType) {
         JSONObject customProps = new JSONObject();
         try {
             customProps.put(MessageBuilder.ALIAS_USER_ANONID_PROP_NAME, anonUser);
@@ -415,9 +414,16 @@ public class TracksClient {
             return;
         }
 
-        track(MessageBuilder.ALIAS_USER_EVENT_NAME, customProps, user, TracksClient.NosaraUserType.WPCOM);
+        track(MessageBuilder.ALIAS_USER_EVENT_NAME, customProps, user, userType);
     }
 
+    /**
+     Used by old version of the WP-Android App
+     @deprecated since version 1.1
+     */
+    public void trackAliasUser(String user, String anonUser) {
+        trackAliasUser(user, anonUser, TracksClient.NosaraUserType.WPCOM);
+    }
 
     private String getAbsoluteURL(String url) {
         // if it already starts with our endpoint, let it pass through
