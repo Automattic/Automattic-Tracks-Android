@@ -22,10 +22,10 @@ android {
     publishNonDefault true
 
     compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    buildToolsVersion "23.0.1"
 
     defaultConfig {
-        versionName "1.0.5"
+        versionName "1.0.6"
         minSdkVersion 14
         targetSdkVersion 22
     }
