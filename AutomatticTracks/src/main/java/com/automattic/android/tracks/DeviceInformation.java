@@ -242,6 +242,12 @@ import java.util.Locale;
     }
 
     public Boolean isBluetoothEnabled() {
+        // Do not retrieve bluetooth info on older Android versions.
+        // See: https://github.com/Automattic/Automattic-Tracks-Android/issues/20
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            return null;
+        }
+
         Boolean isBluetoothEnabled = null;
         if (PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(Manifest.permission.BLUETOOTH)) {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
