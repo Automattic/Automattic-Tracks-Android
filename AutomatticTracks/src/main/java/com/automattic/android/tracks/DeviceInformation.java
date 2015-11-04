@@ -243,13 +243,11 @@ import java.util.Locale;
 
     public Boolean isBluetoothEnabled() {
         Boolean isBluetoothEnabled = null;
-        try {
+        if (PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(Manifest.permission.BLUETOOTH)) {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (bluetoothAdapter != null) {
                 isBluetoothEnabled = bluetoothAdapter.isEnabled();
             }
-        } catch (SecurityException e) {
-            // do nothing since we don't have permissions
         }
         return isBluetoothEnabled;
     }
