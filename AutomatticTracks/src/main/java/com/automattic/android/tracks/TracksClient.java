@@ -309,17 +309,23 @@ public class TracksClient {
         final String packageName = context.getPackageName();
 
         if (PackageManager.PERMISSION_GRANTED != packageManager.checkPermission("android.permission.INTERNET", packageName)) {
-            Log.w(LOGTAG, "Package does not have permission android.permission.INTERNET - Nosara Client will not work at all!");
-            Log.i(LOGTAG, "You can fix this by adding the following to your AndroidManifest.xml file:\n" +
+            Log.e(LOGTAG, "Package does not have permission android.permission.INTERNET - Nosara Client will not work at all!");
+            Log.w(LOGTAG, "You can fix this by adding the following to your AndroidManifest.xml file:\n" +
                     "<uses-permission android:name=\"android.permission.INTERNET\" />");
             return false;
         }
 
         if (PackageManager.PERMISSION_GRANTED != packageManager.checkPermission("android.permission.ACCESS_NETWORK_STATE", packageName)) {
-            Log.w(LOGTAG, "Package does not have permission android.permission.ACCESS_NETWORK_STATE - Nosara Client will not work at all!");
-            Log.i(LOGTAG, "You can fix this by adding the following to your AndroidManifest.xml file:\n" +
+            Log.e(LOGTAG, "Package does not have permission android.permission.ACCESS_NETWORK_STATE - Nosara Client will not work at all!");
+            Log.w(LOGTAG, "You can fix this by adding the following to your AndroidManifest.xml file:\n" +
                     "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />");
             return false;
+        }
+
+        if (PackageManager.PERMISSION_GRANTED != packageManager.checkPermission("android.permission.BLUETOOTH", packageName)) {
+            Log.w(LOGTAG, "Package does not have permission android.permission.BLUETOOTH - Nosara Client will not report BT state");
+            Log.w(LOGTAG, "You can fix this by adding the following to your AndroidManifest.xml file:\n" +
+                    "<uses-permission android:name=\"android.permission.BLUETOOTH\" />");
         }
 
         return true;
