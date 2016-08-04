@@ -3,7 +3,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.1.0'
+        classpath 'com.android.tools.build:gradle:2.1.2'
+        classpath 'com.novoda:bintray-release:0.3.4'
     }
 }
 
@@ -19,15 +20,13 @@ dependencies {
 }
 
 android {
-    publishNonDefault true
-
-    compileSdkVersion 22
-    buildToolsVersion "23.0.1"
+    compileSdkVersion 24
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
-        versionName "1.1.0"
+        versionName "1.1.1"
         minSdkVersion 14
-        targetSdkVersion 22
+        targetSdkVersion 24
     }
 
     compileOptions {
