@@ -1,15 +1,16 @@
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.1.0'
+        classpath 'com.android.tools.build:gradle:2.1.2'
+        classpath 'com.novoda:bintray-release:0.3.4'
     }
 }
 
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
-apply plugin: 'signing'
+apply plugin: 'com.novoda.bintray-release'
 
 repositories {
     mavenCentral()
@@ -19,15 +20,13 @@ dependencies {
 }
 
 android {
-    publishNonDefault true
-
-    compileSdkVersion 22
-    buildToolsVersion "23.0.1"
+    compileSdkVersion 24
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
-        versionName "1.1.0"
+        versionName "1.1.1"
         minSdkVersion 14
-        targetSdkVersion 22
+        targetSdkVersion 24
     }
 
     compileOptions {
@@ -36,56 +35,16 @@ android {
     }
 }
 
-version android.defaultConfig.versionName
-group = "com.automattic"
-archivesBaseName = "tracks"
 
-signing {
-    required {
-        has("release") && project.properties.containsKey("signing.keyId") && project.properties.containsKey("signing.secretKeyRingFile")
-    }
-    sign configurations.archives
-}
-
-// http://central.sonatype.org/pages/gradle.html
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: project.properties.ossrhUsername, password: project.properties.ossrhPassword)
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: project.properties.ossrhUsername, password: project.properties.ossrhPassword)
-            }
-
-            pom.project {
-                name 'Automattic-Tracks-Android'
-                packaging 'aar'
-                description 'Android client for Nosara tracks (event tracking and analytics)'
-                url 'https://github.com/Automattic/Automattic-Tracks-Android'
-                scm {
-                     connection 'scm:git:https://github.com/Automattic/Automattic-Tracks-Android.git'
-                     developerConnection 'scm:git:https://github.com/Automattic/Automattic-Tracks-Android.git'
-                     url 'https://github.com/Automattic/Automattic-Tracks-Android'
-                 }
-                 licenses {
-                     license {
-                         name 'The GPLv2 License'
-                         url 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.html'
-                     }
-                 }
-                developers {
-                    developer {
-                        id 'daniloercoli'
-                        name 'Danilo Ercoli'
-                        email 'danilo@automattic.com'
-                    }
-                }
-            }
-        }
-    }
+publish {
+    userOrg = 'automattic'
+    groupId = 'com.automattic'
+    uploadName = 'tracks'
+    artifactId = 'tracks'
+    description = 'Android client for Nosara tracks (event tracking and analytics)'
+    publishVersion = android.defaultConfig.versionName
+    licences = ['MIT']
+    website = 'https://github.com/Automattic/Automattic-Tracks-Android'
+    dryRun = 'false'
+    autoPublish = 'true'
 }
