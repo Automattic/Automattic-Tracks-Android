@@ -102,7 +102,7 @@ public class EventTable {
             stmt.execute();
 
             db.setTransactionSuccessful();
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             Log.e(TracksDatabaseHelper.LOGTAG, "Cannot insert the current event. Please check the details of the event!", e);
         } finally {
             db.endTransaction();
