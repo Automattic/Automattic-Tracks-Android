@@ -1,5 +1,6 @@
 package com.automattic.android.tracks;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.automattic.android.tracks.Exceptions.EventNameException;
@@ -46,6 +47,10 @@ public class Event implements Serializable {
         if (name.equals(MessageBuilder.ALIAS_USER_EVENT_NAME)) {
             // "_aliasUser is a special case. No validation on it.
             return;
+        }
+
+        if (TextUtils.isEmpty(name)) {
+            throw new EventNameException("Event name must not ne empty or null");
         }
 
         if (name.contains("-")) {
