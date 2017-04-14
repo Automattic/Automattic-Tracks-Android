@@ -42,4 +42,13 @@ public class StringUtils {
         return false;
     }
 
+    /*
+     * returns empty string if passed string is null, otherwise returns passed string
+     */
+    public static String notNullStr(String s) {
+        if (s == null) {
+            return "";
+        }
+        return s;
+    }
 }

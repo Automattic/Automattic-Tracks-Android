@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.util.Log;
 
+import com.automattic.android.tracks.Exceptions.EventDetailsException;
 import com.automattic.android.tracks.Exceptions.EventNameException;
 import com.automattic.android.tracks.datasets.EventTable;
 
@@ -368,7 +369,7 @@ public class TracksClient {
     }
 
     public void track(String eventName, JSONObject customProps, String user, NosaraUserType userType) {
-        Event event = null;
+        Event event;
         try {
             event = new Event(
                     eventName,
@@ -377,7 +378,7 @@ public class TracksClient {
                     getUserAgent(),
                     System.currentTimeMillis()
             );
-        } catch (EventNameException e) {
+        } catch (EventNameException | EventDetailsException e) {
             Log.e(LOGTAG, "Cannot create the event: " +eventName, e);
             return;
         }

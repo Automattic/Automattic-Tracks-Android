@@ -77,7 +77,7 @@ public class EventTable {
             stmt.bindString(1, event.getEventName());
             stmt.bindString(2, event.getUser());
             stmt.bindString(3, event.getUserAgent());
-            stmt.bindLong(4,  event.getUserType().ordinal());
+            stmt.bindLong(4, event.getUserType().ordinal());
 
             if (event.getUserProperties() != null) {
                 stmt.bindString(5, event.getUserProperties().toString());
@@ -97,11 +97,13 @@ public class EventTable {
             }
 
             stmt.bindLong(8, event.getTimeStamp());
-            stmt.bindLong(9,  event.getRetryCount());
+            stmt.bindLong(9, event.getRetryCount());
 
             stmt.execute();
 
             db.setTransactionSuccessful();
+        } catch (IllegalArgumentException e) {
+            Log.e(TracksDatabaseHelper.LOGTAG, "Cannot insert the current event. Please check the details of the event!", e);
         } finally {
             db.endTransaction();
             SqlUtils.closeStatement(stmt);

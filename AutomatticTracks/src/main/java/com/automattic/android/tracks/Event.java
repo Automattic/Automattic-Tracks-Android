@@ -1,7 +1,9 @@
 package com.automattic.android.tracks;
 
+import android.text.TextUtils;
 import android.util.Log;
 
+import com.automattic.android.tracks.Exceptions.EventDetailsException;
 import com.automattic.android.tracks.Exceptions.EventNameException;
 
 import org.json.JSONException;
@@ -33,12 +35,25 @@ public class Event implements Serializable {
     private JSONObject mCustomEventProps;
 
     public Event(String mEventName, String userID, TracksClient.NosaraUserType uType,
-                 String userAgent, long timeStamp) throws EventNameException {
+                 String userAgent, long timeStamp) throws EventNameException, EventDetailsException {
+
         checkEventName(mEventName);
+        if (TextUtils.isEmpty(userID)) {
+            throw new EventDetailsException("Username cannot be empty!");
+        }
+
+        if (uType == null) {
+            throw new EventDetailsException("NosaraUserType cannot be null!");
+        }
+
+        if (TextUtils.isEmpty(userAgent)) {
+            Log.w(LOGTAG, "User Agent string is empty!");
+        }
+
         this.mEventName = mEventName;
         this.mUser = userID;
         this.mUserType = uType;
-        this.mUserAgent = userAgent;
+        this.mUserAgent = StringUtils.notNullStr(userAgent);
         this.mTimeStamp = timeStamp;
     }
 
@@ -46,6 +61,10 @@ public class Event implements Serializable {
         if (name.equals(MessageBuilder.ALIAS_USER_EVENT_NAME)) {
             // "_aliasUser is a special case. No validation on it.
             return;
+        }
+
+        if (TextUtils.isEmpty(name)) {
+            throw new EventNameException("Event name must not ne empty or null");
         }
 
         if (name.contains("-")) {
