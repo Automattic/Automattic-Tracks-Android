@@ -228,14 +228,20 @@ import java.util.Locale;
         return ret;
     }
 
-
     public Boolean isWifiConnected() {
-        Boolean ret = null;
+        Boolean ret = Boolean.FALSE;
 
         if (PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE)) {
             ConnectivityManager connManager = (ConnectivityManager) this.mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            ret = wifiInfo.isConnected();
+            if (connManager != null) {
+                try {
+                    NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                    ret = wifiInfo != null && wifiInfo.isConnected();
+                } catch (NullPointerException e) {
+                    Log.e(LOGTAG, "Cannot access WI-FI status", e);
+                    // See: https://github.com/Automattic/Automattic-Tracks-Android/issues/29
+                }
+            }
         }
 
         return ret;
