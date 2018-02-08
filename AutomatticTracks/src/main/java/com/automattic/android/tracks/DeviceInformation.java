@@ -11,9 +11,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
 import android.view.WindowManager;
 
 import org.json.JSONException;
@@ -45,6 +47,7 @@ import java.util.Locale;
     private final String mAppName;
     private final String mAppVersionName;
     private final Integer mAppVersionCode;
+    private final Locale mLocale;
     private final String mDeviceLanguage;
 
     private final JSONObject mImmutableDeviceInfoJSON;
@@ -81,7 +84,8 @@ import java.util.Locale;
         mAppVersionName = foundAppVersionName;
         mAppVersionCode = foundAppVersionCode;
         // We're caching device's language here, even if the user can change it while the app is running.
-        mDeviceLanguage =  Locale.getDefault().toString();
+        mLocale = Locale.getDefault();
+        mDeviceLanguage =  mLocale.toString();
 
         // We can't count on these features being available, since we need to
         // run on old devices. Thus, the reflection fandango below...
@@ -149,6 +153,11 @@ import java.util.Locale;
             mImmutableDeviceInfoJSON.put("bluetooth_version", getBluetoothVersion());
         } catch (final JSONException e) {
             Log.e(LOGTAG, "Exception writing bluetooth info values in JSON object", e);
+        }
+        try {
+            mImmutableDeviceInfoJSON.put("is_rtl_language", isRtlLanguage());
+        } catch (final JSONException e) {
+            Log.e(LOGTAG, "Exception writing is_rtl_language value in JSON object", e);
         }
     }
 
@@ -276,6 +285,17 @@ import java.util.Locale;
             }
         }
         return bluetoothVersion;
+    }
+
+    /**
+     * @return True if the default locale is Right-to-left, false otherwise. For SDK < 17 always returns false.
+     */
+    public boolean isRtlLanguage() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return TextUtils.getLayoutDirectionFromLocale(mLocale) == View.LAYOUT_DIRECTION_RTL;
+        } else {
+            return false;
+        }
     }
 
     public int getDeviceWidthPixels() {
