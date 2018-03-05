@@ -34,7 +34,9 @@ public class TracksClient {
     protected static final String DEFAULT_USER_AGENT = "Nosara Client for Android" + "/" + LIB_VERSION;
     protected static final String NOSARA_REST_API_ENDPOINT_URL_V1_1 = "https://public-api.wordpress.com/rest/v1.1/";
     protected static final int DEFAULT_EVENTS_QUEUE_THRESHOLD = 9;
+    protected static final int DEFAULT_EVENTS_QUEUE_MAX_SIZE = 10000;
     protected static final int DEFAULT_EVENTS_QUEUE_TIMER_MS = 30000;
+    protected static final int DEFAULT_EVENT_MAX_AGE = 14 * 24 * 60 * 60 * 1000 ; // 14 days
 
     public static enum NosaraUserType {ANON, WPCOM, SIMPLENOTE}
 
@@ -108,8 +110,11 @@ public class TracksClient {
                     if (shadowCopyEventList.size() > 0) {
                         //2.  get the lock over the DB and write data
                         synchronized (mDbLock) {
-                            for (Event currentEvent : shadowCopyEventList) {
-                                EventTable.insertEvent(mContext, currentEvent);
+                            // do not write events if the queue is already full
+                            if (EventTable.getEventsCount(mContext) < DEFAULT_EVENTS_QUEUE_MAX_SIZE) {
+                                for (Event currentEvent : shadowCopyEventList) {
+                                    EventTable.insertEvent(mContext, currentEvent);
+                                }
                             }
                             mDbLock.notifyAll();
                         }
@@ -140,8 +145,22 @@ public class TracksClient {
                                 mPendingFlush = false; // We can remove the flushing flag now.
                                 try {
                                     JSONArray events = new JSONArray();
+
+                                    // 1. get events from the DB
                                     List<Event> eventsList = EventTable.getAndDeleteEvents(mContext, 0);
 
+                                    // 2. Check each event and keep valid ones only
+                                    if (eventsList != null && eventsList.size() > 0) {
+                                        List<Event> validEventsList = new LinkedList<>();
+                                        for (Event singleEvent : eventsList) {
+                                            if (isStillValid(singleEvent)) {
+                                                validEventsList.add(singleEvent);
+                                            }
+                                        }
+                                        eventsList = validEventsList;
+                                    }
+
+                                    // 3. Create the JSON of each event and keep the original objs to be used later in case of errors
                                     if (eventsList != null && eventsList.size() > 0) {
                                         // Create common props here. Then check later at "single event" layer if one of these props changed in that event.
                                         JSONObject commonProps = MessageBuilder.createRequestCommonPropsJSONObject(
@@ -455,7 +474,10 @@ public class TracksClient {
     }
 
     private boolean isStillValid(Event event) {
-        // Should we discard events > 5 days? See event.getTimeStamp()
+        // Discard events > 14 days
+        if (Math.abs(System.currentTimeMillis() - event.getTimeStamp()) > DEFAULT_EVENT_MAX_AGE) {
+            return false;
+        }
         // Should we consider the retry count?
         return true;
     }
