@@ -111,6 +111,7 @@ public class TracksClient {
                         //2.  get the lock over the DB and write data
                         synchronized (mDbLock) {
                             // do not write events if the queue is already full
+                            // TODO: Remove older events and insert the new ones - See https://github.com/Automattic/Automattic-Tracks-Android/pull/35#discussion_r172458380
                             if (EventTable.getEventsCount(mContext) < DEFAULT_EVENTS_QUEUE_MAX_SIZE) {
                                 for (Event currentEvent : shadowCopyEventList) {
                                     EventTable.insertEvent(mContext, currentEvent);
