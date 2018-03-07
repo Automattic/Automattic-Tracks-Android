@@ -360,6 +360,8 @@ public class TracksClient {
         this.mUserProperties = null;
     }
 
+    // Force events to be sent to the Tracks backend.
+    // Note: Underlying queues are cleared on success only. To empty/clear the queues see `clearQueues`.
     public void flush() {
         // we need to get the lock over the DB to awake the writing thread, and to be sure the flush is done asap.
         // Since we need the lock over the DB is better to do that in a thread. Otherwise the caller should wait until the DB is ready.
@@ -375,6 +377,30 @@ public class TracksClient {
         });
         flushingThread.setPriority(Thread.MIN_PRIORITY);
         flushingThread.start();
+    }
+
+    // This removes all the events from the queues
+    public void clearQueues() {
+        Thread clearingThread = new Thread(new Runnable() {
+            public void run() {
+                synchronized (mInsertEventsQueue) {
+                    mInsertEventsQueue.clear();
+                    // No need to call notify here
+                }
+                synchronized (mDbLock) {
+                    if (EventTable.hasEvents(mContext)) {
+                        EventTable.purgeAll(mContext);
+                        // No need to call notify here
+                    }
+                }
+                synchronized (mNetworkQueue) {
+                    mNetworkQueue.clear();
+                    // No need to call notify here
+                }
+            }
+        });
+        clearingThread.setPriority(Thread.MAX_PRIORITY);
+        clearingThread.start();
     }
 
     private Runnable mEventsCountdownRunnable = new Runnable() {

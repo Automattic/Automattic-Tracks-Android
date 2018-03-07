@@ -7,6 +7,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -37,6 +38,7 @@ import java.util.Locale;
 
 /* package */ class DeviceInformation {
     public static final String LOGTAG = "NosaraDeviceInformation";
+    private static final int DISPLAY_SIZE_LARGE_THRESHOLD = 7;
 
     private final Context mContext;
 
@@ -49,6 +51,8 @@ import java.util.Locale;
     private final Integer mAppVersionCode;
     private final Locale mLocale;
     private final String mDeviceLanguage;
+    private int mWidthPixels;
+    private int mHeightPixels;
 
     private final JSONObject mImmutableDeviceInfoJSON;
 
@@ -80,12 +84,12 @@ import java.util.Locale;
             Log.w(LOGTAG, "System information constructed with a context that apparently doesn't exist.");
         }
 
-        mAppName =  (applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo).toString() : "Unknown");
+        mAppName = applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo).toString() : "Unknown";
         mAppVersionName = foundAppVersionName;
         mAppVersionCode = foundAppVersionCode;
         // We're caching device's language here, even if the user can change it while the app is running.
         mLocale = Locale.getDefault();
-        mDeviceLanguage =  mLocale.toString();
+        mDeviceLanguage = mLocale.toString();
 
         // We can't count on these features being available, since we need to
         // run on old devices. Thus, the reflection fandango below...
@@ -113,10 +117,33 @@ import java.util.Locale;
 
         mHasNFC = foundNFC;
         mHasTelephony = foundTelephony;
-        mDisplayMetrics = new DisplayMetrics();
 
+        mDisplayMetrics = new DisplayMetrics();
         Display display = ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        display.getMetrics(mDisplayMetrics);
+        if (display != null) {
+            display.getMetrics(mDisplayMetrics);
+            // since SDK_INT = 1; This doesn't include window decorations
+            mWidthPixels = mDisplayMetrics.widthPixels;
+            mHeightPixels = mDisplayMetrics.heightPixels;
+            // Try to load the real screen size now - This does include window decorations (statusbar bar/menu bar)
+            if (Build.VERSION.SDK_INT >= 14 && Build.VERSION.SDK_INT < 17) {
+                try {
+                    mWidthPixels = (int) Display.class.getMethod("getRawWidth").invoke(display);
+                    mHeightPixels = (int) Display.class.getMethod("getRawHeight").invoke(display);
+                } catch (Exception ignored) {
+                    Log.w(LOGTAG, "Unable to call getRawWidth/getRawHeight: " + ignored.getMessage());
+                }
+            } else if (Build.VERSION.SDK_INT >= 17) {
+                try {
+                    Point realSize = new Point();
+                    display.getRealSize(realSize);
+                    mWidthPixels = realSize.x;
+                    mHeightPixels = realSize.y;
+                } catch (Exception ignored) {
+                    Log.w(LOGTAG, "Unable to call getRealSize: " + ignored.getMessage());
+                }
+            }
+        }
 
         // pre-populate the JSON version with immutable info here for performance reasons
         mImmutableDeviceInfoJSON = new JSONObject();
@@ -144,8 +171,17 @@ import java.util.Locale;
             Log.e(LOGTAG, "Exception writing has_telephony value in JSON object", e);
         }
         try {
-            DisplayMetrics dMetrics = getDisplayMetrics();
-            mImmutableDeviceInfoJSON.put("display_density_dpi", dMetrics.densityDpi);
+            int densityDpi = getDisplayMetrics().densityDpi;
+            mImmutableDeviceInfoJSON.put("display_density_dpi", densityDpi);
+            if (densityDpi > 0) {
+                double height = getDeviceHeightPixels() / (double) densityDpi;
+                double width = getDeviceWidthPixels() / (double) densityDpi;
+                double size = Math.hypot(width, height);
+                // Format it now
+                size = Math.round(size * 10d) / 10d;
+                mImmutableDeviceInfoJSON.put("display_size", size);
+                mImmutableDeviceInfoJSON.put("is_large_display", size >= DISPLAY_SIZE_LARGE_THRESHOLD);
+            }
         } catch (final JSONException e) {
             Log.e(LOGTAG, "Exception writing display_density_dpi value in JSON object", e);
         }
@@ -299,11 +335,11 @@ import java.util.Locale;
     }
 
     public int getDeviceWidthPixels() {
-        return getDisplayMetrics().widthPixels;
+        return mWidthPixels;
     }
 
     public int getDeviceHeightPixels() {
-        return getDisplayMetrics().heightPixels;
+        return mHeightPixels;
     }
 
     public String getDeviceLanguage() {
