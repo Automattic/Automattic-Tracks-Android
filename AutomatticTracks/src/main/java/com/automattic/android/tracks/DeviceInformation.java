@@ -84,12 +84,12 @@ import java.util.Locale;
             Log.w(LOGTAG, "System information constructed with a context that apparently doesn't exist.");
         }
 
-        mAppName =  (applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo).toString() : "Unknown");
+        mAppName = applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo).toString() : "Unknown";
         mAppVersionName = foundAppVersionName;
         mAppVersionCode = foundAppVersionCode;
         // We're caching device's language here, even if the user can change it while the app is running.
         mLocale = Locale.getDefault();
-        mDeviceLanguage =  mLocale.toString();
+        mDeviceLanguage = mLocale.toString();
 
         // We can't count on these features being available, since we need to
         // run on old devices. Thus, the reflection fandango below...
@@ -136,7 +136,7 @@ import java.util.Locale;
             } else if (Build.VERSION.SDK_INT >= 17) {
                 try {
                     Point realSize = new Point();
-                    Display.class.getMethod("getRealSize", Point.class).invoke(display, realSize);
+                    display.getRealSize(realSize);
                     mWidthPixels = realSize.x;
                     mHeightPixels = realSize.y;
                 } catch (Exception ignored) {
@@ -174,8 +174,8 @@ import java.util.Locale;
             int densityDpi = getDisplayMetrics().densityDpi;
             mImmutableDeviceInfoJSON.put("display_density_dpi", densityDpi);
             if (densityDpi > 0) {
-                double height = getDeviceHeightPixels() / (double)densityDpi;
-                double width = getDeviceWidthPixels() / (double)densityDpi;
+                double height = getDeviceHeightPixels() / (double) densityDpi;
+                double width = getDeviceWidthPixels() / (double) densityDpi;
                 double size = Math.hypot(width, height);
                 // Format it now
                 size = Math.round(size * 10d) / 10d;
