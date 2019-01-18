@@ -93,8 +93,7 @@ import java.util.Locale;
         // We're caching device's language here, even if the user can change it while the app is running.
         mLocale = Locale.getDefault();
         mDeviceLanguage = mLocale.toString();
-        mIsPortraitDefault =
-                mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        mIsPortraitDefault = isPortraitDefault();
 
         // We can't count on these features being available, since we need to
         // run on old devices. Thus, the reflection fandango below...
@@ -202,7 +201,6 @@ import java.util.Locale;
         }
     }
 
-
     // Returns those system info that could change upon time.
     public JSONObject getMutableDeviceInfo() {
         JSONObject mutableDeviceInfo = new JSONObject();
@@ -230,14 +228,25 @@ import java.util.Locale;
     }
 
     private String getDeviceOrientation() {
-        int currentRotation =
-                ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+        int currentRotation = getCurrentRotation();
 
         if (currentRotation == Surface.ROTATION_0 || currentRotation == Surface.ROTATION_180) {
             return mIsPortraitDefault ? "Portrait" : "Landscape";
         } else {
             return mIsPortraitDefault ? "Landscape" : "Portrait";
         }
+    }
+
+    private boolean isPortraitDefault() {
+        int currentRotation = getCurrentRotation();
+        return (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
+                && (currentRotation == Surface.ROTATION_0 || currentRotation == Surface.ROTATION_180))
+               || (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE
+                   && ((currentRotation == Surface.ROTATION_90 || currentRotation == Surface.ROTATION_270)));
+    }
+
+    private int getCurrentRotation() {
+        return ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
     }
 
     public JSONObject getImmutableDeviceInfo() {
