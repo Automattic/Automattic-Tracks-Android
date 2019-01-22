@@ -40,6 +40,9 @@ import java.util.Locale;
 
 /* package */ class DeviceInformation {
     public static final String LOGTAG = "NosaraDeviceInformation";
+    private static final String ORIENTATION_PORTRAIT = "portrait";
+    private static final String ORIENTATION_LANDSCAPE = "landscape";
+
     private static final int DISPLAY_SIZE_LARGE_THRESHOLD = 7;
 
     private final Context mContext;
@@ -231,9 +234,9 @@ import java.util.Locale;
         int currentRotation = getCurrentRotation();
 
         if (currentRotation == Surface.ROTATION_0 || currentRotation == Surface.ROTATION_180) {
-            return mIsPortraitDefault ? "Portrait" : "Landscape";
+            return mIsPortraitDefault ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
         } else {
-            return mIsPortraitDefault ? "Landscape" : "Portrait";
+            return mIsPortraitDefault ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
         }
     }
 
