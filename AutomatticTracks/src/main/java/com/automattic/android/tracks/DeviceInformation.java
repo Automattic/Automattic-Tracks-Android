@@ -7,6 +7,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -16,6 +17,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -38,6 +40,9 @@ import java.util.Locale;
 
 /* package */ class DeviceInformation {
     public static final String LOGTAG = "NosaraDeviceInformation";
+    private static final String ORIENTATION_PORTRAIT = "portrait";
+    private static final String ORIENTATION_LANDSCAPE = "landscape";
+
     private static final int DISPLAY_SIZE_LARGE_THRESHOLD = 7;
 
     private final Context mContext;
@@ -55,6 +60,7 @@ import java.util.Locale;
     private int mHeightPixels;
 
     private final JSONObject mImmutableDeviceInfoJSON;
+    private final boolean mIsPortraitDefault;
 
     public DeviceInformation(Context context) {
         mContext = context;
@@ -90,6 +96,7 @@ import java.util.Locale;
         // We're caching device's language here, even if the user can change it while the app is running.
         mLocale = Locale.getDefault();
         mDeviceLanguage = mLocale.toString();
+        mIsPortraitDefault = isPortraitDefault();
 
         // We can't count on these features being available, since we need to
         // run on old devices. Thus, the reflection fandango below...
@@ -197,7 +204,6 @@ import java.util.Locale;
         }
     }
 
-
     // Returns those system info that could change upon time.
     public JSONObject getMutableDeviceInfo() {
         JSONObject mutableDeviceInfo = new JSONObject();
@@ -215,7 +221,35 @@ import java.util.Locale;
             Log.e(LOGTAG, "Exception writing network info values in JSON object", e);
         }
 
+        try {
+            mutableDeviceInfo.put("device_orientation", getDeviceOrientation());
+        } catch (final JSONException e) {
+            Log.e(LOGTAG, "Exception writing device orientation info value in JSON object", e);
+        }
+
         return mutableDeviceInfo;
+    }
+
+    private String getDeviceOrientation() {
+        int currentRotation = getCurrentRotation();
+
+        if (currentRotation == Surface.ROTATION_0 || currentRotation == Surface.ROTATION_180) {
+            return mIsPortraitDefault ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+        } else {
+            return mIsPortraitDefault ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+        }
+    }
+
+    private boolean isPortraitDefault() {
+        int currentRotation = getCurrentRotation();
+        return (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
+                && (currentRotation == Surface.ROTATION_0 || currentRotation == Surface.ROTATION_180))
+               || (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE
+                   && ((currentRotation == Surface.ROTATION_90 || currentRotation == Surface.ROTATION_270)));
+    }
+
+    private int getCurrentRotation() {
+        return ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
     }
 
     public JSONObject getImmutableDeviceInfo() {
