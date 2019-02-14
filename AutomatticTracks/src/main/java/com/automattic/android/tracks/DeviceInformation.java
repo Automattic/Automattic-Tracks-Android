@@ -1,6 +1,7 @@
 package com.automattic.android.tracks;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -217,6 +218,7 @@ import java.util.Locale;
             mutableDeviceInfo.put("current_network_operator", getCurrentNetworkOperator());
             mutableDeviceInfo.put("phone_radio_type", getPhoneRadioType()); // NONE - GMS - CDMA - SIP
             mutableDeviceInfo.put("wifi_connected", isWifiConnected());
+            mutableDeviceInfo.put("is_online", isOnline());
         } catch (final JSONException e) {
             Log.e(LOGTAG, "Exception writing network info values in JSON object", e);
         }
@@ -324,6 +326,18 @@ import java.util.Locale;
         }
 
         return ret;
+    }
+
+    private Boolean isOnline() {
+        if (PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE)) {
+            return false;
+        }
+
+        ConnectivityManager manager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        @SuppressLint("MissingPermission")
+        NetworkInfo networkInfo = manager != null ? manager.getActiveNetworkInfo() : null;
+
+        return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
 
     public Boolean isBluetoothEnabled() {
