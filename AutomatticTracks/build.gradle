@@ -24,7 +24,6 @@ dependencies {
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "28.0.3"
 
     defaultConfig {
         versionName "1.1.5"
