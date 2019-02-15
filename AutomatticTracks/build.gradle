@@ -16,7 +16,6 @@ apply plugin: 'com.novoda.bintray-release'
 repositories {
     google()
     jcenter()
-    mavenCentral()
 }
 
 dependencies {
