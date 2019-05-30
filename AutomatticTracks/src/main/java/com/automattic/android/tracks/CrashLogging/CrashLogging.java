@@ -27,7 +27,17 @@ public class CrashLogging {
     private static CrashLoggingDataProvider mDataProvider;
     private static SentryClient sentry;
 
+    private static Boolean isStarted = false;
+
     public static void start(Context context, CrashLoggingDataProvider dataProvider) {
+
+        synchronized (isStarted) {
+            if (isStarted) {
+                return;
+            }
+
+            isStarted = true;
+        }
 
         sentry = Sentry.init(
                 dataProvider.sentryDSN(),
