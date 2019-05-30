@@ -14,6 +14,7 @@ import java.util.Map;
 
 import io.sentry.Sentry;
 import io.sentry.SentryClient;
+import io.sentry.event.User;
 import io.sentry.android.AndroidSentryClientFactory;
 import io.sentry.connection.EventSendCallback;
 import io.sentry.event.Event;
@@ -74,48 +75,37 @@ public class CrashLogging {
         });
 
         mDataProvider = dataProvider;
-        applyUserTrackingPreferences();
+        setNeedsDataRefresh();
     }
 
     public static void crash() {
         throw new UnsupportedOperationException("This is a sample crash");
     }
 
-    public static boolean getUserHasOptedOut() {
-        return mDataProvider.getUserHasOptedOut();
+    public static void setNeedsDataRefresh() {
+        applyUserTracking();
+        applySentryContext();
     }
 
-    public static void setUserHasOptedOut(boolean userHasOptedOut) {
-        mDataProvider.setUserHasOptedOut(userHasOptedOut);
-        applyUserTrackingPreferences();
-    }
+    private static void applyUserTracking() {
+        sentry.getContext().clearUser();
 
-    private static void applyUserTrackingPreferences() {
-        if(!mDataProvider.getUserHasOptedOut()) {
-            enableUserTracking();
-        }
-        else{
-            disableUserTracking();
-        }
-    }
-
-    private static void enableUserTracking() {
         TracksUser tracksUser = mDataProvider.currentUser();
+
+        if (tracksUser == null) {
+            return;
+        }
 
         sentry.getContext().setUser(new UserBuilder()
                 .setEmail(tracksUser.getEmail())
                 .setUsername(tracksUser.getUsername())
                 .withData("userID", tracksUser.getUserID())
-                .build()
-        );
+                .setData(mDataProvider.userContext())
+                .build());
     }
 
-    private static void disableUserTracking() {
-        sentry.clearContext();
-    }
-
-    public static void setContext(Map<String, Object> context) {
-        sentry.setExtra(context);
+    private static void applySentryContext() {
+        sentry.setExtra(mDataProvider.applicationContext());
     }
 
     // Locale Helpers
