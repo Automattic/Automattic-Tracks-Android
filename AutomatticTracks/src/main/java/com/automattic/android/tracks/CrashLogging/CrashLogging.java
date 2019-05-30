@@ -124,12 +124,16 @@ public class CrashLogging {
 
     public static void log(@NotNull Throwable e, Map<String, String> data) {
 
-        Event event = new EventBuilder().withMessage(e.getMessage())
+        EventBuilder eventBuilder = new EventBuilder()
+                .withMessage(e.getMessage())
                 .withLevel(Event.Level.ERROR)
-                .withSentryInterface(new ExceptionInterface(e))
-                .getEvent();
+                .withSentryInterface(new ExceptionInterface(e));
 
-        sentry.sendEvent(event);
+        for (Map.Entry<String,String> entry : data.entrySet()) {
+            eventBuilder.withExtra(entry.getKey(), entry.getValue());
+        }
+
+        sentry.sendEvent(eventBuilder.getEvent());
     }
 
     public static void log(String message) {
