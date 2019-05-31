@@ -122,15 +122,17 @@ public class CrashLogging {
         sentry.sendException(e);
     }
 
-    public static void log(@NotNull Throwable e, Map<String, String> data) {
+    public static void log(@NotNull Throwable e, @Nullable Map<String, String> data) {
 
         EventBuilder eventBuilder = new EventBuilder()
                 .withMessage(e.getMessage())
                 .withLevel(Event.Level.ERROR)
                 .withSentryInterface(new ExceptionInterface(e));
 
-        for (Map.Entry<String,String> entry : data.entrySet()) {
-            eventBuilder.withExtra(entry.getKey(), entry.getValue());
+        if (data != null) {
+            for (Map.Entry<String,String> entry : data.entrySet()) {
+                eventBuilder.withExtra(entry.getKey(), entry.getValue());
+            }
         }
 
         sentry.sendEvent(eventBuilder.getEvent());
