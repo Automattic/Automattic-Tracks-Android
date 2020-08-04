@@ -1,20 +1,18 @@
 package com.automattic.android.tracks.CrashLogging;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.automattic.android.tracks.BuildConfig;
 import com.automattic.android.tracks.TracksUser;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
 import java.util.Map;
 
 import io.sentry.Sentry;
 import io.sentry.SentryClient;
-import io.sentry.event.User;
 import io.sentry.android.AndroidSentryClientFactory;
 import io.sentry.connection.EventSendCallback;
 import io.sentry.event.Event;
@@ -122,7 +120,7 @@ public class CrashLogging {
         sentry.sendException(e);
     }
 
-    public static void log(@NotNull Throwable e, @Nullable Map<String, String> data) {
+    public static void log(@NonNull Throwable e, @Nullable Map<String, String> data) {
 
         EventBuilder eventBuilder = new EventBuilder()
                 .withMessage(e.getMessage())
