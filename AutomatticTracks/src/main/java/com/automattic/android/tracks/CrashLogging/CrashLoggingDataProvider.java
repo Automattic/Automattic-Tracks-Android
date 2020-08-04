@@ -1,9 +1,9 @@
 package com.automattic.android.tracks.CrashLogging;
 
-import com.automattic.android.tracks.TracksUser;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.automattic.android.tracks.TracksUser;
 
 import java.util.Locale;
 import java.util.Map;
@@ -30,13 +30,13 @@ public interface CrashLoggingDataProvider {
      * Provides {@link CrashLogging} with information on what type of build this is.
      * @return The build type
      */
-    @NotNull String buildType();
+    @NonNull String buildType();
 
     /**
      * Provides {@link CrashLogging} with the name of this release.
      * @return The release name
      */
-    @NotNull String releaseName();
+    @NonNull String releaseName();
 
     /**
      * Provides {@link CrashLogging} with information about the current user.
@@ -49,12 +49,12 @@ public interface CrashLoggingDataProvider {
     /**
      * Provides the {@link CrashLogging} with information about the current application state.
      */
-    @NotNull Map<String, Object> applicationContext();
+    @NonNull Map<String, Object> applicationContext();
 
     /**
      * Provides the {@link CrashLogging} with information about the current application state.
      */
-    @NotNull Map<String, Object> userContext();
+    @NonNull Map<String, Object> userContext();
 
     /**
      * Provides the {@link CrashLogging} with information about the user's current locale
