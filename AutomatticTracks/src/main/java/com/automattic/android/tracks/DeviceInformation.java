@@ -194,6 +194,19 @@ import java.util.Locale;
             Log.e(LOGTAG, "Exception writing display_density_dpi value in JSON object", e);
         }
         try {
+            // Width and height depend on device orientation - to be consistent, always
+            // report the shorter dimension as the width
+            if (mHeightPixels > mWidthPixels) {
+                mImmutableDeviceInfoJSON.put("display_height", mHeightPixels);
+                mImmutableDeviceInfoJSON.put("display_width", mWidthPixels);
+            } else {
+                mImmutableDeviceInfoJSON.put("display_height", mWidthPixels);
+                mImmutableDeviceInfoJSON.put("display_width", mHeightPixels);
+            }
+        } catch (final JSONException e) {
+            Log.e(LOGTAG, "Exception writing display_height and width value in JSON object", e);
+        }
+        try {
             mImmutableDeviceInfoJSON.put("bluetooth_version", getBluetoothVersion());
         } catch (final JSONException e) {
             Log.e(LOGTAG, "Exception writing bluetooth info values in JSON object", e);
