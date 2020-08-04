@@ -13,7 +13,6 @@ import java.util.Map;
 
 import io.sentry.Sentry;
 import io.sentry.SentryClient;
-import io.sentry.event.User;
 import io.sentry.android.AndroidSentryClientFactory;
 import io.sentry.connection.EventSendCallback;
 import io.sentry.event.Event;
