@@ -182,8 +182,8 @@ import java.util.Locale;
             int densityDpi = getDisplayMetrics().densityDpi;
             mImmutableDeviceInfoJSON.put("display_density_dpi", densityDpi);
             if (densityDpi > 0) {
-                double height = getDeviceHeightPixels() / (double) densityDpi;
-                double width = getDeviceWidthPixels() / (double) densityDpi;
+                double height = mHeightPixels / (double) densityDpi;
+                double width = mWidthPixels / (double) densityDpi;
                 double size = Math.hypot(width, height);
                 // Format it now
                 size = Math.round(size * 10d) / 10d;
@@ -410,14 +410,6 @@ import java.util.Locale;
         } else {
             return false;
         }
-    }
-
-    public int getDeviceWidthPixels() {
-        return mWidthPixels;
-    }
-
-    public int getDeviceHeightPixels() {
-        return mHeightPixels;
     }
 
     public String getDeviceLanguage() {
