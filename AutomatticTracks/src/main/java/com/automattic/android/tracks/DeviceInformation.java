@@ -195,7 +195,9 @@ import java.util.Locale;
         }
         try {
             // Width and height depend on device orientation - to be consistent, always
-            // report the shorter dimension as the width
+            // report the shorter dimension as the width.
+            // These values represent the 'real' dimensions of the screen, ignoring navigation
+            // and window decoration.
             if (mHeightPixels > mWidthPixels) {
                 mImmutableDeviceInfoJSON.put("display_height", mHeightPixels);
                 mImmutableDeviceInfoJSON.put("display_width", mWidthPixels);
@@ -205,6 +207,21 @@ import java.util.Locale;
             }
         } catch (final JSONException e) {
             Log.e(LOGTAG, "Exception writing display_height and width value in JSON object", e);
+        }
+        try {
+            // Width and height depend on device orientation - to be consistent, always
+            // report the shorter dimension as the width.
+            // These values represent the usable dimensions of the screen - whatever is left after
+            // navigation and window decoration.
+            if (mDisplayMetrics.heightPixels > mDisplayMetrics.widthPixels) {
+                mImmutableDeviceInfoJSON.put("display_usable_height", mDisplayMetrics.heightPixels);
+                mImmutableDeviceInfoJSON.put("display_usable_width", mDisplayMetrics.widthPixels);
+            } else {
+                mImmutableDeviceInfoJSON.put("display_usable_height", mDisplayMetrics.widthPixels);
+                mImmutableDeviceInfoJSON.put("display_usable_width", mDisplayMetrics.heightPixels);
+            }
+        } catch (final JSONException e) {
+            Log.e(LOGTAG, "Exception writing display_usable_height and width value in JSON object", e);
         }
         try {
             mImmutableDeviceInfoJSON.put("bluetooth_version", getBluetoothVersion());
