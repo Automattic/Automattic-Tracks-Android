@@ -27,7 +27,7 @@ android {
     compileSdkVersion 26
 
     defaultConfig {
-        versionName "1.2"
+        versionName "1.2.1-beta-1"
         minSdkVersion 14
         targetSdkVersion 25
     }
