@@ -24,8 +24,6 @@ class MessageBuilder {
     private static final String USER_ID_KEY = "_ui";
     private static final String USER_LANG_KEY = "_lg";
     private static final String USER_LOGIN_NAME_KEY = "_ul";
-    private static final String DEVICE_HEIGHT_PIXELS_KEY = "_ht";
-    private static final String DEVICE_WIDTH_PIXELS_KEY = "_wd";
 
     public static final String ALIAS_USER_EVENT_NAME = "_aliasUser";
     public static final String ALIAS_USER_ANONID_PROP_NAME = "anonId";
@@ -38,8 +36,6 @@ class MessageBuilder {
                 keyToTestLowercase.equals(REQUEST_TIMESTAMP_KEY) ||
                 keyToTestLowercase.equals(USER_TYPE_KEY) ||
                 keyToTestLowercase.equals(USER_ID_KEY) ||
-                keyToTestLowercase.equals(DEVICE_WIDTH_PIXELS_KEY) ||
-                keyToTestLowercase.equals(DEVICE_HEIGHT_PIXELS_KEY) ||
                 keyToTestLowercase.equals(USER_LANG_KEY) ||
                 keyToTestLowercase.equals(USER_LOGIN_NAME_KEY)
                 ) {
@@ -63,13 +59,6 @@ class MessageBuilder {
             commonProps.put(USER_AGENT_NAME_KEY, userAgent);
         } catch (JSONException e) {
             Log.e(TracksClient.LOGTAG, "Cannot add the "+  USER_AGENT_NAME_KEY + " property to request commons.");
-        }
-
-        try {
-            commonProps.put(DEVICE_WIDTH_PIXELS_KEY, deviceInformation.getDeviceWidthPixels());
-            commonProps.put(DEVICE_HEIGHT_PIXELS_KEY, deviceInformation.getDeviceHeightPixels());
-        } catch (JSONException e) {
-            Log.e(TracksClient.LOGTAG, "Cannot add the device width/height properties to request commons.");
         }
 
         try {

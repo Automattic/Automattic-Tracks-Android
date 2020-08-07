@@ -182,8 +182,8 @@ import java.util.Locale;
             int densityDpi = getDisplayMetrics().densityDpi;
             mImmutableDeviceInfoJSON.put("display_density_dpi", densityDpi);
             if (densityDpi > 0) {
-                double height = getDeviceHeightPixels() / (double) densityDpi;
-                double width = getDeviceWidthPixels() / (double) densityDpi;
+                double height = mHeightPixels / (double) densityDpi;
+                double width = mWidthPixels / (double) densityDpi;
                 double size = Math.hypot(width, height);
                 // Format it now
                 size = Math.round(size * 10d) / 10d;
@@ -192,6 +192,36 @@ import java.util.Locale;
             }
         } catch (final JSONException e) {
             Log.e(LOGTAG, "Exception writing display_density_dpi value in JSON object", e);
+        }
+        try {
+            // Width and height depend on device orientation - to be consistent, always
+            // report the shorter dimension as the width.
+            // These values represent the 'real' dimensions of the screen, ignoring navigation
+            // and window decoration.
+            if (mHeightPixels > mWidthPixels) {
+                mImmutableDeviceInfoJSON.put("display_height", mHeightPixels);
+                mImmutableDeviceInfoJSON.put("display_width", mWidthPixels);
+            } else {
+                mImmutableDeviceInfoJSON.put("display_height", mWidthPixels);
+                mImmutableDeviceInfoJSON.put("display_width", mHeightPixels);
+            }
+        } catch (final JSONException e) {
+            Log.e(LOGTAG, "Exception writing display_height and width value in JSON object", e);
+        }
+        try {
+            // Width and height depend on device orientation - to be consistent, always
+            // report the shorter dimension as the width.
+            // These values represent the usable dimensions of the screen - whatever is left after
+            // navigation and window decoration.
+            if (mDisplayMetrics.heightPixels > mDisplayMetrics.widthPixels) {
+                mImmutableDeviceInfoJSON.put("display_usable_height", mDisplayMetrics.heightPixels);
+                mImmutableDeviceInfoJSON.put("display_usable_width", mDisplayMetrics.widthPixels);
+            } else {
+                mImmutableDeviceInfoJSON.put("display_usable_height", mDisplayMetrics.widthPixels);
+                mImmutableDeviceInfoJSON.put("display_usable_width", mDisplayMetrics.heightPixels);
+            }
+        } catch (final JSONException e) {
+            Log.e(LOGTAG, "Exception writing display_usable_height and width value in JSON object", e);
         }
         try {
             mImmutableDeviceInfoJSON.put("bluetooth_version", getBluetoothVersion());
@@ -380,14 +410,6 @@ import java.util.Locale;
         } else {
             return false;
         }
-    }
-
-    public int getDeviceWidthPixels() {
-        return mWidthPixels;
-    }
-
-    public int getDeviceHeightPixels() {
-        return mHeightPixels;
     }
 
     public String getDeviceLanguage() {
