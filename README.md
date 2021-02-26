@@ -17,25 +17,35 @@ projects but the idea is to share what we've made.
 $ ./gradlew assemble
 ```
 
-* Publish to bintray:
+* Publish to Jitpack (for `Tracks` >`1.2.1`)
 
-```sh
-$ ./gradlew assemble publishToMavenLocal bintrayUpload -PbintrayUser=XXX -PbintrayKey=XXX -PdryRun=false
-```
-
-Note: running the `publishToMavenLocal` task is very important, it will
-create the .po file needed for any maven repository.
+There's no need to do anything. Jitpack will handle build of requested verison itself.
 
 ## Usage
 
+### Jitpack
+
 In your gradle config:
+
+1. Make sure there's `maven { url 'https://jitpack.io' }` defined in project's repositories
+2. Add `Tracks` to dependencies:
 
 ```gradle
 dependencies {
     // Replace LATEST_VERSION by the version you need.
-    compile 'com.automattic:tracks:LATEST_VERSION'
+    implementation 'com.github.Automattic:Automattic-Tracks-Android:LATEST_VERSION'
 }
 ```
+
+### Maven Local
+
+In order to use this project locally, execute `./gradlew publishToMavenLocal` and change version to `LOCAL-SNAPSHOT` on client:
+```gradle
+dependencies {
+    implementation 'com.github.Automattic:Automattic-Tracks-Android:LOCAL-SNAPSHOT'
+}
+```
+
 
 ## License
 
