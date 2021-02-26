@@ -1,0 +1,23 @@
+orbs:
+  android: wordpress-mobile/android@1.0
+
+version: 2.1
+jobs:
+  BuildAndTest:
+    executor:
+      name: android/default
+      api-version: "30"
+    steps:
+      - checkout
+      - android/restore-gradle-cache
+      - run:
+          command: ./gradlew --stacktrace assembleRelease
+      - run:
+          command: ./gradlew --stacktrace testRelease
+      - android/save-gradle-cache
+      - android/save-test-results
+
+workflows:
+  tracks-android:
+    jobs:
+      - BuildAndTest
