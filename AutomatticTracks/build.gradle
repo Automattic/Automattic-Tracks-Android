@@ -54,7 +54,6 @@ afterEvaluate {
                         }
                     }
                 }
-                version 'LOCAL-SNAPSHOT'
             }
         }
     }

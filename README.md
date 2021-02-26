@@ -28,6 +28,7 @@ There's no need to do anything. Jitpack will handle build of requested verison i
 In your gradle config:
 
 1. Make sure there's `maven { url 'https://jitpack.io' }` defined in project's repositories
+
 2. Add `Tracks` to dependencies:
 
 ```gradle
@@ -39,13 +40,25 @@ dependencies {
 
 ### Maven Local
 
-In order to use this project locally, execute `./gradlew publishToMavenLocal` and change version to `LOCAL-SNAPSHOT` on client:
+In order to use this project locally
+1. Define `LOCAL-SNAPSHOT` version in `Track`'s `build.gradle`
+
+```gradle
+publications {
+        maven(MavenPublication) {
+            (...)
+            version 'LOCAL-SNAPSHOT'
+        }
+    }
+```
+
+2. Run `./gradlew publishToMavenLocal` and change version to `LOCAL-SNAPSHOT` on client:
+
 ```gradle
 dependencies {
     implementation 'com.github.Automattic:Automattic-Tracks-Android:LOCAL-SNAPSHOT'
 }
 ```
-
 
 ## License
 
