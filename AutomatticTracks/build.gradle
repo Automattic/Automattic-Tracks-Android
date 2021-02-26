@@ -54,6 +54,9 @@ afterEvaluate {
                         }
                     }
                 }
+                if (project.hasProperty("localDistribution") && project.getProperty("localDistribution").toBoolean()) {
+                    version = "LOCAL-SNAPSHOT"
+                }
             }
         }
     }

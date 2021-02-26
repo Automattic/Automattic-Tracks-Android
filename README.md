@@ -40,19 +40,7 @@ dependencies {
 
 ### Maven Local
 
-In order to use this project locally
-1. Define `LOCAL-SNAPSHOT` version in `Track`'s `build.gradle`
-
-```gradle
-publications {
-        maven(MavenPublication) {
-            (...)
-            version 'LOCAL-SNAPSHOT'
-        }
-    }
-```
-
-2. Run `./gradlew publishToMavenLocal` and change version to `LOCAL-SNAPSHOT` on client:
+Run `./gradlew publishToMavenLocal -PlocalDistribution=true` and change version to `LOCAL-SNAPSHOT` on client:
 
 ```gradle
 dependencies {
