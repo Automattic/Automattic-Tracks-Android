@@ -11,7 +11,7 @@ buildscript {
 
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
-apply plugin: 'com.novoda.bintray-release'
+apply plugin: 'maven-publish'
 
 repositories {
     google()
@@ -38,16 +38,24 @@ android {
     }
 }
 
-
-publish {
-    userOrg = 'automattic'
-    groupId = 'com.automattic'
-    uploadName = 'tracks'
-    artifactId = 'tracks'
-    desc = 'Android client for Nosara tracks (event tracking and analytics)'
-    publishVersion = android.defaultConfig.versionName
-    licences = ['MIT']
-    website = 'https://github.com/Automattic/Automattic-Tracks-Android'
-    dryRun = 'false'
-    autoPublish = 'true'
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                artifactId 'Automattic-Tracks-Android'
+                artifact("$buildDir/outputs/aar/AutomatticTracks-debug.aar")
+                description 'Android client for Nosara tracks (event tracking and analytics)'
+                groupId 'com.github.Automattic'
+                pom {
+                    licenses {
+                        license {
+                            name = 'GNU General Public License v2.0'
+                            url = 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html'
+                        }
+                    }
+                }
+                version 'LOCAL-SNAPSHOT'
+            }
+        }
+    }
 }
