@@ -1,0 +1,9 @@
+install:
+   - echo "Running a custom install command"
+   - ./gradlew clean assembleRelease
+   - ls -la
+   - ls -la AutomatticTracks/build/outputs/aar
+   - mkdir ~/.m2
+   - mkdir ~/.m2/repository
+   - cp AutomatticTracks/build/outputs/aar/AutomatticTracks-release.aar ~/.m2/repository/AutomatticTracks-release.aar
+   - ls -la ~/.m2/repository
