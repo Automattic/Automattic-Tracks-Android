@@ -5,13 +5,12 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.2'
-        classpath 'com.novoda:bintray-release:0.9'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
     }
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'maven'
-apply plugin: 'com.novoda.bintray-release'
+apply plugin: 'com.github.dcendents.android-maven'
 
 repositories {
     google()
@@ -36,18 +35,4 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
-}
-
-
-publish {
-    userOrg = 'automattic'
-    groupId = 'com.automattic'
-    uploadName = 'tracks'
-    artifactId = 'tracks'
-    desc = 'Android client for Nosara tracks (event tracking and analytics)'
-    publishVersion = android.defaultConfig.versionName
-    licences = ['MIT']
-    website = 'https://github.com/Automattic/Automattic-Tracks-Android'
-    dryRun = 'false'
-    autoPublish = 'true'
 }
