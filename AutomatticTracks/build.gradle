@@ -9,7 +9,6 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
 repositories {
