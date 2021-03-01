@@ -3,7 +3,7 @@ orbs:
 
 version: 2.1
 jobs:
-  BuildAndTest:
+  Build:
     executor:
       name: android/default
       api-version: "30"
@@ -11,12 +11,16 @@ jobs:
       - checkout
       - android/restore-gradle-cache
       - run:
+          name: Assemble .aar
           command: ./gradlew --stacktrace assembleRelease
       - run:
+          name: Run unit tests
           command: ./gradlew --stacktrace testRelease
       - run:
+          name: Run Android lint
           command: ./gradlew --stacktrace lintRelease
       - run:
+          name: Assert build correctness on Jitpack
           command: ./gradlew --stacktrace publishToMavenLocal
       - android/save-gradle-cache
       - android/save-test-results
@@ -24,5 +28,5 @@ jobs:
 workflows:
   tracks-android:
     jobs:
-      - BuildAndTest
+      - Build
 
