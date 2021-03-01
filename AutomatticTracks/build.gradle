@@ -45,7 +45,7 @@ afterEvaluate {
                 artifactId 'Automattic-Tracks-Android'
                 artifact("$buildDir/outputs/aar/AutomatticTracks-debug.aar")
                 description 'Android client for Nosara tracks (event tracking and analytics)'
-                groupId 'com.github.Automattic'
+                groupId 'com.automattic'
                 pom {
                     licenses {
                         license {
@@ -53,9 +53,6 @@ afterEvaluate {
                             url = 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html'
                         }
                     }
-                }
-                if (project.hasProperty("localDistribution") && project.getProperty("localDistribution").toBoolean()) {
-                    version = "LOCAL-SNAPSHOT"
                 }
             }
         }

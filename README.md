@@ -17,10 +17,6 @@ projects but the idea is to share what we've made.
 $ ./gradlew assemble
 ```
 
-* Publish to Jitpack (for `Tracks` >`1.2.1`)
-
-There's no need to do anything. Jitpack will handle build of requested verison itself.
-
 ## Usage
 
 ### Jitpack
@@ -35,16 +31,6 @@ In your gradle config:
 dependencies {
     // Replace LATEST_VERSION by the version you need.
     implementation 'com.github.Automattic:Automattic-Tracks-Android:LATEST_VERSION'
-}
-```
-
-### Maven Local
-
-Run `./gradlew publishToMavenLocal -PlocalDistribution=true` and change version to `LOCAL-SNAPSHOT` on client:
-
-```gradle
-dependencies {
-    implementation 'com.github.Automattic:Automattic-Tracks-Android:LOCAL-SNAPSHOT'
 }
 ```
 
