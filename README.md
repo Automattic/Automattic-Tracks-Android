@@ -19,20 +19,7 @@ $ ./gradlew assemble
 
 ## Usage
 
-### Jitpack
-
-In your gradle config:
-
-1. Make sure there's `maven { url 'https://jitpack.io' }` defined in project's repositories
-
-2. Add `Tracks` to dependencies:
-
-```gradle
-dependencies {
-    // Replace LATEST_VERSION by the version you need.
-    implementation 'com.github.Automattic:Automattic-Tracks-Android:LATEST_VERSION'
-}
-```
+Follow instructions under `How to` section on [jitpack.com/Automattic/Automattic-Tracks-Android](https://jitpack.io/#Automattic/Automattic-Tracks-Android/)
 
 ## License
 
