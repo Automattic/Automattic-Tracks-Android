@@ -43,8 +43,8 @@ afterEvaluate {
         publications {
             maven(MavenPublication) {
                 artifactId 'Automattic-Tracks-Android'
-                artifact("$buildDir/outputs/aar/AutomatticTracks-debug.aar")
                 description 'Android client for Nosara tracks (event tracking and analytics)'
+                from components.release
                 groupId 'com.automattic'
                 pom {
                     licenses {
