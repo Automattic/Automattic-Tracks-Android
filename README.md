@@ -17,25 +17,9 @@ projects but the idea is to share what we've made.
 $ ./gradlew assemble
 ```
 
-* Publish to bintray:
-
-```sh
-$ ./gradlew assemble publishToMavenLocal bintrayUpload -PbintrayUser=XXX -PbintrayKey=XXX -PdryRun=false
-```
-
-Note: running the `publishToMavenLocal` task is very important, it will
-create the .po file needed for any maven repository.
-
 ## Usage
 
-In your gradle config:
-
-```gradle
-dependencies {
-    // Replace LATEST_VERSION by the version you need.
-    compile 'com.automattic:tracks:LATEST_VERSION'
-}
-```
+Follow instructions under `How to` section on [jitpack.com/Automattic/Automattic-Tracks-Android](https://jitpack.io/#Automattic/Automattic-Tracks-Android/)
 
 ## License
 
