@@ -2,7 +2,6 @@ package com.automattic.android.tracks.CrashLogging
 
 import android.content.Context
 import com.automattic.android.tracks.BuildConfig
-import com.automattic.android.tracks.toStringValues
 import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
@@ -23,10 +22,10 @@ object CrashLogging {
     ) {
         SentryAndroid.init(context) { options ->
             options.apply {
-                dsn = dataProvider.sentryDSN()
-                environment = dataProvider.buildType()
-                release = dataProvider.releaseName()
-                setTag("locale", getCurrentLanguage(dataProvider.locale()))
+                dsn = dataProvider.sentryDSN
+                environment = dataProvider.buildType
+                release = dataProvider.releaseName
+                setTag("locale", getCurrentLanguage(dataProvider.locale))
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
                     return@BeforeSendCallback if (BuildConfig.DEBUG || dataProvider.userHasOptedOut) {
                         null
@@ -52,12 +51,12 @@ object CrashLogging {
     private fun applyUserTracking() {
         Sentry.clearBreadcrumbs()
         Sentry.setUser(null)
-        val tracksUser = dataProvider.currentUser() ?: return
+        val tracksUser = dataProvider.currentUser ?: return
 
         val user = User().apply {
             email = tracksUser.email
             username = tracksUser.username
-            others = dataProvider.userContext().toStringValues()
+            others = dataProvider.userContext
                     .plus("userID" to tracksUser.userID)
         }
 
@@ -65,7 +64,7 @@ object CrashLogging {
     }
 
     private fun applySentryContext() {
-        Sentry.setExtra("context", dataProvider.applicationContext().toString())
+        Sentry.setExtra("context", dataProvider.applicationContext.toString())
     }
 
     // Locale Helpers

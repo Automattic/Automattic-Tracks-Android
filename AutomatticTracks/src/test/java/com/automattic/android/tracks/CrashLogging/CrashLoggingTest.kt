@@ -40,17 +40,17 @@ class CrashLoggingTest {
     fun `should call for required arguments during initialisation`() {
         initialize()
 
-        verify(dataProvider, times(1)).sentryDSN()
-        verify(dataProvider, times(1)).buildType()
-        verify(dataProvider, times(1)).releaseName()
-        verify(dataProvider, times(1)).locale()
+        verify(dataProvider, times(1)).sentryDSN
+        verify(dataProvider, times(1)).buildType
+        verify(dataProvider, times(1)).releaseName
+        verify(dataProvider, times(1)).locale
     }
 
     @Test
     fun `should not apply user tracking after initialization if user is null`() {
         initialize()
 
-        verify(dataProvider, never()).userContext()
+        verify(dataProvider, never()).userContext
     }
 
     @Test
@@ -59,13 +59,13 @@ class CrashLoggingTest {
 
         verify(user, times(1))?.email
         verify(user, times(1))?.username
-        verify(dataProvider, times(1)).userContext()
+        verify(dataProvider, times(1)).userContext
     }
 
     @Test
     fun `should apply sentry context after initialization`() {
         initialize()
 
-        verify(dataProvider, times(1)).applicationContext()
+        verify(dataProvider, times(1)).applicationContext
     }
 }

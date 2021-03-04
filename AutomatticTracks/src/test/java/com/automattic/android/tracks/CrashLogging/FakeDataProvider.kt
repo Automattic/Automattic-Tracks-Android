@@ -4,23 +4,21 @@ import com.automattic.android.tracks.TracksUser
 import java.util.*
 
 open class FakeDataProvider(
-        private val userOptedOut: Boolean = false,
-        private val currentUser: TracksUser? = null,
+        override val currentUser: TracksUser? = null,
 ) : CrashLoggingDataProvider {
-    override fun sentryDSN() = "https://public@sentry.example.com/1"
 
-    override fun getUserHasOptedOut() = userOptedOut
+    override val userHasOptedOut: Boolean = false
 
-    override fun buildType() = "testBuildType"
+    override val sentryDSN = "https://public@sentry.example.com/1"
 
-    override fun userContext(): MutableMap<String, Any> = mutableMapOf()
+    override val buildType = "testBuildType"
 
-    override fun applicationContext(): MutableMap<String, Any> = mutableMapOf()
+    override val userContext = emptyMap<String, String?>()
 
-    override fun releaseName() = "testReleaseName"
+    override val applicationContext = emptyMap<String, String?>()
 
-    override fun currentUser() = currentUser
+    override val releaseName = "testReleaseName"
 
-    override fun locale(): Locale? = null
+    override val locale: Locale? = null
 
 }
