@@ -6,7 +6,7 @@ import com.automattic.android.tracks.toStringValues
 import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
-import io.sentry.SentryOptions.BeforeSendCallback
+import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
 import io.sentry.protocol.Message
 import io.sentry.protocol.User
@@ -27,10 +27,13 @@ object CrashLogging {
                 environment = dataProvider.buildType()
                 release = dataProvider.releaseName()
                 setTag("locale", getCurrentLanguage(dataProvider.locale()))
-                beforeSend = BeforeSendCallback(
-                        debug = BuildConfig.DEBUG,
-                        dataProvider = dataProvider
-                )
+                beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
+                    return@BeforeSendCallback if (BuildConfig.DEBUG || dataProvider.userHasOptedOut) {
+                        null
+                    } else {
+                        event
+                    }
+                }
             }
         }
         this.dataProvider = dataProvider
