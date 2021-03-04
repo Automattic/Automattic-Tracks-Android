@@ -1,0 +1,2 @@
+before_install:
+  - cp gradle.properties-example gradle.properties
