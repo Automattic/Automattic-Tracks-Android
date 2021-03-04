@@ -39,10 +39,12 @@ object CrashLogging {
         setNeedsDataRefresh()
     }
 
+    @JvmStatic
     fun crash() {
         throw UnsupportedOperationException("This is a sample crash")
     }
 
+    @JvmStatic
     fun setNeedsDataRefresh() {
         applyUserTracking()
         applySentryContext()
@@ -75,10 +77,12 @@ object CrashLogging {
     }
 
     // Logging Helpers
+    @JvmStatic
     fun log(e: Throwable) {
         Sentry.captureException(e)
     }
 
+    @JvmStatic
     fun log(throwable: Throwable, data: Map<String?, String?>?) {
         val event = SentryEvent().apply {
             message = Message().apply {
@@ -90,6 +94,7 @@ object CrashLogging {
         Sentry.captureEvent(event)
     }
 
+    @JvmStatic
     fun log(message: String) {
         Sentry.captureMessage(message)
     }
