@@ -39,3 +39,7 @@ proguard/
 
 # private config file
 AutomatticTracks/gradle.properties
+
+# OS X generated file
+.DS_Store
+
