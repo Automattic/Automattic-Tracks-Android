@@ -11,6 +11,9 @@ jobs:
       - checkout
       - android/restore-gradle-cache
       - run:
+          name: Setup gradle.properties
+          command: cp gradle.properties-example gradle.properties
+      - run:
           name: Assemble .aar
           command: ./gradlew --stacktrace assembleRelease
       - run:

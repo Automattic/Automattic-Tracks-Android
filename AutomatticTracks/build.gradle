@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
     implementation 'io.sentry:sentry-android:4.1.0'
-    implementation "androidx.annotation:annotation:1.1.0"
+    implementation 'androidx.annotation:annotation:1.1.0'
     testImplementation "junit:junit:4.13"
     testImplementation "org.mockito:mockito-core:3.3.3"
     testImplementation 'org.robolectric:robolectric:4.4'
