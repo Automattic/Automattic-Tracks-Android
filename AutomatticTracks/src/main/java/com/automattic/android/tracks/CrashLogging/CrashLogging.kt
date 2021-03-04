@@ -78,12 +78,13 @@ object CrashLogging {
     }
 
     fun log(throwable: Throwable, data: Map<String?, String?>?) {
-        val event = SentryEvent()
-        val message = Message()
-        message.message = throwable.message
-        event.message = Message()
-        event.level = SentryLevel.ERROR
-        event.setExtras(data)
+        val event = SentryEvent().apply {
+            message = Message().apply {
+                message = throwable.message
+            }
+            level = SentryLevel.ERROR
+            setExtras(data)
+        }
         Sentry.captureEvent(event)
     }
 
