@@ -1,11 +1,9 @@
 package com.automattic.android.tracks.CrashLogging
 
 import android.content.Context
+import android.os.Build
 import com.automattic.android.tracks.BuildConfig
-import io.sentry.Sentry
-import io.sentry.SentryEvent
-import io.sentry.SentryLevel
-import io.sentry.SentryOptions
+import io.sentry.*
 import io.sentry.android.core.SentryAndroid
 import io.sentry.protocol.Message
 import io.sentry.protocol.User
@@ -27,6 +25,7 @@ object CrashLogging {
                 dsn = dataProvider.sentryDSN
                 environment = dataProvider.buildType
                 release = dataProvider.releaseName
+                setLogger(SystemOutLogger())
                 setTag("locale", getCurrentLanguage(dataProvider.locale))
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
                     return@BeforeSendCallback if (BuildConfig.DEBUG || dataProvider.userHasOptedOut) {
