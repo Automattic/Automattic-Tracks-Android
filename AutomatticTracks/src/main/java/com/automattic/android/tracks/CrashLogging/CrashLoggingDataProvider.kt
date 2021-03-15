@@ -1,4 +1,4 @@
-package com.automattic.android.tracks.CrashLogging
+package com.automattic.android.tracks.crashlogging
 
 import com.automattic.android.tracks.TracksUser
 import java.util.*

@@ -15,16 +15,20 @@ apply plugin: 'maven-publish'
 
 repositories {
     google()
+    mavenCentral()
     jcenter()
 }
 
 dependencies {
-    implementation 'io.sentry:sentry-android:4.1.0'
+    implementation 'io.sentry:sentry-android:4.3.0'
     implementation 'androidx.annotation:annotation:1.1.0'
-    testImplementation 'junit:junit:4.13'
+    testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:3.3.3'
-    testImplementation 'org.robolectric:robolectric:4.4'
+    testImplementation 'org.robolectric:robolectric:4.5.1'
     testImplementation 'androidx.test:core:1.3.0'
+
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test:runner:1.3.0'
 }
 
 android {
@@ -32,8 +36,10 @@ android {
 
     defaultConfig {
         versionName "1.2.1"
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 25
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -43,6 +49,15 @@ android {
 
     lintOptions {
         baseline file("lint-baseline.xml")
+    }
+
+    sourceSets {
+        androidTest {
+            java.srcDirs += "src/sharedTest/kotlin"
+        }
+        test {
+            java.srcDirs += "src/sharedTest/kotlin"
+        }
     }
 }
 

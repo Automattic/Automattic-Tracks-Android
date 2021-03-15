@@ -1,15 +1,15 @@
-package com.automattic.android.tracks.CrashLogging
+package com.automattic.android.tracks.fakes
 
+import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.TracksUser
 import java.util.*
 
 open class FakeDataProvider(
         override val currentUser: TracksUser? = null,
+        override val sentryDSN: String = "https://public@sentry.example.com/1"
 ) : CrashLoggingDataProvider {
 
     override val userHasOptedOut: Boolean = false
-
-    override val sentryDSN = "https://public@sentry.example.com/1"
 
     override val buildType = "testBuildType"
 

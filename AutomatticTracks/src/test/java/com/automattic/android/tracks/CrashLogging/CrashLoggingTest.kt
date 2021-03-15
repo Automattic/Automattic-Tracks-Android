@@ -1,6 +1,7 @@
-package com.automattic.android.tracks.CrashLogging
+package com.automattic.android.tracks.crashlogging
 
 import com.automattic.android.tracks.TracksUser
+import com.automattic.android.tracks.fakes.FakeDataProvider
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.*
