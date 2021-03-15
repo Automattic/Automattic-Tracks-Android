@@ -13,6 +13,8 @@ import java.util.*
 
 object CrashLogging {
 
+    private const val EMPTY_VALUE = ""
+
     private lateinit var dataProvider: CrashLoggingDataProvider
 
     @JvmStatic
@@ -66,7 +68,9 @@ object CrashLogging {
     }
 
     private fun applySentryContext() {
-        Sentry.setExtra("context", dataProvider.applicationContext.toString())
+        dataProvider.applicationContext.forEach { entry ->
+            Sentry.setExtra(entry.key, entry.value ?: EMPTY_VALUE)
+        }
     }
 
     // Locale Helpers
