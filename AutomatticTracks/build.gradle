@@ -19,11 +19,18 @@ repositories {
     jcenter()
 }
 
+configurations {
+    ktlint
+}
+
 dependencies {
+    ktlint "com.pinterest:ktlint:0.40.0"
     //noinspection GradleDependency
     implementation 'io.sentry:sentry-android:1.7.16'
     implementation 'androidx.annotation:annotation:1.1.0'
 }
+
+apply from: 'ktlint.gradle'
 
 android {
     compileSdkVersion 30
