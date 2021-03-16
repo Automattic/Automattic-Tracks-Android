@@ -4,7 +4,6 @@ buildscript {
         jcenter()
     }
     dependencies {
-        //noinspection GradleDependency
         classpath 'com.android.tools.build:gradle:4.0.2'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.31'
     }
@@ -25,7 +24,6 @@ configurations {
 
 dependencies {
     ktlint "com.pinterest:ktlint:0.40.0"
-    //noinspection GradleDependency
     implementation 'io.sentry:sentry-android:1.7.16'
     implementation 'androidx.annotation:annotation:1.1.0'
 }
@@ -49,6 +47,7 @@ android {
     lintOptions {
         baseline file("lint-baseline.xml")
         warningsAsErrors true
+        warning 'GradleDependency'
     }
 }
 
