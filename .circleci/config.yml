@@ -15,7 +15,7 @@ jobs:
           command: cp gradle.properties-example gradle.properties
       - run:
           name: Static code analysis
-          command: ./gradlew --stacktrace ktlint
+          command: ./gradlew --stacktrace ciktlint
       - run:
           name: Assemble .aar
           command: ./gradlew --stacktrace assembleRelease
