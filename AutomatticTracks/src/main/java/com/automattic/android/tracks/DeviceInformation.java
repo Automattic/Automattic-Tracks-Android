@@ -388,15 +388,12 @@ import java.util.Locale;
     }
 
     public String getBluetoothVersion() {
-        String bluetoothVersion = null;
-        if (Build.VERSION.SDK_INT >= 8) {
-            bluetoothVersion = "none";
-            if(Build.VERSION.SDK_INT >= 18 &&
-                    mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-                bluetoothVersion = "ble";
-            } else if(mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
-                bluetoothVersion = "classic";
-            }
+        String bluetoothVersion = "none";
+        if (Build.VERSION.SDK_INT >= 18 &&
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+            bluetoothVersion = "ble";
+        } else if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
+            bluetoothVersion = "classic";
         }
         return bluetoothVersion;
     }

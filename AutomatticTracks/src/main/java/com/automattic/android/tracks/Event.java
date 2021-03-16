@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -140,7 +141,7 @@ public class Event implements Serializable {
         }
 
         // Emit a warning if the property isn't lowercase.
-        if (!key.toLowerCase().equals(key)) {
+        if (!key.toLowerCase(Locale.ROOT).equals(key)) {
             Log.w(LOGTAG, "Properties should have lowercase name: "+ key);
         }
 
