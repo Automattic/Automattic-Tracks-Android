@@ -24,12 +24,12 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 30
 
     defaultConfig {
         versionName "1.2.1"
         minSdkVersion 14
-        targetSdkVersion 25
+        targetSdkVersion 30
     }
 
     compileOptions {
