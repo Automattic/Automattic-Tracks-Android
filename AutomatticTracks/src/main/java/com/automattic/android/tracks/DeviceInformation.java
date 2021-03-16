@@ -388,8 +388,7 @@ import java.util.Locale;
     }
 
     public String getBluetoothVersion() {
-        String bluetoothVersion = null;
-        bluetoothVersion = "none";
+        String bluetoothVersion = "none";
         if (Build.VERSION.SDK_INT >= 18 &&
                 mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             bluetoothVersion = "ble";
