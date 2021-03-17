@@ -134,14 +134,14 @@ import java.util.Locale;
             mWidthPixels = mDisplayMetrics.widthPixels;
             mHeightPixels = mDisplayMetrics.heightPixels;
             // Try to load the real screen size now - This does include window decorations (statusbar bar/menu bar)
-            if (Build.VERSION.SDK_INT >= 14 && Build.VERSION.SDK_INT < 17) {
+            if (Build.VERSION.SDK_INT < 17) {
                 try {
                     mWidthPixels = (int) Display.class.getMethod("getRawWidth").invoke(display);
                     mHeightPixels = (int) Display.class.getMethod("getRawHeight").invoke(display);
                 } catch (Exception ignored) {
                     Log.w(LOGTAG, "Unable to call getRawWidth/getRawHeight: " + ignored.getMessage());
                 }
-            } else if (Build.VERSION.SDK_INT >= 17) {
+            } else {
                 try {
                     Point realSize = new Point();
                     display.getRealSize(realSize);
