@@ -2,11 +2,16 @@ package com.automattic.android.tracks.crashlogging
 
 import android.content.Context
 import com.automattic.android.tracks.BuildConfig
-import io.sentry.*
+import io.sentry.NoOpLogger
+import io.sentry.Sentry
+import io.sentry.SentryEvent
+import io.sentry.SentryLevel
+import io.sentry.SentryOptions
+import io.sentry.SystemOutLogger
 import io.sentry.android.core.SentryAndroid
 import io.sentry.protocol.Message
 import io.sentry.protocol.User
-import java.util.*
+import java.util.Locale
 
 object CrashLogging {
 
@@ -16,8 +21,8 @@ object CrashLogging {
 
     @JvmStatic
     fun start(
-            context: Context,
-            dataProvider: CrashLoggingDataProvider,
+        context: Context,
+        dataProvider: CrashLoggingDataProvider,
     ) {
         SentryAndroid.init(context) { options ->
             options.apply {
@@ -60,7 +65,7 @@ object CrashLogging {
             email = tracksUser.email
             username = tracksUser.username
             others = dataProvider.userContext
-                    .plus("userID" to tracksUser.userID)
+                .plus("userID" to tracksUser.userID)
         }
 
         Sentry.setUser(user)

@@ -1,12 +1,12 @@
 package com.automattic.android.tracks.fakes
 
-import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.TracksUser
-import java.util.*
+import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
+import java.util.Locale
 
 open class FakeDataProvider(
-        override val currentUser: TracksUser? = null,
-        override val sentryDSN: String = "https://public@sentry.example.com/1"
+    override val currentUser: TracksUser? = null,
+    override val sentryDSN: String = "https://public@sentry.example.com/1"
 ) : CrashLoggingDataProvider {
 
     override val userHasOptedOut: Boolean = false
@@ -20,5 +20,4 @@ open class FakeDataProvider(
     override val releaseName = "testReleaseName"
 
     override val locale: Locale? = null
-
 }

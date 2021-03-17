@@ -1,7 +1,7 @@
 package com.automattic.android.tracks.crashlogging
 
 import com.automattic.android.tracks.TracksUser
-import java.util.*
+import java.util.Locale
 
 interface CrashLoggingDataProvider {
     /**

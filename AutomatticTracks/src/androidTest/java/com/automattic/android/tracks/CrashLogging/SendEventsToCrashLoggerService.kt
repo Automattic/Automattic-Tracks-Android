@@ -1,6 +1,5 @@
 package com.automattic.android.tracks.crashlogging
 
-
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.automattic.android.tracks.TracksUser
@@ -13,21 +12,21 @@ import org.junit.runner.RunWith
 class SendEventsToCrashLoggerService {
 
     val testUser = TracksUser(
-            "testUserId",
-            "testEmail",
-            "testUsername"
+        "testUserId",
+        "testEmail",
+        "testUsername"
     )
 
     var dataProvider: CrashLoggingDataProvider = FakeDataProvider(
-            currentUser = testUser,
-            sentryDSN = "DSN of Sentry test project"
+        currentUser = testUser,
+        sentryDSN = "DSN of Sentry test project"
     )
 
     @Before
     fun setUp() {
         CrashLogging.start(
-                context = InstrumentationRegistry.getInstrumentation().context,
-                dataProvider = dataProvider
+            context = InstrumentationRegistry.getInstrumentation().context,
+            dataProvider = dataProvider
         )
     }
 

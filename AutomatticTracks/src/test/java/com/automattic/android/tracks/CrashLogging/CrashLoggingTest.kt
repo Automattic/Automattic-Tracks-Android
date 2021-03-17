@@ -4,7 +4,10 @@ import com.automattic.android.tracks.TracksUser
 import com.automattic.android.tracks.fakes.FakeDataProvider
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.*
+import org.mockito.Mockito.never
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
@@ -15,9 +18,9 @@ class CrashLoggingTest {
     var user: TracksUser? = null
 
     val testUser = TracksUser(
-            "testUserId",
-            "testEmail",
-            "testUsername"
+        "testUserId",
+        "testEmail",
+        "testUsername"
     )
 
     private fun initialize(currentUser: TracksUser? = null) {
@@ -27,8 +30,8 @@ class CrashLoggingTest {
         dataProvider = spy(FakeDataProvider(currentUser = user))
 
         CrashLogging.start(
-                context = RuntimeEnvironment.systemContext,
-                dataProvider = dataProvider
+            context = RuntimeEnvironment.systemContext,
+            dataProvider = dataProvider
         )
     }
 
