@@ -2,6 +2,7 @@ package com.automattic.android.tracks.crashlogging
 
 import com.automattic.android.tracks.TracksUser
 import com.automattic.android.tracks.fakes.FakeDataProvider
+import com.automattic.android.tracks.fakes.testUser
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
@@ -16,12 +17,6 @@ class CrashLoggingTest {
 
     lateinit var dataProvider: CrashLoggingDataProvider
     var user: TracksUser? = null
-
-    val testUser = TracksUser(
-        "testUserId",
-        "testEmail",
-        "testUsername"
-    )
 
     private fun initialize(currentUser: TracksUser? = null) {
 
