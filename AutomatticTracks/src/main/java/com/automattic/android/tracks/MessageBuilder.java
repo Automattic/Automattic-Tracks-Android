@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
+import java.util.Locale;
 
 class MessageBuilder {
 
@@ -29,7 +30,7 @@ class MessageBuilder {
     public static final String ALIAS_USER_ANONID_PROP_NAME = "anonId";
 
     public static synchronized boolean isReservedKeyword(String keyToTest) {
-        String keyToTestLowercase = keyToTest.toLowerCase();
+        String keyToTestLowercase = keyToTest.toLowerCase(Locale.ROOT);
         if (keyToTestLowercase.equals(EVENT_NAME_KEY) ||
                 keyToTestLowercase.equals(USER_AGENT_NAME_KEY) ||
                 keyToTestLowercase.equals(EVENT_TIMESTAMP_KEY) ||
@@ -113,9 +114,9 @@ class MessageBuilder {
             // Property names need to be lowercase and use underscores instead of dashes,
             // but for a particular event/prop this is not the case
             if (event.getEventName().equals(ALIAS_USER_EVENT_NAME)) {
-                String anonID = eventJSON.getString(ALIAS_USER_ANONID_PROP_NAME.toLowerCase());
+                String anonID = eventJSON.getString(ALIAS_USER_ANONID_PROP_NAME.toLowerCase(Locale.ROOT));
                 eventJSON.put(ALIAS_USER_ANONID_PROP_NAME, anonID);
-                eventJSON.remove(ALIAS_USER_ANONID_PROP_NAME.toLowerCase());
+                eventJSON.remove(ALIAS_USER_ANONID_PROP_NAME.toLowerCase(Locale.ROOT));
             }
 
            return eventJSON;
@@ -141,7 +142,7 @@ class MessageBuilder {
         Iterator<String> iter = objectToFlatten.keys();
         while (iter.hasNext()) {
             String key = iter.next();
-            String flattenKey = String.valueOf(flattenPrefix + key).toLowerCase();
+            String flattenKey = String.valueOf(flattenPrefix + key).toLowerCase(Locale.ROOT);
             try {
                 Object value = objectToFlatten.get(key);
                 String valueString;
