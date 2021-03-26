@@ -47,7 +47,7 @@ interface CrashLoggingDataProvider {
     val applicationContext: Map<String, String?>
 
     /**
-     * Provides the [CrashLogging] with information about the current application state.
+     * Provides the [CrashLogging] with information about the current user state.
      */
     val userContext: Map<String, String?>
 

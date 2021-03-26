@@ -2,13 +2,13 @@ package com.automattic.android.tracks.crashlogging
 
 import android.content.Context
 import com.automattic.android.tracks.BuildConfig
+import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerProxy
+import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerProxyImpl
 import io.sentry.NoOpLogger
-import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.SystemOutLogger
-import io.sentry.android.core.SentryAndroid
 import io.sentry.protocol.Message
 import io.sentry.protocol.User
 
@@ -17,13 +17,25 @@ object CrashLogging {
     private const val EMPTY_STRING = ""
 
     private lateinit var dataProvider: CrashLoggingDataProvider
+    private lateinit var sentryProxy: SentryErrorTrackerProxy
 
     @JvmStatic
     fun start(
         context: Context,
         dataProvider: CrashLoggingDataProvider,
     ) {
-        SentryAndroid.init(context) { options ->
+        start(context, dataProvider, SentryErrorTrackerProxyImpl())
+    }
+
+    internal fun start(
+        context: Context,
+        dataProvider: CrashLoggingDataProvider,
+        sentryProxy: SentryErrorTrackerProxy
+    ) {
+        this.sentryProxy = sentryProxy
+        this.dataProvider = dataProvider
+
+        sentryProxy.initialize(context) { options ->
             options.apply {
                 dsn = dataProvider.sentryDSN
                 environment = dataProvider.buildType
@@ -40,19 +52,18 @@ object CrashLogging {
                 }
             }
         }
-        this.dataProvider = dataProvider
         setNeedsDataRefresh()
     }
 
     @JvmStatic
     fun setNeedsDataRefresh() {
         applyUserTracking()
-        applySentryContext()
+        applyApplicationContext()
     }
 
     private fun applyUserTracking() {
-        Sentry.clearBreadcrumbs()
-        Sentry.setUser(null)
+        sentryProxy.clearBreadcrumbs()
+        sentryProxy.setUser(null)
         val tracksUser = dataProvider.currentUser ?: return
 
         val user = User().apply {
@@ -62,34 +73,34 @@ object CrashLogging {
                 .plus("userID" to tracksUser.userID)
         }
 
-        Sentry.setUser(user)
+        sentryProxy.setUser(user)
     }
 
-    private fun applySentryContext() {
+    private fun applyApplicationContext() {
         dataProvider.applicationContext.forEach { entry ->
-            Sentry.setExtra(entry.key, entry.value ?: EMPTY_STRING)
+            sentryProxy.applyExtra(entry.key, entry.value ?: EMPTY_STRING)
         }
     }
 
     @JvmStatic
-    fun log(e: Throwable) {
-        Sentry.captureException(e)
+    fun log(throwable: Throwable) {
+        sentryProxy.captureException(throwable)
     }
 
     @JvmStatic
-    fun log(throwable: Throwable, data: Map<String?, String?>?) {
+    fun log(throwable: Throwable, data: Map<String, String?>) {
         val event = SentryEvent().apply {
             message = Message().apply {
                 message = throwable.message
             }
             level = SentryLevel.ERROR
-            setExtras(data)
+            setExtras(data.toMutableMap() as Map<String, String?>)
         }
-        Sentry.captureEvent(event)
+        sentryProxy.captureEvent(event)
     }
 
     @JvmStatic
     fun log(message: String) {
-        Sentry.captureMessage(message)
+        sentryProxy.captureMessage(message)
     }
 }
