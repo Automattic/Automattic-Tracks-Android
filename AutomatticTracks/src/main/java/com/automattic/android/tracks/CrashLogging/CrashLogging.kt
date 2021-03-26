@@ -46,11 +46,6 @@ object CrashLogging {
     }
 
     @JvmStatic
-    fun crash() {
-        throw UnsupportedOperationException("This is a sample crash")
-    }
-
-    @JvmStatic
     fun setNeedsDataRefresh() {
         applyUserTracking()
         applySentryContext()

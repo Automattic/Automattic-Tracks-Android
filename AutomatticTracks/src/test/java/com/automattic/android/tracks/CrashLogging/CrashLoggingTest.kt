@@ -30,11 +30,6 @@ class CrashLoggingTest {
         )
     }
 
-    @Test(expected = UnsupportedOperationException::class)
-    fun shouldThrowExceptionOnRequest() {
-        CrashLogging.crash()
-    }
-
     @Test
     fun `should call for required arguments during initialisation`() {
         initialize()
