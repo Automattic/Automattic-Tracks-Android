@@ -11,11 +11,10 @@ import io.sentry.SystemOutLogger
 import io.sentry.android.core.SentryAndroid
 import io.sentry.protocol.Message
 import io.sentry.protocol.User
-import java.util.Locale
 
 object CrashLogging {
 
-    private const val EMPTY_VALUE = ""
+    private const val EMPTY_STRING = ""
 
     private lateinit var dataProvider: CrashLoggingDataProvider
 
@@ -68,7 +67,7 @@ object CrashLogging {
 
     private fun applySentryContext() {
         dataProvider.applicationContext.forEach { entry ->
-            Sentry.setExtra(entry.key, entry.value ?: EMPTY_VALUE)
+            Sentry.setExtra(entry.key, entry.value ?: EMPTY_STRING)
         }
     }
 
