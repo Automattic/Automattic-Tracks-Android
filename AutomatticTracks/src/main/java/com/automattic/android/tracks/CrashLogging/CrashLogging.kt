@@ -31,7 +31,7 @@ object CrashLogging {
                 release = dataProvider.releaseName
                 setDebug(BuildConfig.DEBUG)
                 setLogger(if (BuildConfig.DEBUG) SystemOutLogger() else NoOpLogger.getInstance())
-                setTag("locale", getCurrentLanguage(dataProvider.locale))
+                setTag("locale", dataProvider.locale?.language ?: "unknown")
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
                     return@BeforeSendCallback if (dataProvider.userHasOptedOut) {
                         null
@@ -72,14 +72,6 @@ object CrashLogging {
         }
     }
 
-    // Locale Helpers
-    private fun getCurrentLanguage(locale: Locale?): String {
-        return if (locale == null) {
-            "unknown"
-        } else locale.language
-    }
-
-    // Logging Helpers
     @JvmStatic
     fun log(e: Throwable) {
         Sentry.captureException(e)
