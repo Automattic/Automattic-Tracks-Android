@@ -35,6 +35,8 @@ dependencies {
 
 apply from: 'ktlint.gradle'
 
+def CONFIG = { property -> "${project.properties.get(property)}" }
+
 android {
     compileSdkVersion 30
 
@@ -42,6 +44,7 @@ android {
         versionName "1.2.1"
         minSdkVersion 16
         targetSdkVersion 30
+        buildConfigField "String", "SENTRY_TEST_PROJECT_DSN", CONFIG("sentryTestProjectDSN")
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

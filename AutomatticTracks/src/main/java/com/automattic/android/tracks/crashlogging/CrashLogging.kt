@@ -4,11 +4,9 @@ import android.content.Context
 import com.automattic.android.tracks.BuildConfig
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerProxy
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerProxyImpl
-import io.sentry.NoOpLogger
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
-import io.sentry.SystemOutLogger
 import io.sentry.protocol.Message
 import io.sentry.protocol.User
 

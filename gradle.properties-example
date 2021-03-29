@@ -1,1 +1,2 @@
 android.useAndroidX=true
+sentryTestProjectDSN="https://public@sentry.example.com/1"
