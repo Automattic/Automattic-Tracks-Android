@@ -1,6 +1,7 @@
 package com.automattic.android.tracks.crashlogging
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import com.automattic.android.tracks.BuildConfig
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerProxy
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerProxyImpl
@@ -23,6 +24,7 @@ object CrashLogging {
         start(context, dataProvider, SentryErrorTrackerProxyImpl())
     }
 
+    @VisibleForTesting
     internal fun start(
         context: Context,
         dataProvider: CrashLoggingDataProvider,
