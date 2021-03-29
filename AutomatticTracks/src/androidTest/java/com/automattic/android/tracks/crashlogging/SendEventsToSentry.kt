@@ -8,13 +8,18 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * This class is *not* a test in a formal way. This is a helper tool for making the Tracks library
+ * easier to send events. Correctness assertion is done by a developer by visiting Sentry dashboard.
+ *
+ * To start using this class, please change a `sentryTestProjectDSN` property in gradle.properties
+ * to DSN of a test project. Then run this class. In a few seconds you should expect 3 new events
+ * on Sentry dashboard.
+ */
 @RunWith(AndroidJUnit4::class)
-class SendEventsToCrashLoggerService {
+class SendEventsToSentry {
 
-    var dataProvider: CrashLoggingDataProvider = FakeDataProvider(
-        currentUser = testUser,
-        sentryDSN = "DSN of Sentry test project"
-    )
+    var dataProvider: CrashLoggingDataProvider = FakeDataProvider(currentUser = testUser)
 
     @Before
     fun setUp() {
