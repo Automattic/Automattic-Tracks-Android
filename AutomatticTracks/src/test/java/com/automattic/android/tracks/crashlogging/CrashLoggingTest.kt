@@ -9,6 +9,7 @@ import io.sentry.SentryLevel
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.Test
+import java.util.Locale
 
 class CrashLoggingTest {
 
@@ -19,9 +20,14 @@ class CrashLoggingTest {
 
     private fun initialize(
         currentUser: TracksUser? = null,
-        userHasOptedOut: Boolean = false
+        userHasOptedOut: Boolean = false,
+        locale: Locale? = Locale.US,
     ) {
-        dataProvider = FakeDataProvider(currentUser = currentUser, userHasOptedOut = userHasOptedOut)
+        dataProvider = FakeDataProvider(
+            currentUser = currentUser,
+            userHasOptedOut = userHasOptedOut,
+            locale = locale
+        )
 
         CrashLogging.start(
             context = mockedContext,
@@ -39,9 +45,22 @@ class CrashLoggingTest {
                 assertThat(options.dsn).isEqualTo(dataProvider.sentryDSN)
                 assertThat(options.environment).isEqualTo(dataProvider.buildType)
                 assertThat(options.release).isEqualTo(dataProvider.releaseName)
-                assertThat(options.tags["locale"]).isEqualTo(dataProvider.locale?.language)
             }.assertAll()
         }
+    }
+
+    @Test
+    fun `should assign language code if locale is known`() {
+        initialize(locale = Locale.US)
+
+        assertThat(fakeProxy.sentryOptions.tags["locale"]).isEqualTo(dataProvider.locale?.language)
+    }
+
+    @Test
+    fun `should assign 'unknown' if locale is not known`() {
+        initialize(locale = null)
+
+        assertThat(fakeProxy.sentryOptions.tags["locale"]).isEqualTo("unknown")
     }
 
     @Test
