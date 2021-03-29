@@ -9,8 +9,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * This class is *not* a test in a formal way. This is a helper tool for making the Tracks library
- * easier to send events. Correctness assertion is done by a developer by visiting Sentry dashboard.
+ * This class is *not* a test in a formal way. This is a helper tool for making it easier to send
+ * events by Tracks. Correctness assertion is done by a developer by visiting Sentry dashboard.
  *
  * To start using this class, please change a `sentryTestProjectDSN` property in gradle.properties
  * to DSN of a test project. Then run this class. In a few seconds you should expect 3 new events
@@ -19,7 +19,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SendEventsToSentry {
 
-    var dataProvider: CrashLoggingDataProvider = FakeDataProvider(currentUser = testUser)
+    private val dataProvider: CrashLoggingDataProvider = FakeDataProvider(currentUser = testUser)
 
     @Before
     fun setUp() {

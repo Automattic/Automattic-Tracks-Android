@@ -13,8 +13,8 @@ import java.util.Locale
 
 class CrashLoggingTest {
 
-    val fakeProxy = FakeSentryErrorTrackerProxy()
-    val mockedContext = Activity()
+    private val fakeProxy = FakeSentryErrorTrackerProxy()
+    private val mockedContext = Activity()
 
     lateinit var dataProvider: CrashLoggingDataProvider
 
