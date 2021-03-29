@@ -104,7 +104,7 @@ class CrashLoggingTest {
     }
 
     @Test
-    fun `should clear breadcrumbs on initialisation`() {
+    fun `should clear breadcrumbs on initialization`() {
         initialize()
 
         assertThat(fakeProxy.clearBreadcrumbsCounter).isEqualTo(1)
