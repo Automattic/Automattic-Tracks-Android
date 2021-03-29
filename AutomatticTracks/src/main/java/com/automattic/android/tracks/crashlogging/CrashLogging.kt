@@ -14,8 +14,6 @@ import io.sentry.protocol.User
 
 object CrashLogging {
 
-    private const val EMPTY_STRING = ""
-
     private lateinit var dataProvider: CrashLoggingDataProvider
     private lateinit var sentryProxy: SentryErrorTrackerProxy
 
@@ -78,7 +76,7 @@ object CrashLogging {
 
     private fun applyApplicationContext() {
         dataProvider.applicationContext.forEach { entry ->
-            sentryProxy.applyExtra(entry.key, entry.value ?: EMPTY_STRING)
+            sentryProxy.applyExtra(entry.key, entry.value.orEmpty())
         }
     }
 
