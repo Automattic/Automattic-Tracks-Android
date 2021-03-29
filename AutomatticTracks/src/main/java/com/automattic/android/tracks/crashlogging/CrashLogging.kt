@@ -58,17 +58,17 @@ object CrashLogging {
 
     private fun applyUserTracking() {
         sentryProxy.clearBreadcrumbs()
-        sentryProxy.setUser(null)
-        val tracksUser = dataProvider.currentUser ?: return
 
-        val user = User().apply {
-            email = tracksUser.email
-            username = tracksUser.username
-            others = dataProvider.userContext
-                .plus("userID" to tracksUser.userID)
-        }
-
-        sentryProxy.setUser(user)
+        sentryProxy.setUser(
+            dataProvider.currentUser?.let { tracksUser ->
+                User().apply {
+                    email = tracksUser.email
+                    username = tracksUser.username
+                    others = dataProvider.userContext
+                        .plus("userID" to tracksUser.userID)
+                }
+            }
+        )
     }
 
     private fun applyApplicationContext() {
