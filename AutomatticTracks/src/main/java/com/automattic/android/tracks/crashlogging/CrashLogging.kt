@@ -39,7 +39,6 @@ object CrashLogging {
                 environment = dataProvider.buildType
                 release = dataProvider.releaseName
                 setDebug(BuildConfig.DEBUG)
-                setLogger(if (BuildConfig.DEBUG) SystemOutLogger() else NoOpLogger.getInstance())
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
                     return@BeforeSendCallback if (dataProvider.userHasOptedOut) {
