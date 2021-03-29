@@ -45,6 +45,7 @@ android {
         buildConfigField "String", "SENTRY_TEST_PROJECT_DSN", project.properties.get("sentryTestProjectDSN")
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments('notClass': 'com.automattic.android.tracks.crashlogging.SendEventsToSentry')
     }
 
     compileOptions {
