@@ -9,12 +9,7 @@ repositories {
     jcenter()
 }
 
-configurations {
-    ktlint
-}
-
 dependencies {
-    ktlint "com.pinterest:ktlint:0.40.0"
     implementation 'io.sentry:sentry-android:4.3.0'
     implementation 'androidx.annotation:annotation:1.1.0'
 
@@ -26,8 +21,6 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test:runner:1.3.0'
 }
-
-apply from: 'ktlint.gradle'
 
 android {
     compileSdkVersion 30
