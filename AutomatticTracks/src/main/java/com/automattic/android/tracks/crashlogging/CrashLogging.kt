@@ -13,7 +13,7 @@ import io.sentry.protocol.User
 object CrashLogging {
 
     private lateinit var dataProvider: CrashLoggingDataProvider
-    private lateinit var sentryProxy: SentryErrorTrackerWrapper
+    private lateinit var sentryWrapper: SentryErrorTrackerWrapper
 
     @JvmStatic
     fun start(
@@ -27,12 +27,12 @@ object CrashLogging {
     internal fun start(
         context: Context,
         dataProvider: CrashLoggingDataProvider,
-        sentryProxy: SentryErrorTrackerWrapper
+        sentryWrapper: SentryErrorTrackerWrapper
     ) {
-        this.sentryProxy = sentryProxy
+        this.sentryWrapper = sentryWrapper
         this.dataProvider = dataProvider
 
-        sentryProxy.initialize(context) { options ->
+        sentryWrapper.initialize(context) { options ->
             options.apply {
                 dsn = dataProvider.sentryDSN
                 environment = dataProvider.buildType
@@ -58,9 +58,9 @@ object CrashLogging {
     }
 
     private fun applyUserTracking() {
-        sentryProxy.clearBreadcrumbs()
+        sentryWrapper.clearBreadcrumbs()
 
-        sentryProxy.setUser(
+        sentryWrapper.setUser(
             dataProvider.currentUser?.let { tracksUser ->
                 User().apply {
                     email = tracksUser.email
@@ -74,13 +74,13 @@ object CrashLogging {
 
     private fun applyApplicationContext() {
         dataProvider.applicationContext.forEach { entry ->
-            sentryProxy.applyExtra(entry.key, entry.value.orEmpty())
+            sentryWrapper.applyExtra(entry.key, entry.value.orEmpty())
         }
     }
 
     @JvmStatic
     fun log(throwable: Throwable) {
-        sentryProxy.captureException(throwable)
+        sentryWrapper.captureException(throwable)
     }
 
     @JvmStatic
@@ -92,11 +92,11 @@ object CrashLogging {
             level = SentryLevel.ERROR
             setExtras(data.toMutableMap() as Map<String, String?>)
         }
-        sentryProxy.captureEvent(event)
+        sentryWrapper.captureEvent(event)
     }
 
     @JvmStatic
     fun log(message: String) {
-        sentryProxy.captureMessage(message)
+        sentryWrapper.captureMessage(message)
     }
 }

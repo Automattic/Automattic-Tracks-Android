@@ -41,7 +41,7 @@ class CrashLoggingTest {
         CrashLogging.start(
             context = mockedContext,
             dataProvider = dataProvider,
-            sentryProxy = mockedWrapper
+            sentryWrapper = mockedWrapper
         )
     }
 
