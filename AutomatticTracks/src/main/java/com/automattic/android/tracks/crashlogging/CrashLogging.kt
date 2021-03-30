@@ -2,7 +2,6 @@ package com.automattic.android.tracks.crashlogging
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
-import com.automattic.android.tracks.BuildConfig
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
@@ -37,7 +36,7 @@ object CrashLogging {
                 dsn = dataProvider.sentryDSN
                 environment = dataProvider.buildType
                 release = dataProvider.releaseName
-                setDebug(BuildConfig.DEBUG)
+                setDebug(dataProvider.enableCrashLoggingLogs)
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
                     return@BeforeSendCallback if (dataProvider.userHasOptedOut) {

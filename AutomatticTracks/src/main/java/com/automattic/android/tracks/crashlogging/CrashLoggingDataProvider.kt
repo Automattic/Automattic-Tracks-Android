@@ -53,7 +53,11 @@ interface CrashLoggingDataProvider {
 
     /**
      * Provides the [CrashLogging] with information about the user's current locale
-     *
      */
     val locale: Locale?
+
+    /**
+     * Provides [CrashLogging] with information on whether error tracker should log debug data
+     */
+    val enableCrashLoggingLogs: Boolean
 }

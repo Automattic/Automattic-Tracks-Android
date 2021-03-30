@@ -25,17 +25,19 @@ class CrashLoggingTest {
     private val mockedWrapper: SentryErrorTrackerWrapper = mock()
     private val mockedContext = Activity()
 
-    lateinit var dataProvider: CrashLoggingDataProvider
+    private var dataProvider = FakeDataProvider()
 
     private fun initialize(
-        currentUser: TracksUser? = null,
-        userHasOptedOut: Boolean = false,
-        locale: Locale? = Locale.US,
+        currentUser: TracksUser? = dataProvider.currentUser,
+        userHasOptedOut: Boolean = dataProvider.userHasOptedOut,
+        locale: Locale? = dataProvider.locale,
+        enableCrashLoggingLogs: Boolean = dataProvider.enableCrashLoggingLogs,
     ) {
         dataProvider = FakeDataProvider(
             currentUser = currentUser,
             userHasOptedOut = userHasOptedOut,
-            locale = locale
+            locale = locale,
+            enableCrashLoggingLogs = enableCrashLoggingLogs,
         )
 
         CrashLogging.start(
@@ -164,6 +166,20 @@ class CrashLoggingTest {
         CrashLogging.log(testMessage)
 
         verify(mockedWrapper, times(1)).captureMessage(testMessage)
+    }
+
+    @Test
+    fun `should enable logging if requested`() {
+        initialize(enableCrashLoggingLogs = true)
+
+        assertThat(capturedOptions.isDebug).isTrue
+    }
+
+    @Test
+    fun `should disable logging if requested`() {
+        initialize(enableCrashLoggingLogs = false)
+
+        assertThat(capturedOptions.isDebug).isFalse
     }
 
     private val capturedOptions: SentryOptions

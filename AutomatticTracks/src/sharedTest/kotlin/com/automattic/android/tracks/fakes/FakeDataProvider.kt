@@ -5,7 +5,7 @@ import com.automattic.android.tracks.TracksUser
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import java.util.Locale
 
-open class FakeDataProvider(
+class FakeDataProvider(
     override val currentUser: TracksUser? = null,
     override val sentryDSN: String = BuildConfig.SENTRY_TEST_PROJECT_DSN,
     override val userHasOptedOut: Boolean = false,
@@ -14,4 +14,5 @@ open class FakeDataProvider(
     override val applicationContext: Map<String, String?> = mapOf("app" to "context", "some null" to null),
     override val releaseName: String = "testReleaseName",
     override val locale: Locale? = Locale.US,
+    override val enableCrashLoggingLogs: Boolean = true,
 ) : CrashLoggingDataProvider
