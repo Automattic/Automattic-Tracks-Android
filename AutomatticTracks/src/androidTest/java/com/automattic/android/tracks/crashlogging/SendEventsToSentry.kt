@@ -15,6 +15,10 @@ import org.junit.runner.RunWith
  * To start using this class, please change a `sentryTestProjectDSN` property in gradle.properties
  * to DSN of a test project. Then run this class. In a few seconds you should expect 3 new events
  * on Sentry dashboard.
+ *
+ * Troubleshooting: if running this "test" results with `Test framework quit unexpectedly` make
+ * sure, that `Include Extra Params from Gradle build file` under `Instrumentation arguments`
+ * in run configuration is unchecked.
  */
 @RunWith(AndroidJUnit4::class)
 class SendEventsToSentry {
