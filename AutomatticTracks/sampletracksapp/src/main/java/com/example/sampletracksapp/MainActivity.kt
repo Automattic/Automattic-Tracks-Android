@@ -13,27 +13,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         CrashLogging.start(
-            this,
-            object : CrashLoggingDataProvider {
-                override val sentryDSN: String
-                    get() = TODO("Not yet implemented")
-                override val userHasOptedOut: Boolean
-                    get() = TODO("Not yet implemented")
-                override val buildType: String
-                    get() = TODO("Not yet implemented")
-                override val releaseName: String
-                    get() = TODO("Not yet implemented")
-                override val currentUser: TracksUser?
-                    get() = TODO("Not yet implemented")
-                override val applicationContext: Map<String, String?>
-                    get() = TODO("Not yet implemented")
-                override val userContext: Map<String, String?>
-                    get() = TODO("Not yet implemented")
-                override val locale: Locale?
-                    get() = TODO("Not yet implemented")
-                override val enableCrashLoggingLogs: Boolean
-                    get() = TODO("Not yet implemented")
-            }
+                this,
+                object : CrashLoggingDataProvider {
+                    override val sentryDSN = BuildConfig.SENTRY_TEST_PROJECT_DSN
+                    override val userHasOptedOut = false
+                    override val buildType = BuildConfig.BUILD_TYPE
+                    override val releaseName = BuildConfig.VERSION_NAME
+                    override val currentUser = TracksUser(userID = "test user id", email = "test@user.com", username = "test username")
+                    override val applicationContext = mapOf("sample" to "application context value", "empty" to null)
+                    override val userContext = mapOf("sample" to "user context value", "empty" to null)
+                    override val locale = Locale.US
+                    override val enableCrashLoggingLogs = true
+                }
         )
     }
 }
