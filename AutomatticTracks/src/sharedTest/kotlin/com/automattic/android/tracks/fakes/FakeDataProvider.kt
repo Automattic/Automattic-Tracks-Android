@@ -11,7 +11,7 @@ open class FakeDataProvider(
     override val userHasOptedOut: Boolean = false,
     override val buildType: String = "testBuildType",
     override val userContext: Map<String, String?> = mapOf("user" to "context"),
-    override val applicationContext: Map<String, String?> = mapOf("app" to "context"),
+    override val applicationContext: Map<String, String?> = mapOf("app" to "context", "some null" to null),
     override val releaseName: String = "testReleaseName",
     override val locale: Locale? = Locale.US,
 ) : CrashLoggingDataProvider

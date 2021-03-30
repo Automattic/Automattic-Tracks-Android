@@ -26,8 +26,11 @@ dependencies {
     ktlint "com.pinterest:ktlint:0.40.0"
     implementation 'io.sentry:sentry-android:4.3.0'
     implementation 'androidx.annotation:annotation:1.1.0'
+
     testImplementation 'junit:junit:4.13.2'
-    testImplementation "org.assertj:assertj-core:3.19.0"
+    testImplementation 'org.assertj:assertj-core:3.19.0'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:2.2.11'
+    testImplementation 'org.mockito:mockito-inline:3.8.0'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test:runner:1.3.0'

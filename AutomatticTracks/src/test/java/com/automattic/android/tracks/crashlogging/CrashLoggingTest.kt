@@ -2,18 +2,27 @@ package com.automattic.android.tracks.crashlogging
 
 import android.app.Activity
 import com.automattic.android.tracks.TracksUser
+import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerProxyImpl
 import com.automattic.android.tracks.fakes.FakeDataProvider
 import com.automattic.android.tracks.fakes.testUser
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
+import io.sentry.SentryOptions
+import io.sentry.protocol.User
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.nullableArgumentCaptor
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import java.util.Locale
 
 class CrashLoggingTest {
 
-    private val fakeProxy = FakeSentryErrorTrackerProxy()
+    private val fakeProxy: SentryErrorTrackerProxyImpl = mock()
     private val mockedContext = Activity()
 
     lateinit var dataProvider: CrashLoggingDataProvider
@@ -40,7 +49,7 @@ class CrashLoggingTest {
     fun `should assign required arguments to options`() {
         initialize()
 
-        fakeProxy.sentryOptions.let { options ->
+        capturedOptions.let { options ->
             SoftAssertions().apply {
                 assertThat(options.dsn).isEqualTo(dataProvider.sentryDSN)
                 assertThat(options.environment).isEqualTo(dataProvider.buildType)
@@ -53,21 +62,21 @@ class CrashLoggingTest {
     fun `should assign language code if locale is known`() {
         initialize(locale = Locale.US)
 
-        assertThat(fakeProxy.sentryOptions.tags["locale"]).isEqualTo(dataProvider.locale?.language)
+        assertThat(capturedOptions.tags["locale"]).isEqualTo(dataProvider.locale?.language)
     }
 
     @Test
     fun `should assign 'unknown' if locale is not known`() {
         initialize(locale = null)
 
-        assertThat(fakeProxy.sentryOptions.tags["locale"]).isEqualTo("unknown")
+        assertThat(capturedOptions.tags["locale"]).isEqualTo("unknown")
     }
 
     @Test
     fun `should not send an event if user opted out`() {
         initialize(userHasOptedOut = true)
 
-        val beforeSendResult = fakeProxy.sentryOptions.beforeSend?.execute(SentryEvent(), null)
+        val beforeSendResult = capturedOptions.beforeSend?.execute(SentryEvent(), null)
 
         assertThat(beforeSendResult).isEqualTo(null)
     }
@@ -77,7 +86,7 @@ class CrashLoggingTest {
         val testEvent = SentryEvent()
         initialize(userHasOptedOut = false)
 
-        val beforeSendResult = fakeProxy.sentryOptions.beforeSend?.execute(testEvent, null)
+        val beforeSendResult = capturedOptions.beforeSend?.execute(testEvent, null)
 
         assertThat(beforeSendResult).isEqualTo(testEvent)
     }
@@ -86,7 +95,7 @@ class CrashLoggingTest {
     fun `should apply user tracking after initialization if user is not null`() {
         initialize(currentUser = testUser)
 
-        fakeProxy.currentUser.let { user ->
+        capturedUser.let { user ->
             SoftAssertions().apply {
                 assertThat(user?.email).isEqualTo(testUser.email)
                 assertThat(user?.username).isEqualTo(testUser.username)
@@ -100,40 +109,42 @@ class CrashLoggingTest {
     fun `should not apply user tracking after initialization if user is null`() {
         initialize(currentUser = null)
 
-        assertThat(fakeProxy.currentUser).isNull()
+        assertThat(capturedUser).isNull()
     }
 
     @Test
     fun `should clear breadcrumbs on initialization`() {
         initialize()
 
-        assertThat(fakeProxy.clearBreadcrumbsCounter).isEqualTo(1)
+        verify(fakeProxy, times(1)).clearBreadcrumbs()
     }
 
     @Test
     fun `should apply application context after initialization`() {
         initialize()
 
-        assertThat(fakeProxy.extras).isEqualTo(dataProvider.applicationContext)
+        dataProvider.applicationContext.forEach { (key, value) ->
+            verify(fakeProxy, times(1)).applyExtra(key, value.orEmpty())
+        }
     }
 
     @Test
-    fun `should capture exception`() {
+    fun `should log exception`() {
         initialize()
 
         CrashLogging.log(TEST_THROWABLE)
 
-        assertThat(fakeProxy.capturedException).isEqualTo(TEST_THROWABLE)
+        verify(fakeProxy, times(1)).captureException(TEST_THROWABLE)
     }
 
     @Test
-    fun `should capture exception with additional data`() {
+    fun `should log exception with additional data`() {
         val additionalData = mapOf<String, String?>("additional" to "data", "another" to "extra")
         initialize()
 
         CrashLogging.log(TEST_THROWABLE, additionalData)
 
-        fakeProxy.capturedEvent.let { event ->
+        capturedEvent.let { event ->
             SoftAssertions().apply {
                 assertThat(event.message?.message).isEqualTo(TEST_THROWABLE.message)
                 assertThat(event.level).isEqualTo(SentryLevel.ERROR)
@@ -146,14 +157,32 @@ class CrashLoggingTest {
     }
 
     @Test
-    fun `should capture message`() {
+    fun `should log message`() {
         val testMessage = "test message"
         initialize()
 
         CrashLogging.log(testMessage)
 
-        assertThat(fakeProxy.capturedMessage).isEqualTo(testMessage)
+        verify(fakeProxy, times(1)).captureMessage(testMessage)
     }
+
+    private val capturedOptions: SentryOptions
+        get() = argumentCaptor<(SentryOptions) -> Unit>().let { captor ->
+            verify(fakeProxy).initialize(any(), captor.capture())
+            SentryOptions().apply(captor.lastValue)
+        }
+
+    private val capturedUser: User?
+        get() = nullableArgumentCaptor<User>().let { captor ->
+            verify(fakeProxy).setUser(captor.capture())
+            captor.lastValue
+        }
+
+    private val capturedEvent: SentryEvent
+        get() = argumentCaptor<SentryEvent>().let { captor ->
+            verify(fakeProxy).captureEvent(captor.capture())
+            captor.lastValue
+        }
 
     companion object {
         val TEST_THROWABLE = Throwable("test exception")

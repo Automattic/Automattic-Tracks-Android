@@ -3,7 +3,6 @@ package com.automattic.android.tracks.crashlogging
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.automattic.android.tracks.BuildConfig
-import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerProxy
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerProxyImpl
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
@@ -14,7 +13,7 @@ import io.sentry.protocol.User
 object CrashLogging {
 
     private lateinit var dataProvider: CrashLoggingDataProvider
-    private lateinit var sentryProxy: SentryErrorTrackerProxy
+    private lateinit var sentryProxy: SentryErrorTrackerProxyImpl
 
     @JvmStatic
     fun start(
@@ -28,7 +27,7 @@ object CrashLogging {
     internal fun start(
         context: Context,
         dataProvider: CrashLoggingDataProvider,
-        sentryProxy: SentryErrorTrackerProxy
+        sentryProxy: SentryErrorTrackerProxyImpl
     ) {
         this.sentryProxy = sentryProxy
         this.dataProvider = dataProvider
