@@ -2,7 +2,7 @@ package com.automattic.android.tracks.crashlogging
 
 import android.app.Activity
 import com.automattic.android.tracks.TracksUser
-import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerProxyImpl
+import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper
 import com.automattic.android.tracks.fakes.FakeDataProvider
 import com.automattic.android.tracks.fakes.testUser
 import io.sentry.SentryEvent
@@ -22,7 +22,7 @@ import java.util.Locale
 
 class CrashLoggingTest {
 
-    private val fakeProxy: SentryErrorTrackerProxyImpl = mock()
+    private val mockedWrapper: SentryErrorTrackerWrapper = mock()
     private val mockedContext = Activity()
 
     lateinit var dataProvider: CrashLoggingDataProvider
@@ -41,7 +41,7 @@ class CrashLoggingTest {
         CrashLogging.start(
             context = mockedContext,
             dataProvider = dataProvider,
-            sentryProxy = fakeProxy
+            sentryProxy = mockedWrapper
         )
     }
 
@@ -116,7 +116,7 @@ class CrashLoggingTest {
     fun `should clear breadcrumbs on initialization`() {
         initialize()
 
-        verify(fakeProxy, times(1)).clearBreadcrumbs()
+        verify(mockedWrapper, times(1)).clearBreadcrumbs()
     }
 
     @Test
@@ -124,7 +124,7 @@ class CrashLoggingTest {
         initialize()
 
         dataProvider.applicationContext.forEach { (key, value) ->
-            verify(fakeProxy, times(1)).applyExtra(key, value.orEmpty())
+            verify(mockedWrapper, times(1)).applyExtra(key, value.orEmpty())
         }
     }
 
@@ -134,7 +134,7 @@ class CrashLoggingTest {
 
         CrashLogging.log(TEST_THROWABLE)
 
-        verify(fakeProxy, times(1)).captureException(TEST_THROWABLE)
+        verify(mockedWrapper, times(1)).captureException(TEST_THROWABLE)
     }
 
     @Test
@@ -163,24 +163,24 @@ class CrashLoggingTest {
 
         CrashLogging.log(testMessage)
 
-        verify(fakeProxy, times(1)).captureMessage(testMessage)
+        verify(mockedWrapper, times(1)).captureMessage(testMessage)
     }
 
     private val capturedOptions: SentryOptions
         get() = argumentCaptor<(SentryOptions) -> Unit>().let { captor ->
-            verify(fakeProxy).initialize(any(), captor.capture())
+            verify(mockedWrapper).initialize(any(), captor.capture())
             SentryOptions().apply(captor.lastValue)
         }
 
     private val capturedUser: User?
         get() = nullableArgumentCaptor<User>().let { captor ->
-            verify(fakeProxy).setUser(captor.capture())
+            verify(mockedWrapper).setUser(captor.capture())
             captor.lastValue
         }
 
     private val capturedEvent: SentryEvent
         get() = argumentCaptor<SentryEvent>().let { captor ->
-            verify(fakeProxy).captureEvent(captor.capture())
+            verify(mockedWrapper).captureEvent(captor.capture())
             captor.lastValue
         }
 
