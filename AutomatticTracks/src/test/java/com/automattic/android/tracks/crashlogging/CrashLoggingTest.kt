@@ -126,7 +126,7 @@ class CrashLoggingTest {
         initialize()
 
         dataProvider.applicationContext.forEach { (key, value) ->
-            verify(mockedWrapper, times(1)).applyExtra(key, value.orEmpty())
+            verify(mockedWrapper, times(1)).applyExtra(key, value)
         }
     }
 

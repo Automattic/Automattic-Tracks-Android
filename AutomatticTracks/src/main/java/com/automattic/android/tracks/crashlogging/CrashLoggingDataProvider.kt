@@ -44,12 +44,12 @@ interface CrashLoggingDataProvider {
     /**
      * Provides the [CrashLogging] with information about the current application state.
      */
-    val applicationContext: Map<String, String?>
+    val applicationContext: Map<String, String>
 
     /**
      * Provides the [CrashLogging] with information about the current user state.
      */
-    val userContext: Map<String, String?>
+    val userContext: Map<String, String>
 
     /**
      * Provides the [CrashLogging] with information about the user's current locale
