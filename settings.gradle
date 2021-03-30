@@ -1,1 +1,22 @@
-include ':AutomatticTracks'
+pluginManagement {
+    plugins {
+        id 'com.android.application' version '4.0.2'
+        id 'com.android.library' version '4.0.2'
+        id 'org.jetbrains.kotlin.android' version '1.4.31'
+    }
+    repositories {
+        google()
+        gradlePluginPortal()
+        jcenter()
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id.contains("com.android")) {
+                useModule("com.android.tools.build:gradle:4.0.2")
+            }
+        }
+    }
+}
+
+include ':AutomatticTracks:lib'
+include ':AutomatticTracks:sampletracksapp'
