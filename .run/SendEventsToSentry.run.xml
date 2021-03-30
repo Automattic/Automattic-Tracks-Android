@@ -7,7 +7,7 @@
     <option name="PACKAGE_NAME" value="" />
     <option name="INSTRUMENTATION_RUNNER_CLASS" value="" />
     <option name="EXTRA_OPTIONS" value="" />
-    <option name="INCLUDE_GRADLE_EXTRA_OPTIONS" value="true" />
+    <option name="INCLUDE_GRADLE_EXTRA_OPTIONS" value="false" />
     <option name="CLEAR_LOGCAT" value="false" />
     <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
     <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
