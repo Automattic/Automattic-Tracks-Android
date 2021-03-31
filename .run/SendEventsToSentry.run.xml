@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="SendEventsToSentry" type="AndroidTestRunConfigurationType" factoryName="Android Instrumented Tests" nameIsGenerated="true">
-    <module name="Automattic-Tracks-Android.AutomatticTracks" />
+    <module name="Automattic-Tracks-Android.AutomatticTracks.lib" />
     <option name="TESTING_TYPE" value="2" />
     <option name="METHOD_NAME" value="" />
     <option name="CLASS_NAME" value="com.automattic.android.tracks.crashlogging.SendEventsToSentry" />
