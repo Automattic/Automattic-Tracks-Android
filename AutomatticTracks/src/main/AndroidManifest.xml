@@ -5,4 +5,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
+    <application>
+        <meta-data
+            android:name="io.sentry.auto-init"
+            android:value="false" />
+    </application>
 </manifest>
