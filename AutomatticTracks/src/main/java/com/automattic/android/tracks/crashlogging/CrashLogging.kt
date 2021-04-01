@@ -3,34 +3,42 @@ package com.automattic.android.tracks.crashlogging
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper
+import com.automattic.android.tracks.crashlogging.internal.toSentryUser
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.protocol.Message
-import io.sentry.protocol.User
 
 object CrashLogging {
 
     private lateinit var dataProvider: CrashLoggingDataProvider
     private lateinit var sentryWrapper: SentryErrorTrackerWrapper
+    private var userOptOut: Boolean = true
 
     @JvmStatic
     fun start(
         context: Context,
         dataProvider: CrashLoggingDataProvider,
+        userHasOptOut: Boolean,
     ) {
-        start(context, dataProvider, SentryErrorTrackerWrapper())
+        start(context, dataProvider, SentryErrorTrackerWrapper(), userHasOptOut)
     }
 
     @VisibleForTesting
     internal fun start(
         context: Context,
         dataProvider: CrashLoggingDataProvider,
-        sentryWrapper: SentryErrorTrackerWrapper
+        sentryWrapper: SentryErrorTrackerWrapper,
+        userHasOptOut: Boolean,
     ) {
         this.sentryWrapper = sentryWrapper
         this.dataProvider = dataProvider
+        this.userOptOut = userHasOptOut
 
+        initialize(context)
+    }
+
+    private fun initialize(context: Context) {
         sentryWrapper.initialize(context) { options ->
             options.apply {
                 dsn = dataProvider.sentryDSN
@@ -39,40 +47,24 @@ object CrashLogging {
                 setDebug(dataProvider.enableCrashLoggingLogs)
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
-                    return@BeforeSendCallback if (dataProvider.userHasOptedOut()) {
+                    return@BeforeSendCallback if (userOptOut) {
                         null
                     } else {
-                        event
+                        event.apply {
+                            user = dataProvider.userProvider()?.toSentryUser()
+                        }
                     }
                 }
             }
         }
-        setNeedsDataRefresh()
     }
 
-    @JvmStatic
-    fun setNeedsDataRefresh() {
-        applyUserTracking()
-        applyApplicationContext()
+    fun updateUserOptOutPreference(userHasOptOut: Boolean) {
+        this.userOptOut = userHasOptOut
     }
 
-    private fun applyUserTracking() {
-        sentryWrapper.clearBreadcrumbs()
-
-        sentryWrapper.setUser(
-            dataProvider.currentUser()?.let { tracksUser ->
-                User().apply {
-                    email = tracksUser.email
-                    username = tracksUser.username
-                    others = dataProvider.userContext()
-                        .plus("userID" to tracksUser.userID)
-                }
-            }
-        )
-    }
-
-    private fun applyApplicationContext() {
-        dataProvider.applicationContext().forEach { entry ->
+    fun appendApplicationContext(newApplicationContext: Map<String, String>) {
+        newApplicationContext.forEach { entry ->
             sentryWrapper.applyExtra(entry.key, entry.value)
         }
     }

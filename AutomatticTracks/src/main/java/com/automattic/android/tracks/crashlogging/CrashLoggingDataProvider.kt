@@ -30,25 +30,9 @@ interface CrashLoggingDataProvider {
     val enableCrashLoggingLogs: Boolean
 
     /**
-     * Provides [CrashLogging] with information on whether the user has opted out
-     * of data collection.
-     */
-    fun userHasOptedOut(): Boolean
-
-    /**
      * Provides [CrashLogging] with information about the current user.
      *
      * @see TracksUser
      */
-    fun currentUser(): TracksUser?
-
-    /**
-     * Provides the [CrashLogging] with information about the current application state.
-     */
-    fun applicationContext(): Map<String, String>
-
-    /**
-     * Provides the [CrashLogging] with information about the current user state.
-     */
-    fun userContext(): Map<String, String>
+    fun userProvider(): TracksUser?
 }

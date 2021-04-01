@@ -26,13 +26,14 @@ import java.lang.NullPointerException
 @RunWith(AndroidJUnit4::class)
 class SendEventsToSentry {
 
-    private val dataProvider = FakeDataProvider(currentUser = testUser1)
+    private val dataProvider = FakeDataProvider(user = testUser1)
 
     @Before
     fun setUp() {
         CrashLogging.start(
             context = InstrumentationRegistry.getInstrumentation().context,
-            dataProvider = dataProvider
+            dataProvider = dataProvider,
+            userHasOptOut = false
         )
     }
 
@@ -53,10 +54,23 @@ class SendEventsToSentry {
 
     @Test
     fun logMessageWithUpdatedUser() {
+        dataProvider.user = testUser1
         CrashLogging.log(NullPointerException())
 
-        dataProvider.updateCurrentUser(testUser2)
+        dataProvider.user = testUser2
         CrashLogging.log(NullPointerException())
+    }
+
+    @Test
+    fun logMessageWithAppendedApplicationContext() {
+        CrashLogging.appendApplicationContext(mapOf("1 application" to "context"))
+        CrashLogging.log(OutOfMemoryError())
+
+        CrashLogging.appendApplicationContext(mapOf("2 application" to "context"))
+        CrashLogging.log(OutOfMemoryError())
+
+        CrashLogging.appendApplicationContext(mapOf("1 application" to "updated context"))
+        CrashLogging.log(OutOfMemoryError())
     }
 
     companion object {

@@ -5,11 +5,13 @@ import com.automattic.android.tracks.TracksUser
 val testUser1 = TracksUser(
     userID = "1 testUserId",
     email = "1 testEmail",
-    username = "1 testUsername"
+    username = "1 testUsername",
+    context = mapOf("1 sample" to "context"),
 )
 
 val testUser2 = TracksUser(
     userID = "2 testUserId",
     email = "2 testEmail",
-    username = "2 testUsername"
+    username = "2 testUsername",
+    context = mapOf("2 sample" to "context"),
 )
