@@ -39,7 +39,7 @@ object CrashLogging {
                 setDebug(dataProvider.enableCrashLoggingLogs)
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
-                    return@BeforeSendCallback if (dataProvider.userHasOptedOut) {
+                    return@BeforeSendCallback if (dataProvider.userHasOptedOut()) {
                         null
                     } else {
                         event
@@ -60,11 +60,11 @@ object CrashLogging {
         sentryWrapper.clearBreadcrumbs()
 
         sentryWrapper.setUser(
-            dataProvider.currentUser?.let { tracksUser ->
+            dataProvider.currentUser()?.let { tracksUser ->
                 User().apply {
                     email = tracksUser.email
                     username = tracksUser.username
-                    others = dataProvider.userContext
+                    others = dataProvider.userContext()
                         .plus("userID" to tracksUser.userID)
                 }
             }
@@ -72,8 +72,8 @@ object CrashLogging {
     }
 
     private fun applyApplicationContext() {
-        dataProvider.applicationContext.forEach { entry ->
-            sentryWrapper.applyExtra(entry.key, entry.value.orEmpty())
+        dataProvider.applicationContext().forEach { entry ->
+            sentryWrapper.applyExtra(entry.key, entry.value)
         }
     }
 

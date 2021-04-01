@@ -4,7 +4,8 @@ import android.app.Activity
 import com.automattic.android.tracks.TracksUser
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper
 import com.automattic.android.tracks.fakes.FakeDataProvider
-import com.automattic.android.tracks.fakes.testUser
+import com.automattic.android.tracks.fakes.testUser1
+import com.automattic.android.tracks.fakes.testUser2
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
@@ -14,6 +15,7 @@ import org.assertj.core.api.SoftAssertions
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.nullableArgumentCaptor
 import org.mockito.kotlin.times
@@ -95,13 +97,13 @@ class CrashLoggingTest {
 
     @Test
     fun `should apply user tracking after initialization if user is not null`() {
-        initialize(currentUser = testUser)
+        initialize(currentUser = testUser1)
 
         capturedUser.let { user ->
             SoftAssertions().apply {
-                assertThat(user?.email).isEqualTo(testUser.email)
-                assertThat(user?.username).isEqualTo(testUser.username)
-                assertThat(user?.others?.get("userID")).isEqualTo(testUser.userID)
+                assertThat(user?.email).isEqualTo(testUser1.email)
+                assertThat(user?.username).isEqualTo(testUser1.username)
+                assertThat(user?.others?.get("userID")).isEqualTo(testUser1.userID)
                 assertThat(user?.others).containsAllEntriesOf(dataProvider.userContext)
             }.assertAll()
         }
@@ -182,6 +184,16 @@ class CrashLoggingTest {
         assertThat(capturedOptions.isDebug).isFalse
     }
 
+    @Test
+    fun `should send event with updated user on user update`() {
+        initialize(currentUser = testUser1)
+
+        assertThat(capturedUser?.username).isEqualTo(testUser1.username)
+
+        dataProvider.updateCurrentUser(testUser2)
+        assertThat(capturedUser?.username).isEqualTo(testUser2.username)
+    }
+
     private val capturedOptions: SentryOptions
         get() = argumentCaptor<(SentryOptions) -> Unit>().let { captor ->
             verify(mockedWrapper).initialize(any(), captor.capture())
@@ -190,7 +202,7 @@ class CrashLoggingTest {
 
     private val capturedUser: User?
         get() = nullableArgumentCaptor<User>().let { captor ->
-            verify(mockedWrapper).setUser(captor.capture())
+            verify(mockedWrapper, atLeastOnce()).setUser(captor.capture())
             captor.lastValue
         }
 
