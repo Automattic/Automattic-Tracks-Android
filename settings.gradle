@@ -16,5 +16,5 @@ pluginManagement {
     }
 }
 
-include ':AutomatticTracks:lib'
-include ':AutomatticTracks:sampletracksapp'
+include ':lib'
+include ':sampletracksapp'
