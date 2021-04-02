@@ -4,5 +4,4 @@ data class TracksUser(
     val userID: String,
     val email: String,
     val username: String,
-    val context: Map<String, String>,
 )

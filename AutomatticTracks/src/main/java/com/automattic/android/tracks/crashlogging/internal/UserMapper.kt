@@ -7,6 +7,5 @@ internal fun TracksUser.toSentryUser(): User = User().let { sentryUser ->
     sentryUser.email = email
     sentryUser.username = username
     sentryUser.id = userID
-    sentryUser.others = context
     sentryUser
 }

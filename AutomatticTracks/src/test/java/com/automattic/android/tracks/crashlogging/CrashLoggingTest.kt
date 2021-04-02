@@ -99,7 +99,6 @@ class CrashLoggingTest {
                 assertThat(user?.email).isEqualTo(testUser1.email)
                 assertThat(user?.username).isEqualTo(testUser1.username)
                 assertThat(user?.id).isEqualTo(testUser1.userID)
-                assertThat(user?.others).containsAllEntriesOf(testUser1.context)
             }.assertAll()
         }
     }
