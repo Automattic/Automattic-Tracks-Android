@@ -35,4 +35,10 @@ interface CrashLoggingDataProvider {
      * @see TracksUser
      */
     fun userProvider(): TracksUser?
+
+    /**
+     * Provides [CrashLogging] with information on whether the user has requested to opt out
+     * of crash logging data collection
+     */
+    fun userHasOptOutProvider(): Boolean
 }

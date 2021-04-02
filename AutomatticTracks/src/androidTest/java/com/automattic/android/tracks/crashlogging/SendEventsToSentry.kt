@@ -33,7 +33,6 @@ class SendEventsToSentry {
         CrashLogging.start(
             context = InstrumentationRegistry.getInstrumentation().context,
             dataProvider = dataProvider,
-            userHasOptOut = false
         )
     }
 

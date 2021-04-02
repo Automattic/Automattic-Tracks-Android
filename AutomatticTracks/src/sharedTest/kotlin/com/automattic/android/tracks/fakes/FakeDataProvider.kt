@@ -12,9 +12,14 @@ class FakeDataProvider(
     override val locale: Locale? = Locale.US,
     override val enableCrashLoggingLogs: Boolean = true,
     var user: TracksUser? = testUser1,
+    var userHasOptOut: Boolean = false,
 ) : CrashLoggingDataProvider {
 
     override fun userProvider(): TracksUser? {
         return user
+    }
+
+    override fun userHasOptOutProvider(): Boolean {
+        return userHasOptOut
     }
 }

@@ -13,15 +13,13 @@ object CrashLogging {
 
     private lateinit var dataProvider: CrashLoggingDataProvider
     private lateinit var sentryWrapper: SentryErrorTrackerWrapper
-    private var userOptOut: Boolean = true
 
     @JvmStatic
     fun start(
         context: Context,
         dataProvider: CrashLoggingDataProvider,
-        userHasOptOut: Boolean,
     ) {
-        start(context, dataProvider, SentryErrorTrackerWrapper(), userHasOptOut)
+        start(context, dataProvider, SentryErrorTrackerWrapper())
     }
 
     @VisibleForTesting
@@ -29,11 +27,9 @@ object CrashLogging {
         context: Context,
         dataProvider: CrashLoggingDataProvider,
         sentryWrapper: SentryErrorTrackerWrapper,
-        userHasOptOut: Boolean,
     ) {
         this.sentryWrapper = sentryWrapper
         this.dataProvider = dataProvider
-        this.userOptOut = userHasOptOut
 
         initialize(context)
     }
@@ -47,7 +43,7 @@ object CrashLogging {
                 setDebug(dataProvider.enableCrashLoggingLogs)
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
-                    return@BeforeSendCallback if (userOptOut) {
+                    return@BeforeSendCallback if (dataProvider.userHasOptOutProvider()) {
                         null
                     } else {
                         event.apply {
@@ -57,10 +53,6 @@ object CrashLogging {
                 }
             }
         }
-    }
-
-    fun updateUserOptOutPreference(userHasOptOut: Boolean) {
-        this.userOptOut = userHasOptOut
     }
 
     fun appendApplicationContext(newApplicationContext: Map<String, String>) {

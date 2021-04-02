@@ -29,18 +29,18 @@ class CrashLoggingTest {
     private fun initialize(
         locale: Locale? = dataProvider.locale,
         enableCrashLoggingLogs: Boolean = dataProvider.enableCrashLoggingLogs,
-        userHasOptedOut: Boolean = false,
+        userHasOptOut: Boolean = false,
     ) {
         dataProvider = FakeDataProvider(
             locale = locale,
             enableCrashLoggingLogs = enableCrashLoggingLogs,
+            userHasOptOut = userHasOptOut
         )
 
         CrashLogging.start(
             context = mockedContext,
             dataProvider = dataProvider,
             sentryWrapper = mockedWrapper,
-            userHasOptOut = userHasOptedOut,
         )
     }
 
@@ -73,7 +73,7 @@ class CrashLoggingTest {
 
     @Test
     fun `should not send an event if user opted out`() {
-        initialize(userHasOptedOut = true)
+        initialize(userHasOptOut = true)
 
         val beforeSendResult = capturedOptions.beforeSend?.execute(SentryEvent(), null)
 
@@ -83,7 +83,7 @@ class CrashLoggingTest {
     @Test
     fun `should send an event if user has not opted out`() {
         val testEvent = SentryEvent()
-        initialize(userHasOptedOut = false)
+        initialize(userHasOptOut = false)
 
         val beforeSendResult = beforeSendModifiedEvent(capturedOptions, testEvent)
 
@@ -187,12 +187,12 @@ class CrashLoggingTest {
 
     @Test
     fun `should stop sending events if user has decided to opt out`() {
-        initialize(userHasOptedOut = false)
+        initialize(userHasOptOut = false)
         val options = capturedOptions
 
         assertThat(beforeSendModifiedEvent(options)).isNotNull
 
-        CrashLogging.updateUserOptOutPreference(userHasOptOut = true)
+        dataProvider.userHasOptOut = true
 
         assertThat(beforeSendModifiedEvent(options)).isNull()
     }
