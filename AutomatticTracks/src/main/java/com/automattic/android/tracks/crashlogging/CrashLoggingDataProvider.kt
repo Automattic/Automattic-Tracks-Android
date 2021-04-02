@@ -1,6 +1,5 @@
 package com.automattic.android.tracks.crashlogging
 
-import com.automattic.android.tracks.TracksUser
 import java.util.Locale
 
 interface CrashLoggingDataProvider {
@@ -32,9 +31,9 @@ interface CrashLoggingDataProvider {
     /**
      * Provides [CrashLogging] with information about the current user.
      *
-     * @see TracksUser
+     * @see CrashLoggingUser
      */
-    fun userProvider(): TracksUser?
+    fun userProvider(): CrashLoggingUser?
 
     /**
      * Provides [CrashLogging] with information on whether the user has requested to opt out

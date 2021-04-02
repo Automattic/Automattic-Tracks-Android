@@ -1,8 +1,8 @@
 package com.automattic.android.tracks.fakes
 
 import com.automattic.android.tracks.BuildConfig
-import com.automattic.android.tracks.TracksUser
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
+import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import java.util.Locale
 
 class FakeDataProvider(
@@ -11,11 +11,11 @@ class FakeDataProvider(
     override val releaseName: String = "testReleaseName",
     override val locale: Locale? = Locale.US,
     override val enableCrashLoggingLogs: Boolean = true,
-    var user: TracksUser? = testUser1,
+    var user: CrashLoggingUser? = testUser1,
     var userHasOptOut: Boolean = false,
 ) : CrashLoggingDataProvider {
 
-    override fun userProvider(): TracksUser? {
+    override fun userProvider(): CrashLoggingUser? {
         return user
     }
 
