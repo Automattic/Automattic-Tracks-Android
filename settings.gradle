@@ -1,1 +1,20 @@
+pluginManagement {
+    plugins {
+        id 'org.jetbrains.kotlin.android' version '1.4.31'
+    }
+    repositories {
+        google()
+        gradlePluginPortal()
+        jcenter()
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id.contains("com.android")) {
+                useModule("com.android.tools.build:gradle:4.0.2")
+            }
+        }
+    }
+}
+
 include ':AutomatticTracks'
+include ':sampletracksapp'
