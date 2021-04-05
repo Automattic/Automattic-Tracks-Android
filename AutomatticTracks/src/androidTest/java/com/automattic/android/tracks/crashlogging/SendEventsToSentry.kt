@@ -3,10 +3,13 @@ package com.automattic.android.tracks.crashlogging
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.automattic.android.tracks.fakes.FakeDataProvider
-import com.automattic.android.tracks.fakes.testUser
+import com.automattic.android.tracks.fakes.testUser1
+import com.automattic.android.tracks.fakes.testUser2
+import org.junit.AfterClass
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.lang.NullPointerException
 
 /**
  * This class is *not* a test in a formal way. This is a helper tool for making it easier to send
@@ -23,39 +26,62 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SendEventsToSentry {
 
-    private val dataProvider: CrashLoggingDataProvider = FakeDataProvider(currentUser = testUser)
+    private val dataProvider = FakeDataProvider(user = testUser1)
 
     @Before
     fun setUp() {
         CrashLogging.start(
             context = InstrumentationRegistry.getInstrumentation().context,
-            dataProvider = dataProvider
+            dataProvider = dataProvider,
         )
     }
 
     @Test
     fun logWithData() {
         CrashLogging.log(LogWithDataException, data = mapOf("test key" to "test value"))
-
-        waitForEventToBeSent()
     }
 
     @Test
     fun logWithException() {
         CrashLogging.log(Log)
-
-        waitForEventToBeSent()
     }
 
     @Test
     fun logMessage() {
         CrashLogging.log("This is test message")
-
-        waitForEventToBeSent()
     }
 
-    private fun waitForEventToBeSent() {
-        Thread.sleep(5000)
+    @Test
+    fun logMessageWithUpdatedUser() {
+        dataProvider.user = testUser1
+        CrashLogging.log(NullPointerException())
+
+        dataProvider.user = testUser2
+        CrashLogging.log(NullPointerException())
+    }
+
+    @Test
+    fun logMessageWithAppendedApplicationContext() {
+        CrashLogging.appendApplicationContext(mapOf("1 application" to "context"))
+        CrashLogging.log(OutOfMemoryError())
+
+        CrashLogging.appendApplicationContext(mapOf("2 application" to "context"))
+        CrashLogging.log(OutOfMemoryError())
+
+        CrashLogging.appendApplicationContext(mapOf("1 application" to "updated context"))
+        CrashLogging.log(OutOfMemoryError())
+    }
+
+    companion object {
+        @AfterClass
+        @JvmStatic
+        fun tearDown() {
+            waitForEventsToBeSent()
+        }
+
+        private fun waitForEventsToBeSent() {
+            Thread.sleep(5000)
+        }
     }
 
     object LogWithDataException : Exception()

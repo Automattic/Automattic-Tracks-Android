@@ -1,6 +1,5 @@
 package com.automattic.android.tracks.crashlogging
 
-import com.automattic.android.tracks.TracksUser
 import java.util.Locale
 
 interface CrashLoggingDataProvider {
@@ -8,12 +7,6 @@ interface CrashLoggingDataProvider {
      * Provides [CrashLogging] with the Sentry DSN for this application.
      */
     val sentryDSN: String
-
-    /**
-     * Provides [CrashLogging] with information on whether the user has opted out
-     * of data collection.
-     */
-    val userHasOptedOut: Boolean
 
     /**
      * Provides [CrashLogging] with information on what type of build this is.
@@ -26,23 +19,6 @@ interface CrashLoggingDataProvider {
     val releaseName: String
 
     /**
-     * Provides [CrashLogging] with information about the current user.
-     *
-     * @see TracksUser
-     */
-    val currentUser: TracksUser?
-
-    /**
-     * Provides the [CrashLogging] with information about the current application state.
-     */
-    val applicationContext: Map<String, String>
-
-    /**
-     * Provides the [CrashLogging] with information about the current user state.
-     */
-    val userContext: Map<String, String>
-
-    /**
      * Provides the [CrashLogging] with information about the user's current locale
      */
     val locale: Locale?
@@ -51,4 +27,17 @@ interface CrashLoggingDataProvider {
      * Provides [CrashLogging] with information on whether error tracker should log debug data
      */
     val enableCrashLoggingLogs: Boolean
+
+    /**
+     * Provides [CrashLogging] with information about the current user.
+     *
+     * @see CrashLoggingUser
+     */
+    fun userProvider(): CrashLoggingUser?
+
+    /**
+     * Provides [CrashLogging] with information on whether the user has requested to opt out
+     * of crash logging data collection
+     */
+    fun userHasOptOutProvider(): Boolean
 }

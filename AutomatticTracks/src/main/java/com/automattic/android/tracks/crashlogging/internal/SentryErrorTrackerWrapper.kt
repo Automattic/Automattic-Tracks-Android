@@ -5,7 +5,6 @@ import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
-import io.sentry.protocol.User
 
 internal class SentryErrorTrackerWrapper {
 
@@ -13,14 +12,6 @@ internal class SentryErrorTrackerWrapper {
         SentryAndroid.init(context) { options ->
             configure(options)
         }
-    }
-
-    fun clearBreadcrumbs() {
-        Sentry.clearBreadcrumbs()
-    }
-
-    fun setUser(user: User?) {
-        Sentry.setUser(user)
     }
 
     fun captureException(exception: Throwable) {

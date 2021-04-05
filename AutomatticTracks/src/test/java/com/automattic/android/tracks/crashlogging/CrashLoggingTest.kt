@@ -1,10 +1,10 @@
 package com.automattic.android.tracks.crashlogging
 
 import android.app.Activity
-import com.automattic.android.tracks.TracksUser
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper
 import com.automattic.android.tracks.fakes.FakeDataProvider
-import com.automattic.android.tracks.fakes.testUser
+import com.automattic.android.tracks.fakes.testUser1
+import com.automattic.android.tracks.fakes.testUser2
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
@@ -15,7 +15,6 @@ import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.nullableArgumentCaptor
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import java.util.Locale
@@ -28,22 +27,20 @@ class CrashLoggingTest {
     private var dataProvider = FakeDataProvider()
 
     private fun initialize(
-        currentUser: TracksUser? = dataProvider.currentUser,
-        userHasOptedOut: Boolean = dataProvider.userHasOptedOut,
         locale: Locale? = dataProvider.locale,
         enableCrashLoggingLogs: Boolean = dataProvider.enableCrashLoggingLogs,
+        userHasOptOut: Boolean = false,
     ) {
         dataProvider = FakeDataProvider(
-            currentUser = currentUser,
-            userHasOptedOut = userHasOptedOut,
             locale = locale,
             enableCrashLoggingLogs = enableCrashLoggingLogs,
+            userHasOptOut = userHasOptOut
         )
 
         CrashLogging.start(
             context = mockedContext,
             dataProvider = dataProvider,
-            sentryWrapper = mockedWrapper
+            sentryWrapper = mockedWrapper,
         )
     }
 
@@ -76,7 +73,7 @@ class CrashLoggingTest {
 
     @Test
     fun `should not send an event if user opted out`() {
-        initialize(userHasOptedOut = true)
+        initialize(userHasOptOut = true)
 
         val beforeSendResult = capturedOptions.beforeSend?.execute(SentryEvent(), null)
 
@@ -86,46 +83,41 @@ class CrashLoggingTest {
     @Test
     fun `should send an event if user has not opted out`() {
         val testEvent = SentryEvent()
-        initialize(userHasOptedOut = false)
+        initialize(userHasOptOut = false)
 
-        val beforeSendResult = capturedOptions.beforeSend?.execute(testEvent, null)
+        val beforeSendResult = beforeSendModifiedEvent(capturedOptions, testEvent)
 
         assertThat(beforeSendResult).isEqualTo(testEvent)
     }
 
     @Test
-    fun `should apply user tracking after initialization if user is not null`() {
-        initialize(currentUser = testUser)
+    fun `should apply user tracking if user is not null`() {
+        initialize()
 
         capturedUser.let { user ->
             SoftAssertions().apply {
-                assertThat(user?.email).isEqualTo(testUser.email)
-                assertThat(user?.username).isEqualTo(testUser.username)
-                assertThat(user?.others?.get("userID")).isEqualTo(testUser.userID)
-                assertThat(user?.others).containsAllEntriesOf(dataProvider.userContext)
+                assertThat(user?.email).isEqualTo(testUser1.email)
+                assertThat(user?.username).isEqualTo(testUser1.username)
+                assertThat(user?.id).isEqualTo(testUser1.userID)
             }.assertAll()
         }
     }
 
     @Test
     fun `should not apply user tracking after initialization if user is null`() {
-        initialize(currentUser = null)
+        initialize()
+        dataProvider.user = null
 
         assertThat(capturedUser).isNull()
     }
 
     @Test
-    fun `should clear breadcrumbs on initialization`() {
-        initialize()
-
-        verify(mockedWrapper, times(1)).clearBreadcrumbs()
-    }
-
-    @Test
     fun `should apply application context after initialization`() {
+        val testApplicationContext = mapOf("app" to "context")
         initialize()
+        CrashLogging.appendApplicationContext(testApplicationContext)
 
-        dataProvider.applicationContext.forEach { (key, value) ->
+        testApplicationContext.forEach { (key, value) ->
             verify(mockedWrapper, times(1)).applyExtra(key, value)
         }
     }
@@ -182,6 +174,29 @@ class CrashLoggingTest {
         assertThat(capturedOptions.isDebug).isFalse
     }
 
+    @Test
+    fun `should send event with updated user on user update`() {
+        initialize()
+        dataProvider.user = testUser1
+
+        assertThat(capturedUser?.username).isEqualTo(testUser1.username)
+
+        dataProvider.user = testUser2
+        assertThat(capturedUser?.username).isEqualTo(testUser2.username)
+    }
+
+    @Test
+    fun `should stop sending events if user has decided to opt out`() {
+        initialize(userHasOptOut = false)
+        val options = capturedOptions
+
+        assertThat(beforeSendModifiedEvent(options)).isNotNull
+
+        dataProvider.userHasOptOut = true
+
+        assertThat(beforeSendModifiedEvent(options)).isNull()
+    }
+
     private val capturedOptions: SentryOptions
         get() = argumentCaptor<(SentryOptions) -> Unit>().let { captor ->
             verify(mockedWrapper).initialize(any(), captor.capture())
@@ -189,16 +204,20 @@ class CrashLoggingTest {
         }
 
     private val capturedUser: User?
-        get() = nullableArgumentCaptor<User>().let { captor ->
-            verify(mockedWrapper).setUser(captor.capture())
-            captor.lastValue
-        }
+        get() = beforeSendModifiedEvent(capturedOptions)?.user
 
     private val capturedEvent: SentryEvent
         get() = argumentCaptor<SentryEvent>().let { captor ->
             verify(mockedWrapper).captureEvent(captor.capture())
             captor.lastValue
         }
+
+    private fun beforeSendModifiedEvent(
+        options: SentryOptions,
+        event: SentryEvent = SentryEvent(),
+    ): SentryEvent? {
+        return options.beforeSend?.execute(event, null)
+    }
 
     companion object {
         val TEST_THROWABLE = Throwable("test exception")
