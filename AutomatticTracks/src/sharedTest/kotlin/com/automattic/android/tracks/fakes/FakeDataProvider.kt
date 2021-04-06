@@ -13,6 +13,7 @@ class FakeDataProvider(
     override val enableCrashLoggingLogs: Boolean = true,
     var user: CrashLoggingUser? = testUser1,
     var userHasOptOut: Boolean = false,
+    var shouldDropException: (String, String, String) -> Boolean = { _: String, _: String, _: String -> false },
 ) : CrashLoggingDataProvider {
 
     override fun userProvider(): CrashLoggingUser? {
@@ -21,5 +22,9 @@ class FakeDataProvider(
 
     override fun userHasOptOutProvider(): Boolean {
         return userHasOptOut
+    }
+
+    override fun shouldDropWrappingException(module: String, type: String, value: String): Boolean {
+        return shouldDropException(module, type, value)
     }
 }

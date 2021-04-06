@@ -20,6 +20,13 @@ class MainActivity : AppCompatActivity() {
                 override val releaseName = "test"
                 override val locale = Locale.US
                 override val enableCrashLoggingLogs = true
+                override fun shouldDropWrappingException(
+                    module: String,
+                    type: String,
+                    value: String
+                ): Boolean {
+                    return false
+                }
                 override fun userProvider(): CrashLoggingUser {
                     return CrashLoggingUser(
                         userID = "test user id",

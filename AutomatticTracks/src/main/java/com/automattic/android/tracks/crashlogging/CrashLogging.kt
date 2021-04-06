@@ -43,6 +43,7 @@ object CrashLogging {
                 setDebug(dataProvider.enableCrashLoggingLogs)
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
+                    dropExceptionIfRequired(event)
                     return@BeforeSendCallback if (dataProvider.userHasOptOutProvider()) {
                         null
                     } else {
@@ -51,6 +52,14 @@ object CrashLogging {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun dropExceptionIfRequired(event: SentryEvent) {
+        event.exceptions?.lastOrNull()?.let { lastException ->
+            if (dataProvider.shouldDropWrappingException(lastException.module, lastException.type, lastException.value)) {
+                event.exceptions.remove(lastException)
             }
         }
     }

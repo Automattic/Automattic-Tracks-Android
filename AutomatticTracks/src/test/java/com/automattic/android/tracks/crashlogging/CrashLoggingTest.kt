@@ -8,12 +8,14 @@ import com.automattic.android.tracks.fakes.testUser2
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
+import io.sentry.protocol.SentryException
 import io.sentry.protocol.User
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -29,12 +31,14 @@ class CrashLoggingTest {
     private fun initialize(
         locale: Locale? = dataProvider.locale,
         enableCrashLoggingLogs: Boolean = dataProvider.enableCrashLoggingLogs,
-        userHasOptOut: Boolean = false,
+        userHasOptOut: Boolean = dataProvider.userHasOptOut,
+        shouldDropException: (String, String, String) -> Boolean = dataProvider.shouldDropException,
     ) {
         dataProvider = FakeDataProvider(
             locale = locale,
             enableCrashLoggingLogs = enableCrashLoggingLogs,
-            userHasOptOut = userHasOptOut
+            userHasOptOut = userHasOptOut,
+            shouldDropException = shouldDropException
         )
 
         CrashLogging.start(
@@ -197,6 +201,23 @@ class CrashLoggingTest {
         assertThat(beforeSendModifiedEvent(options)).isNull()
     }
 
+    @Test
+    fun `should drop exception from stacktrace if its defined and stacktrace contains it`() {
+        val testExceptions = mutableListOf(
+            DO_NOT_DROP,
+            TO_DROP
+        )
+        initialize(shouldDropException = shouldDrop(TO_DROP))
+
+        val event = mock<SentryEvent> {
+            on { exceptions } doReturn testExceptions
+        }
+
+        val updatedEvent = beforeSendModifiedEvent(capturedOptions, event)
+
+        assertThat(updatedEvent?.exceptions).contains(DO_NOT_DROP).doesNotContain(TO_DROP)
+    }
+
     private val capturedOptions: SentryOptions
         get() = argumentCaptor<(SentryOptions) -> Unit>().let { captor ->
             verify(mockedWrapper).initialize(any(), captor.capture())
@@ -219,7 +240,24 @@ class CrashLoggingTest {
         return options.beforeSend?.execute(event, null)
     }
 
+    private fun shouldDrop(exception: SentryException): (String, String, String) -> Boolean =
+        { module: String, type: String, value: String ->
+            exception.module == module && exception.type == type && exception.value == value
+        }
+
     companion object {
         val TEST_THROWABLE = Throwable("test exception")
+
+        val DO_NOT_DROP = SentryException().apply {
+            module = "do"
+            type = "not"
+            value = "drop me"
+        }
+
+        val TO_DROP = SentryException().apply {
+            module = "please"
+            type = "drop"
+            value = "me"
+        }
     }
 }
