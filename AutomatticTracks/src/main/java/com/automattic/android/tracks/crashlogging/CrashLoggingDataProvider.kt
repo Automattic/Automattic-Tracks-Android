@@ -29,6 +29,12 @@ interface CrashLoggingDataProvider {
     val enableCrashLoggingLogs: Boolean
 
     /**
+     * Provides [CrashLogging] with information about exception that should be dropped if is the
+     * last one on stacktrace
+     */
+    val toDropIfLastException: CrashLoggingException?
+
+    /**
      * Provides [CrashLogging] with information about the current user.
      *
      * @see CrashLoggingUser
