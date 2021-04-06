@@ -4,10 +4,13 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper
 import com.automattic.android.tracks.crashlogging.internal.toSentryUser
+import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
+import io.sentry.SpanStatus
 import io.sentry.protocol.Message
+
 
 object CrashLogging {
 
@@ -37,6 +40,7 @@ object CrashLogging {
     private fun initialize(context: Context) {
         sentryWrapper.initialize(context) { options ->
             options.apply {
+                tracesSampleRate = 1.0
                 dsn = dataProvider.sentryDSN
                 environment = dataProvider.buildType
                 release = dataProvider.releaseName
