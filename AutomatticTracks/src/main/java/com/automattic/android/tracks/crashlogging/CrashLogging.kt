@@ -58,7 +58,7 @@ object CrashLogging {
 
     private fun dropExceptionIfRequired(event: SentryEvent) {
         event.exceptions?.lastOrNull()?.let { lastException ->
-            if (dataProvider.toDropIfLastException?.isEqualTo(lastException) == true) {
+            if (dataProvider.shouldDropWrappingException(lastException.module, lastException.type, lastException.value)) {
                 event.exceptions.remove(lastException)
             }
         }

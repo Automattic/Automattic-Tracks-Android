@@ -29,10 +29,14 @@ interface CrashLoggingDataProvider {
     val enableCrashLoggingLogs: Boolean
 
     /**
-     * Provides [CrashLogging] with information about exception that should be dropped if is the
-     * last one on stacktrace
+     * Provides [CrashLogging] with information about exceptions that should be dropped if is the
+     * last one on stack trace
+     *
+     * E.g. "Invoking subscriber failed" exception means that an exception occurred during
+     * an EventBus event and it's not particularly useful for debugging.
+     *
      */
-    val toDropIfLastException: CrashLoggingException?
+    fun shouldDropWrappingException(module: String, type: String, value: String): Boolean
 
     /**
      * Provides [CrashLogging] with information about the current user.

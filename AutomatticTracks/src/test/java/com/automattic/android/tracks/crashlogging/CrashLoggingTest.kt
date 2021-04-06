@@ -32,13 +32,13 @@ class CrashLoggingTest {
         locale: Locale? = dataProvider.locale,
         enableCrashLoggingLogs: Boolean = dataProvider.enableCrashLoggingLogs,
         userHasOptOut: Boolean = dataProvider.userHasOptOut,
-        toDropException: CrashLoggingException? = dataProvider.toDropIfLastException
+        shouldDropException: (String, String, String) -> Boolean = dataProvider.shouldDropException,
     ) {
         dataProvider = FakeDataProvider(
             locale = locale,
             enableCrashLoggingLogs = enableCrashLoggingLogs,
             userHasOptOut = userHasOptOut,
-            toDropIfLastException = toDropException
+            shouldDropException = shouldDropException
         )
 
         CrashLogging.start(
@@ -204,10 +204,10 @@ class CrashLoggingTest {
     @Test
     fun `should drop exception from stacktrace if its defined and stacktrace contains it`() {
         val testExceptions = mutableListOf(
-            DO_NOT_REMOVE,
-            TO_REMOVE
+            DO_NOT_DROP,
+            TO_DROP
         )
-        initialize(toDropException = TO_REMOVE.toCrashLoggingException())
+        initialize(shouldDropException = shouldDrop(TO_DROP))
 
         val event = mock<SentryEvent> {
             on { exceptions } doReturn testExceptions
@@ -215,7 +215,7 @@ class CrashLoggingTest {
 
         val updatedEvent = beforeSendModifiedEvent(capturedOptions, event)
 
-        assertThat(updatedEvent?.exceptions).contains(DO_NOT_REMOVE).doesNotContain(TO_REMOVE)
+        assertThat(updatedEvent?.exceptions).contains(DO_NOT_DROP).doesNotContain(TO_DROP)
     }
 
     private val capturedOptions: SentryOptions
@@ -240,24 +240,23 @@ class CrashLoggingTest {
         return options.beforeSend?.execute(event, null)
     }
 
-    private fun SentryException.toCrashLoggingException() =
-        CrashLoggingException(
-            module = module,
-            type = type,
-            value = value,
-        )
+    private fun shouldDrop(exception: SentryException): (String, String, String) -> Boolean =
+        { module: String, type: String, value: String ->
+            exception.module == module && exception.type == type && exception.value == value
+        }
 
     companion object {
         val TEST_THROWABLE = Throwable("test exception")
 
-        val DO_NOT_REMOVE = SentryException().apply {
+        val DO_NOT_DROP = SentryException().apply {
             module = "do"
             type = "not"
-            value = "remove me"
+            value = "drop me"
         }
-        val TO_REMOVE = SentryException().apply {
+
+        val TO_DROP = SentryException().apply {
             module = "please"
-            type = "remove"
+            type = "drop"
             value = "me"
         }
     }

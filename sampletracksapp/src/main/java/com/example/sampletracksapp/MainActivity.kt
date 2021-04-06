@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.automattic.android.tracks.crashlogging.CrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
-import com.automattic.android.tracks.crashlogging.CrashLoggingException
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.example.sampletracksapp.databinding.ActivityMainBinding
 import java.util.Locale
@@ -21,7 +20,13 @@ class MainActivity : AppCompatActivity() {
                 override val releaseName = "test"
                 override val locale = Locale.US
                 override val enableCrashLoggingLogs = true
-                override val toDropIfLastException: CrashLoggingException? = null
+                override fun shouldDropWrappingException(
+                    module: String,
+                    type: String,
+                    value: String
+                ): Boolean {
+                    return false
+                }
                 override fun userProvider(): CrashLoggingUser {
                     return CrashLoggingUser(
                         userID = "test user id",
