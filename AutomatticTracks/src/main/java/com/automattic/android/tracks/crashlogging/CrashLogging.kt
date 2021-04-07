@@ -9,32 +9,18 @@ import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.protocol.Message
 
-object CrashLogging {
+class CrashLogging @VisibleForTesting internal constructor(
+    context: Context,
+    private val dataProvider: CrashLoggingDataProvider,
+    private val sentryWrapper: SentryErrorTrackerWrapper,
+) {
 
-    private lateinit var dataProvider: CrashLoggingDataProvider
-    private lateinit var sentryWrapper: SentryErrorTrackerWrapper
-
-    @JvmStatic
-    fun start(
+    constructor(
         context: Context,
         dataProvider: CrashLoggingDataProvider,
-    ) {
-        start(context, dataProvider, SentryErrorTrackerWrapper())
-    }
+    ) : this(context, dataProvider, SentryErrorTrackerWrapper())
 
-    @VisibleForTesting
-    internal fun start(
-        context: Context,
-        dataProvider: CrashLoggingDataProvider,
-        sentryWrapper: SentryErrorTrackerWrapper,
-    ) {
-        this.sentryWrapper = sentryWrapper
-        this.dataProvider = dataProvider
-
-        initialize(context)
-    }
-
-    private fun initialize(context: Context) {
+    init {
         sentryWrapper.initialize(context) { options ->
             options.apply {
                 dsn = dataProvider.sentryDSN
@@ -70,12 +56,10 @@ object CrashLogging {
         }
     }
 
-    @JvmStatic
     fun log(throwable: Throwable) {
         sentryWrapper.captureException(throwable)
     }
 
-    @JvmStatic
     fun log(throwable: Throwable, data: Map<String, String?>) {
         val event = SentryEvent().apply {
             message = Message().apply {
@@ -87,7 +71,6 @@ object CrashLogging {
         sentryWrapper.captureEvent(event)
     }
 
-    @JvmStatic
     fun log(message: String) {
         sentryWrapper.captureMessage(message)
     }

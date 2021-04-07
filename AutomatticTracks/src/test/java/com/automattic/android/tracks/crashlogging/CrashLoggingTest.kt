@@ -28,6 +28,8 @@ class CrashLoggingTest {
 
     private var dataProvider = FakeDataProvider()
 
+    private lateinit var crashLogging: CrashLogging
+
     private fun initialize(
         locale: Locale? = dataProvider.locale,
         enableCrashLoggingLogs: Boolean = dataProvider.enableCrashLoggingLogs,
@@ -41,7 +43,7 @@ class CrashLoggingTest {
             shouldDropException = shouldDropException
         )
 
-        CrashLogging.start(
+        crashLogging = CrashLogging(
             context = mockedContext,
             dataProvider = dataProvider,
             sentryWrapper = mockedWrapper,
@@ -119,7 +121,7 @@ class CrashLoggingTest {
     fun `should apply application context after initialization`() {
         val testApplicationContext = mapOf("app" to "context")
         initialize()
-        CrashLogging.appendApplicationContext(testApplicationContext)
+        crashLogging.appendApplicationContext(testApplicationContext)
 
         testApplicationContext.forEach { (key, value) ->
             verify(mockedWrapper, times(1)).applyExtra(key, value)
@@ -130,7 +132,7 @@ class CrashLoggingTest {
     fun `should log exception`() {
         initialize()
 
-        CrashLogging.log(TEST_THROWABLE)
+        crashLogging.log(TEST_THROWABLE)
 
         verify(mockedWrapper, times(1)).captureException(TEST_THROWABLE)
     }
@@ -140,7 +142,7 @@ class CrashLoggingTest {
         val additionalData = mapOf<String, String?>("additional" to "data", "another" to "extra")
         initialize()
 
-        CrashLogging.log(TEST_THROWABLE, additionalData)
+        crashLogging.log(TEST_THROWABLE, additionalData)
 
         capturedEvent.let { event ->
             SoftAssertions().apply {
@@ -159,7 +161,7 @@ class CrashLoggingTest {
         val testMessage = "test message"
         initialize()
 
-        CrashLogging.log(testMessage)
+        crashLogging.log(testMessage)
 
         verify(mockedWrapper, times(1)).captureMessage(testMessage)
     }
