@@ -31,7 +31,7 @@ class SendEventsToSentry {
 
     @Before
     fun setUp() {
-        crashLogging = CrashLogging(
+        crashLogging = SentryCrashLogging(
             context = InstrumentationRegistry.getInstrumentation().context,
             dataProvider = dataProvider,
         )

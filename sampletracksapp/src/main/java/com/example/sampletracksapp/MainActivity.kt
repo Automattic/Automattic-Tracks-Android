@@ -2,7 +2,7 @@ package com.example.sampletracksapp
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.automattic.android.tracks.crashlogging.CrashLogging
+import com.automattic.android.tracks.crashlogging.SentryCrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.example.sampletracksapp.databinding.ActivityMainBinding
@@ -12,7 +12,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val crashLogging = CrashLogging(
+        val crashLogging = SentryCrashLogging(
             this,
             object : CrashLoggingDataProvider {
                 override val sentryDSN = BuildConfig.SENTRY_TEST_PROJECT_DSN

@@ -21,14 +21,14 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import java.util.Locale
 
-class CrashLoggingTest {
+class SentryCrashLoggingTest {
 
     private val mockedWrapper: SentryErrorTrackerWrapper = mock()
     private val mockedContext = Activity()
 
     private var dataProvider = FakeDataProvider()
 
-    private lateinit var crashLogging: CrashLogging
+    private lateinit var crashLogging: SentryCrashLogging
 
     private fun initialize(
         locale: Locale? = dataProvider.locale,
@@ -43,7 +43,7 @@ class CrashLoggingTest {
             shouldDropException = shouldDropException
         )
 
-        crashLogging = CrashLogging(
+        crashLogging = SentryCrashLogging(
             context = mockedContext,
             dataProvider = dataProvider,
             sentryWrapper = mockedWrapper,
