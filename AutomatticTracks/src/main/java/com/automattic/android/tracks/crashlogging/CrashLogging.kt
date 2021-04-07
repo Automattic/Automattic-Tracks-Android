@@ -44,16 +44,12 @@ object CrashLogging {
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
 
+                    if (dataProvider.userHasOptOutProvider()) return@BeforeSendCallback null
+
                     dropExceptionIfRequired(event)
-
                     appendExtra(event)
-
-                    return@BeforeSendCallback if (dataProvider.userHasOptOutProvider()) {
-                        null
-                    } else {
-                        event.apply {
-                            user = dataProvider.userProvider()?.toSentryUser()
-                        }
+                    event.apply {
+                        user = dataProvider.userProvider()?.toSentryUser()
                     }
                 }
             }

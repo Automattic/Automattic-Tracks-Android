@@ -19,6 +19,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyZeroInteractions
 import java.util.Locale
 
 class CrashLoggingTest {
@@ -248,6 +249,16 @@ class CrashLoggingTest {
         val updatedEvent = beforeSendModifiedEvent(capturedOptions, testEventWithExtraApplied)
 
         assertThat(updatedEvent?.getExtra(extraKey)).isEqualTo(extraValue)
+    }
+
+    @Test
+    fun `should not modify event if it's not meant to be sent`() {
+        initialize(userHasOptOut = true)
+        val testEvent: SentryEvent = mock()
+
+        capturedOptions.beforeSend?.execute(testEvent, null)
+
+        verifyZeroInteractions(testEvent)
     }
 
     private val capturedOptions: SentryOptions
