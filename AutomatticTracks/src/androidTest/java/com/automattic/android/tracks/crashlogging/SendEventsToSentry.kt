@@ -72,6 +72,17 @@ class SendEventsToSentry {
         CrashLogging.log(OutOfMemoryError())
     }
 
+    @Test
+    fun shouldAppendExtraForKeyIfRequested() {
+        val extraKey = "key"
+        dataProvider.extraKeys = listOf(extraKey)
+        dataProvider.appendBeforeSendAction = { key ->
+            if (key == extraKey) "value" else ""
+        }
+
+        CrashLogging.log("This is test message")
+    }
+
     companion object {
         @AfterClass
         @JvmStatic
