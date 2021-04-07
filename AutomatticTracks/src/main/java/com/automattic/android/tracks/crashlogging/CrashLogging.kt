@@ -59,7 +59,7 @@ object CrashLogging {
     private fun appendExtra(event: SentryEvent) {
         dataProvider.getEventExtraKeys().forEach { key ->
             if (event.getExtra(key) == null) {
-                event.setExtra(key, dataProvider.appendToEventBeforeSend(key))
+                event.setExtra(key, dataProvider.appendToEventBeforeSend(key, event.eventLevel))
             }
         }
     }

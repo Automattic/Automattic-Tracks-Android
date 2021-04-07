@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.automattic.android.tracks.crashlogging.CrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
+import com.automattic.android.tracks.crashlogging.EventLevel
 import com.example.sampletracksapp.databinding.ActivityMainBinding
 import java.util.Locale
 
@@ -43,7 +44,7 @@ class MainActivity : AppCompatActivity() {
                     return emptyList()
                 }
 
-                override fun appendToEventBeforeSend(key: String): String {
+                override fun appendToEventBeforeSend(key: String, eventLevel: EventLevel): String {
                     return ""
                 }
             }

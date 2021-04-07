@@ -3,6 +3,7 @@ package com.automattic.android.tracks.fakes
 import com.automattic.android.tracks.BuildConfig
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
+import com.automattic.android.tracks.crashlogging.EventLevel
 import java.util.Locale
 
 class FakeDataProvider(
@@ -30,8 +31,8 @@ class FakeDataProvider(
         return extraKeys
     }
 
-    override fun appendToEventBeforeSend(key: String): String {
-        return appendBeforeSendAction.invoke(key)
+    override fun appendToEventBeforeSend(key: String, eventLevel: EventLevel): String {
+        return appendBeforeSendAction(key)
     }
 
     override fun shouldDropWrappingException(module: String, type: String, value: String): Boolean {

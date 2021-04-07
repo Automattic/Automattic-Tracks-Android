@@ -61,5 +61,5 @@ interface CrashLoggingDataProvider {
      * Provides [CrashLogging] with content of extra value to append to an event based on key
      * provided by [getEventExtraKeys]
      */
-    fun appendToEventBeforeSend(key: String): String
+    fun appendToEventBeforeSend(key: String, eventLevel: EventLevel): String
 }
