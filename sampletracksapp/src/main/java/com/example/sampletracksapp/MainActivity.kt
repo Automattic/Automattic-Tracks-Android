@@ -38,6 +38,14 @@ class MainActivity : AppCompatActivity() {
                 override fun userHasOptOutProvider(): Boolean {
                     return false
                 }
+
+                override fun getEventExtraKeys(): List<String> {
+                    return emptyList()
+                }
+
+                override fun appendToEventBeforeSend(key: String): String {
+                    return ""
+                }
             }
         )
 

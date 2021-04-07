@@ -50,4 +50,16 @@ interface CrashLoggingDataProvider {
      * of crash logging data collection
      */
     fun userHasOptOutProvider(): Boolean
+
+    /**
+     * Provides [CrashLogging] with information about possible keys for events extra data applied
+     * just-before sending it
+     */
+    fun getEventExtraKeys(): List<String>
+
+    /**
+     * Provides [CrashLogging] with content of extra value to append to an event based on key
+     * provided by [getEventExtraKeys]
+     */
+    fun appendToEventBeforeSend(key: String): String
 }

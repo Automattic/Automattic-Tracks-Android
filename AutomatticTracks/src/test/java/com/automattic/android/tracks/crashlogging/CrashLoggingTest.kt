@@ -33,12 +33,16 @@ class CrashLoggingTest {
         enableCrashLoggingLogs: Boolean = dataProvider.enableCrashLoggingLogs,
         userHasOptOut: Boolean = dataProvider.userHasOptOut,
         shouldDropException: (String, String, String) -> Boolean = dataProvider.shouldDropException,
+        extraKeys: List<String> = dataProvider.extraKeys,
+        appendBeforeSendAction: (String) -> String = dataProvider.appendBeforeSendAction,
     ) {
         dataProvider = FakeDataProvider(
             locale = locale,
             enableCrashLoggingLogs = enableCrashLoggingLogs,
             userHasOptOut = userHasOptOut,
-            shouldDropException = shouldDropException
+            shouldDropException = shouldDropException,
+            extraKeys = extraKeys,
+            appendBeforeSendAction = appendBeforeSendAction,
         )
 
         CrashLogging.start(
@@ -216,6 +220,34 @@ class CrashLoggingTest {
         val updatedEvent = beforeSendModifiedEvent(capturedOptions, event)
 
         assertThat(updatedEvent?.exceptions).contains(DO_NOT_DROP).doesNotContain(TO_DROP)
+    }
+
+    @Test
+    fun `should append extra to event before sending it`() {
+        val extraKey = "key"
+        val extraValue = "value"
+
+        initialize(extraKeys = listOf(extraKey), appendBeforeSendAction = { extraValue })
+
+        val updatedEvent = beforeSendModifiedEvent(capturedOptions)
+
+        assertThat(updatedEvent?.getExtra(extraKey)).isEqualTo(extraValue)
+    }
+
+    @Test
+    fun `should not append extra to event if its already there`() {
+        val extraKey = "key"
+        val extraValue = "value"
+        val updatedExtraValue = "updatedValue"
+        val testEventWithExtraApplied = SentryEvent().apply { setExtra(extraKey, extraValue) }
+        initialize(
+            extraKeys = listOf(extraKey),
+            appendBeforeSendAction = { updatedExtraValue }
+        )
+
+        val updatedEvent = beforeSendModifiedEvent(capturedOptions, testEventWithExtraApplied)
+
+        assertThat(updatedEvent?.getExtra(extraKey)).isEqualTo(extraValue)
     }
 
     private val capturedOptions: SentryOptions

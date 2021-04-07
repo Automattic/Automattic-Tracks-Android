@@ -14,6 +14,8 @@ class FakeDataProvider(
     var user: CrashLoggingUser? = testUser1,
     var userHasOptOut: Boolean = false,
     var shouldDropException: (String, String, String) -> Boolean = { _: String, _: String, _: String -> false },
+    var extraKeys: List<String> = emptyList(),
+    var appendBeforeSendAction: (String) -> String = { "" }
 ) : CrashLoggingDataProvider {
 
     override fun userProvider(): CrashLoggingUser? {
@@ -22,6 +24,14 @@ class FakeDataProvider(
 
     override fun userHasOptOutProvider(): Boolean {
         return userHasOptOut
+    }
+
+    override fun getEventExtraKeys(): List<String> {
+        return extraKeys
+    }
+
+    override fun appendToEventBeforeSend(key: String): String {
+        return appendBeforeSendAction.invoke(key)
     }
 
     override fun shouldDropWrappingException(module: String, type: String, value: String): Boolean {
