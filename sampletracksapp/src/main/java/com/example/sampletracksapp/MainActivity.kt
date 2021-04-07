@@ -2,9 +2,9 @@ package com.example.sampletracksapp
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.automattic.android.tracks.crashlogging.SentryCrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
+import com.automattic.android.tracks.crashlogging.SentryCrashLogging
 import com.example.sampletracksapp.databinding.ActivityMainBinding
 import java.util.Locale
 
