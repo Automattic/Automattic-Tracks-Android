@@ -3,8 +3,8 @@ package com.example.sampletracksapp
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
+import com.automattic.android.tracks.crashlogging.CrashLoggingProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
-import com.automattic.android.tracks.crashlogging.SentryCrashLogging
 import com.example.sampletracksapp.databinding.ActivityMainBinding
 import java.util.Locale
 
@@ -12,7 +12,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val crashLogging = SentryCrashLogging(
+        val crashLogging = CrashLoggingProvider.createInstance(
             this,
             object : CrashLoggingDataProvider {
                 override val sentryDSN = BuildConfig.SENTRY_TEST_PROJECT_DSN

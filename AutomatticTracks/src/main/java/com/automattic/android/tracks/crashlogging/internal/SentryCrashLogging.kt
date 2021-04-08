@@ -1,15 +1,14 @@
-package com.automattic.android.tracks.crashlogging
+package com.automattic.android.tracks.crashlogging.internal
 
 import android.content.Context
-import androidx.annotation.VisibleForTesting
-import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper
-import com.automattic.android.tracks.crashlogging.internal.toSentryUser
+import com.automattic.android.tracks.crashlogging.CrashLogging
+import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.protocol.Message
 
-class SentryCrashLogging @VisibleForTesting internal constructor(
+internal class SentryCrashLogging constructor(
     context: Context,
     private val dataProvider: CrashLoggingDataProvider,
     private val sentryWrapper: SentryErrorTrackerWrapper,

@@ -9,7 +9,6 @@ import org.junit.AfterClass
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.lang.NullPointerException
 
 /**
  * This class is *not* a test in a formal way. This is a helper tool for making it easier to send
@@ -31,7 +30,7 @@ class SendEventsToSentry {
 
     @Before
     fun setUp() {
-        crashLogging = SentryCrashLogging(
+        crashLogging = CrashLoggingProvider.createInstance(
             context = InstrumentationRegistry.getInstrumentation().context,
             dataProvider = dataProvider,
         )

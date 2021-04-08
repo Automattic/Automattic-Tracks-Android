@@ -1,6 +1,7 @@
 package com.automattic.android.tracks.crashlogging
 
 import android.app.Activity
+import com.automattic.android.tracks.crashlogging.internal.SentryCrashLogging
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper
 import com.automattic.android.tracks.fakes.FakeDataProvider
 import com.automattic.android.tracks.fakes.testUser1
