@@ -3,6 +3,8 @@ package com.automattic.android.tracks.fakes
 import com.automattic.android.tracks.BuildConfig
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
+import com.automattic.android.tracks.crashlogging.EventLevel
+import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import java.util.Locale
 
 class FakeDataProvider(
@@ -14,6 +16,8 @@ class FakeDataProvider(
     var user: CrashLoggingUser? = testUser1,
     var userHasOptOut: Boolean = false,
     var shouldDropException: (String, String, String) -> Boolean = { _: String, _: String, _: String -> false },
+    var extraKeys: List<String> = emptyList(),
+    var provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = { emptyMap() }
 ) : CrashLoggingDataProvider {
 
     override fun userProvider(): CrashLoggingUser? {
@@ -22,6 +26,17 @@ class FakeDataProvider(
 
     override fun userHasOptOutProvider(): Boolean {
         return userHasOptOut
+    }
+
+    override fun extraKnownKeys(): List<String> {
+        return extraKeys
+    }
+
+    override fun provideExtrasForEvent(
+        currentExtras: Map<ExtraKnownKey, String>,
+        eventLevel: EventLevel
+    ): Map<ExtraKnownKey, String> {
+        return provideExtrasForEvent(currentExtras)
     }
 
     override fun shouldDropWrappingException(module: String, type: String, value: String): Boolean {
