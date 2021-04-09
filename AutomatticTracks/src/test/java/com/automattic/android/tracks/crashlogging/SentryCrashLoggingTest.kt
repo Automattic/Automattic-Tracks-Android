@@ -38,7 +38,7 @@ class SentryCrashLoggingTest {
         userHasOptOut: Boolean = dataProvider.userHasOptOut,
         shouldDropException: (String, String, String) -> Boolean = dataProvider.shouldDropException,
         extraKeys: List<String> = dataProvider.extraKeys,
-        appendBeforeSendAction: (String) -> String = dataProvider.appendBeforeSendAction,
+        provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = dataProvider.provideExtrasForEvent,
     ) {
         dataProvider = FakeDataProvider(
             locale = locale,
@@ -46,7 +46,7 @@ class SentryCrashLoggingTest {
             userHasOptOut = userHasOptOut,
             shouldDropException = shouldDropException,
             extraKeys = extraKeys,
-            appendBeforeSendAction = appendBeforeSendAction,
+            provideExtrasForEvent = provideExtrasForEvent,
         )
 
         crashLogging = SentryCrashLogging(
@@ -231,25 +231,12 @@ class SentryCrashLoggingTest {
         val extraKey = "key"
         val extraValue = "value"
 
-        initialize(extraKeys = listOf(extraKey), appendBeforeSendAction = { extraValue })
-
-        val updatedEvent = beforeSendModifiedEvent(capturedOptions)
-
-        assertThat(updatedEvent?.getExtra(extraKey)).isEqualTo(extraValue)
-    }
-
-    @Test
-    fun `should not append extra to event if its already there`() {
-        val extraKey = "key"
-        val extraValue = "value"
-        val updatedExtraValue = "updatedValue"
-        val testEventWithExtraApplied = SentryEvent().apply { setExtra(extraKey, extraValue) }
         initialize(
             extraKeys = listOf(extraKey),
-            appendBeforeSendAction = { updatedExtraValue }
+            provideExtrasForEvent = { mapOf(extraKey to extraValue) }
         )
 
-        val updatedEvent = beforeSendModifiedEvent(capturedOptions, testEventWithExtraApplied)
+        val updatedEvent = beforeSendModifiedEvent(capturedOptions)
 
         assertThat(updatedEvent?.getExtra(extraKey)).isEqualTo(extraValue)
     }

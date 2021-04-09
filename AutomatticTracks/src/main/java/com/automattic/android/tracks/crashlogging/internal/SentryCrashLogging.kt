@@ -38,12 +38,16 @@ internal class SentryCrashLogging constructor(
     }
 
     private fun appendExtra(event: SentryEvent) {
-        dataProvider.getEventExtraKeys().forEach { key ->
-            if (event.getExtra(key) == null) {
-                event.setExtra(key, dataProvider.appendToEventBeforeSend(key, event.eventLevel))
-            }
-        }
+        event.setExtras(
+            dataProvider.provideExtrasForEvent(
+                currentExtras = mergeKnownKeysWithValues(event),
+                eventLevel = event.eventLevel
+            )
+        )
     }
+
+    private fun mergeKnownKeysWithValues(event: SentryEvent) = dataProvider.extraKnownKeys()
+        .associateWith { knownKey -> event.getExtra(knownKey).toString() }
 
     private fun dropExceptionIfRequired(event: SentryEvent) {
         event.exceptions?.lastOrNull()?.let { lastException ->

@@ -6,6 +6,7 @@ import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.EventLevel
+import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.example.sampletracksapp.databinding.ActivityMainBinding
 import java.util.Locale
 
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
                 ): Boolean {
                     return false
                 }
+
                 override fun userProvider(): CrashLoggingUser {
                     return CrashLoggingUser(
                         userID = "test user id",
@@ -40,12 +42,15 @@ class MainActivity : AppCompatActivity() {
                     return false
                 }
 
-                override fun getEventExtraKeys(): List<String> {
+                override fun extraKnownKeys(): List<String> {
                     return emptyList()
                 }
 
-                override fun appendToEventBeforeSend(key: String, eventLevel: EventLevel): String {
-                    return ""
+                override fun provideExtrasForEvent(
+                    currentExtras: Map<ExtraKnownKey, String>,
+                    eventLevel: EventLevel
+                ): Map<ExtraKnownKey, String> {
+                    return mapOf("extra" to "value")
                 }
             }
         )

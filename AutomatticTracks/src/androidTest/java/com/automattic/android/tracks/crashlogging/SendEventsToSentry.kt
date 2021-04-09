@@ -76,11 +76,11 @@ class SendEventsToSentry {
     fun shouldAppendExtraForKeyIfRequested() {
         val extraKey = "key"
         dataProvider.extraKeys = listOf(extraKey)
-        dataProvider.appendBeforeSendAction = { key ->
-            if (key == extraKey) "value" else ""
+        dataProvider.provideExtrasForEvent = { _ ->
+            mapOf("key" to "value")
         }
 
-        CrashLogging.log("This is test message")
+        crashLogging.log("This is test message")
     }
 
     companion object {

@@ -4,6 +4,7 @@ import com.automattic.android.tracks.BuildConfig
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.EventLevel
+import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import java.util.Locale
 
 class FakeDataProvider(
@@ -16,7 +17,7 @@ class FakeDataProvider(
     var userHasOptOut: Boolean = false,
     var shouldDropException: (String, String, String) -> Boolean = { _: String, _: String, _: String -> false },
     var extraKeys: List<String> = emptyList(),
-    var appendBeforeSendAction: (String) -> String = { "" }
+    var provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = { emptyMap() }
 ) : CrashLoggingDataProvider {
 
     override fun userProvider(): CrashLoggingUser? {
@@ -27,12 +28,15 @@ class FakeDataProvider(
         return userHasOptOut
     }
 
-    override fun getEventExtraKeys(): List<String> {
+    override fun extraKnownKeys(): List<String> {
         return extraKeys
     }
 
-    override fun appendToEventBeforeSend(key: String, eventLevel: EventLevel): String {
-        return appendBeforeSendAction(key)
+    override fun provideExtrasForEvent(
+        currentExtras: Map<ExtraKnownKey, String>,
+        eventLevel: EventLevel
+    ): Map<ExtraKnownKey, String> {
+        return provideExtrasForEvent(currentExtras)
     }
 
     override fun shouldDropWrappingException(module: String, type: String, value: String): Boolean {

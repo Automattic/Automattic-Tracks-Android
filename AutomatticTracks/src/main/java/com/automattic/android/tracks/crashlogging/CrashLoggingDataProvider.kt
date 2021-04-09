@@ -55,11 +55,16 @@ interface CrashLoggingDataProvider {
      * Provides [CrashLogging] with information about possible keys for events extra data applied
      * just-before sending it
      */
-    fun getEventExtraKeys(): List<String>
+    fun extraKnownKeys(): List<ExtraKnownKey>
 
     /**
      * Provides [CrashLogging] with content of extra value to append to an event based on key
-     * provided by [getEventExtraKeys]
+     * provided by [extraKnownKeys]
      */
-    fun appendToEventBeforeSend(key: String, eventLevel: EventLevel): String
+    fun provideExtrasForEvent(
+        currentExtras: Map<ExtraKnownKey, String>,
+        eventLevel: EventLevel
+    ): Map<ExtraKnownKey, String>
 }
+
+typealias ExtraKnownKey = String
