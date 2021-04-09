@@ -15,11 +15,6 @@ internal class SentryCrashLogging constructor(
     private val sentryWrapper: SentryErrorTrackerWrapper,
 ) : CrashLogging {
 
-    constructor(
-        context: Context,
-        dataProvider: CrashLoggingDataProvider,
-    ) : this(context, dataProvider, SentryErrorTrackerWrapper())
-
     init {
         sentryWrapper.initialize(context) { options ->
             options.apply {
