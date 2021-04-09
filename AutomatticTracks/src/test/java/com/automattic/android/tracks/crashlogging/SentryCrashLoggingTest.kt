@@ -255,7 +255,7 @@ class SentryCrashLoggingTest {
     }
 
     @Test
-    fun `should not modify event if it's not meant to be sent`() {
+    fun `should not modify events if the user has opted out`() {
         initialize(userHasOptOut = true)
         val testEvent: SentryEvent = mock()
 
