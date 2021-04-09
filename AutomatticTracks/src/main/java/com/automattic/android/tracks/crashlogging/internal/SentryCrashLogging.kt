@@ -3,6 +3,7 @@ package com.automattic.android.tracks.crashlogging.internal
 import android.content.Context
 import com.automattic.android.tracks.crashlogging.CrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
+import com.automattic.android.tracks.crashlogging.eventLevel
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
@@ -14,11 +15,6 @@ internal class SentryCrashLogging constructor(
     private val sentryWrapper: SentryErrorTrackerWrapper,
 ) : CrashLogging {
 
-    constructor(
-        context: Context,
-        dataProvider: CrashLoggingDataProvider,
-    ) : this(context, dataProvider, SentryErrorTrackerWrapper())
-
     init {
         sentryWrapper.initialize(context) { options ->
             options.apply {
@@ -28,22 +24,39 @@ internal class SentryCrashLogging constructor(
                 setDebug(dataProvider.enableCrashLoggingLogs)
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
+
+                    if (dataProvider.userHasOptOutProvider()) return@BeforeSendCallback null
+
                     dropExceptionIfRequired(event)
-                    return@BeforeSendCallback if (dataProvider.userHasOptOutProvider()) {
-                        null
-                    } else {
-                        event.apply {
-                            user = dataProvider.userProvider()?.toSentryUser()
-                        }
+                    appendExtra(event)
+                    event.apply {
+                        user = dataProvider.userProvider()?.toSentryUser()
                     }
                 }
             }
         }
     }
 
+    private fun appendExtra(event: SentryEvent) {
+        event.setExtras(
+            dataProvider.provideExtrasForEvent(
+                currentExtras = mergeKnownKeysWithValues(event),
+                eventLevel = event.eventLevel
+            )
+        )
+    }
+
+    private fun mergeKnownKeysWithValues(event: SentryEvent) = dataProvider.extraKnownKeys()
+        .associateWith { knownKey -> event.getExtra(knownKey).toString() }
+
     private fun dropExceptionIfRequired(event: SentryEvent) {
         event.exceptions?.lastOrNull()?.let { lastException ->
-            if (dataProvider.shouldDropWrappingException(lastException.module, lastException.type, lastException.value)) {
+            if (dataProvider.shouldDropWrappingException(
+                    lastException.module,
+                    lastException.type,
+                    lastException.value
+                )
+            ) {
                 event.exceptions.remove(lastException)
             }
         }
