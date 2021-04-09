@@ -38,8 +38,8 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
 
-                override fun userHasOptOutProvider(): Boolean {
-                    return false
+                override fun crashLoggingEnabled(): Boolean {
+                    return true
                 }
 
                 override fun extraKnownKeys(): List<String> {

@@ -25,7 +25,7 @@ internal class SentryCrashLogging constructor(
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
 
-                    if (dataProvider.userHasOptOutProvider()) return@BeforeSendCallback null
+                    if (!dataProvider.crashLoggingEnabled()) return@BeforeSendCallback null
 
                     dropExceptionIfRequired(event)
                     appendExtra(event)

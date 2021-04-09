@@ -46,10 +46,10 @@ interface CrashLoggingDataProvider {
     fun userProvider(): CrashLoggingUser?
 
     /**
-     * Provides [CrashLogging] with information on whether the user has requested to opt out
-     * of crash logging data collection
+     * Provides [CrashLogging] with information on whether the client has enable crash logging
+     * data collection
      */
-    fun userHasOptOutProvider(): Boolean
+    fun crashLoggingEnabled(): Boolean
 
     /**
      * Provides [CrashLogging] with information about possible keys for events extra data applied

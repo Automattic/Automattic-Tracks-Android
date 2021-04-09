@@ -14,7 +14,7 @@ class FakeDataProvider(
     override val locale: Locale? = Locale.US,
     override val enableCrashLoggingLogs: Boolean = true,
     var user: CrashLoggingUser? = testUser1,
-    var userHasOptOut: Boolean = false,
+    var crashLoggingEnabled: Boolean = true,
     var shouldDropException: (String, String, String) -> Boolean = { _: String, _: String, _: String -> false },
     var extraKeys: List<String> = emptyList(),
     var provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = { emptyMap() }
@@ -24,8 +24,8 @@ class FakeDataProvider(
         return user
     }
 
-    override fun userHasOptOutProvider(): Boolean {
-        return userHasOptOut
+    override fun crashLoggingEnabled(): Boolean {
+        return crashLoggingEnabled
     }
 
     override fun extraKnownKeys(): List<String> {
