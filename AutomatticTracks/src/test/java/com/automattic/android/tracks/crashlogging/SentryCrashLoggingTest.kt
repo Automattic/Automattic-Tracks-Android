@@ -1,6 +1,7 @@
 package com.automattic.android.tracks.crashlogging
 
 import android.app.Activity
+import com.automattic.android.tracks.crashlogging.internal.SentryCrashLogging
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper
 import com.automattic.android.tracks.fakes.FakeDataProvider
 import com.automattic.android.tracks.fakes.testUser1
@@ -22,12 +23,14 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyZeroInteractions
 import java.util.Locale
 
-class CrashLoggingTest {
+class SentryCrashLoggingTest {
 
     private val mockedWrapper: SentryErrorTrackerWrapper = mock()
     private val mockedContext = Activity()
 
     private var dataProvider = FakeDataProvider()
+
+    private lateinit var crashLogging: SentryCrashLogging
 
     private fun initialize(
         locale: Locale? = dataProvider.locale,
@@ -46,7 +49,7 @@ class CrashLoggingTest {
             appendBeforeSendAction = appendBeforeSendAction,
         )
 
-        CrashLogging.start(
+        crashLogging = SentryCrashLogging(
             context = mockedContext,
             dataProvider = dataProvider,
             sentryWrapper = mockedWrapper,
@@ -124,7 +127,7 @@ class CrashLoggingTest {
     fun `should apply application context after initialization`() {
         val testApplicationContext = mapOf("app" to "context")
         initialize()
-        CrashLogging.appendApplicationContext(testApplicationContext)
+        crashLogging.appendApplicationContext(testApplicationContext)
 
         testApplicationContext.forEach { (key, value) ->
             verify(mockedWrapper, times(1)).applyExtra(key, value)
@@ -135,7 +138,7 @@ class CrashLoggingTest {
     fun `should log exception`() {
         initialize()
 
-        CrashLogging.log(TEST_THROWABLE)
+        crashLogging.log(TEST_THROWABLE)
 
         verify(mockedWrapper, times(1)).captureException(TEST_THROWABLE)
     }
@@ -145,7 +148,7 @@ class CrashLoggingTest {
         val additionalData = mapOf<String, String?>("additional" to "data", "another" to "extra")
         initialize()
 
-        CrashLogging.log(TEST_THROWABLE, additionalData)
+        crashLogging.log(TEST_THROWABLE, additionalData)
 
         capturedEvent.let { event ->
             SoftAssertions().apply {
@@ -164,7 +167,7 @@ class CrashLoggingTest {
         val testMessage = "test message"
         initialize()
 
-        CrashLogging.log(testMessage)
+        crashLogging.log(testMessage)
 
         verify(mockedWrapper, times(1)).captureMessage(testMessage)
     }

@@ -9,7 +9,6 @@ import org.junit.AfterClass
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.lang.NullPointerException
 
 /**
  * This class is *not* a test in a formal way. This is a helper tool for making it easier to send
@@ -27,10 +26,11 @@ import java.lang.NullPointerException
 class SendEventsToSentry {
 
     private val dataProvider = FakeDataProvider(user = testUser1)
+    private lateinit var crashLogging: CrashLogging
 
     @Before
     fun setUp() {
-        CrashLogging.start(
+        crashLogging = CrashLoggingProvider.createInstance(
             context = InstrumentationRegistry.getInstrumentation().context,
             dataProvider = dataProvider,
         )
@@ -38,38 +38,38 @@ class SendEventsToSentry {
 
     @Test
     fun logWithData() {
-        CrashLogging.log(LogWithDataException, data = mapOf("test key" to "test value"))
+        crashLogging.log(LogWithDataException, data = mapOf("test key" to "test value"))
     }
 
     @Test
     fun logWithException() {
-        CrashLogging.log(Log)
+        crashLogging.log(Log)
     }
 
     @Test
     fun logMessage() {
-        CrashLogging.log("This is test message")
+        crashLogging.log("This is test message")
     }
 
     @Test
     fun logMessageWithUpdatedUser() {
         dataProvider.user = testUser1
-        CrashLogging.log(NullPointerException())
+        crashLogging.log(NullPointerException())
 
         dataProvider.user = testUser2
-        CrashLogging.log(NullPointerException())
+        crashLogging.log(NullPointerException())
     }
 
     @Test
     fun logMessageWithAppendedApplicationContext() {
-        CrashLogging.appendApplicationContext(mapOf("1 application" to "context"))
-        CrashLogging.log(OutOfMemoryError())
+        crashLogging.appendApplicationContext(mapOf("1 application" to "context"))
+        crashLogging.log(OutOfMemoryError())
 
-        CrashLogging.appendApplicationContext(mapOf("2 application" to "context"))
-        CrashLogging.log(OutOfMemoryError())
+        crashLogging.appendApplicationContext(mapOf("2 application" to "context"))
+        crashLogging.log(OutOfMemoryError())
 
-        CrashLogging.appendApplicationContext(mapOf("1 application" to "updated context"))
-        CrashLogging.log(OutOfMemoryError())
+        crashLogging.appendApplicationContext(mapOf("1 application" to "updated context"))
+        crashLogging.log(OutOfMemoryError())
     }
 
     @Test

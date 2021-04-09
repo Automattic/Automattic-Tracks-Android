@@ -2,8 +2,8 @@ package com.example.sampletracksapp
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.automattic.android.tracks.crashlogging.CrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
+import com.automattic.android.tracks.crashlogging.CrashLoggingProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.EventLevel
 import com.example.sampletracksapp.databinding.ActivityMainBinding
@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        CrashLogging.start(
+        val crashLogging = CrashLoggingProvider.createInstance(
             this,
             object : CrashLoggingDataProvider {
                 override val sentryDSN = BuildConfig.SENTRY_TEST_PROJECT_DSN
@@ -54,15 +54,15 @@ class MainActivity : AppCompatActivity() {
             setContentView(root)
 
             logMessage.setOnClickListener {
-                CrashLogging.log("Message from Tracks test app")
+                crashLogging.log("Message from Tracks test app")
             }
 
             logException.setOnClickListener {
-                CrashLogging.log(Exception("Exception from Tracks test app"))
+                crashLogging.log(Exception("Exception from Tracks test app"))
             }
 
             logExceptionWithExtra.setOnClickListener {
-                CrashLogging.log(
+                crashLogging.log(
                     throwable = Exception("Exception from Tracks test app with extra data"),
                     data = mapOf("extra" to "data bundled with exception")
                 )
