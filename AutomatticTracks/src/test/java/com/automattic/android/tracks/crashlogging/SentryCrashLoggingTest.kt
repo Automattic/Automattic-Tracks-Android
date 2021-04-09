@@ -34,13 +34,13 @@ class SentryCrashLoggingTest {
     private fun initialize(
         locale: Locale? = dataProvider.locale,
         enableCrashLoggingLogs: Boolean = dataProvider.enableCrashLoggingLogs,
-        userHasOptOut: Boolean = dataProvider.userHasOptOut,
+        crashLoggingEnabled: Boolean = dataProvider.crashLoggingEnabled,
         shouldDropException: (String, String, String) -> Boolean = dataProvider.shouldDropException,
     ) {
         dataProvider = FakeDataProvider(
             locale = locale,
             enableCrashLoggingLogs = enableCrashLoggingLogs,
-            userHasOptOut = userHasOptOut,
+            crashLoggingEnabled = crashLoggingEnabled,
             shouldDropException = shouldDropException
         )
 
@@ -79,8 +79,8 @@ class SentryCrashLoggingTest {
     }
 
     @Test
-    fun `should not send an event if user opted out`() {
-        initialize(userHasOptOut = true)
+    fun `should not send an event if crash logging is disabled`() {
+        initialize(crashLoggingEnabled = false)
 
         val beforeSendResult = capturedOptions.beforeSend?.execute(SentryEvent(), null)
 
@@ -88,9 +88,9 @@ class SentryCrashLoggingTest {
     }
 
     @Test
-    fun `should send an event if user has not opted out`() {
+    fun `should send an event if crash logging is enabled`() {
         val testEvent = SentryEvent()
-        initialize(userHasOptOut = false)
+        initialize(crashLoggingEnabled = true)
 
         val beforeSendResult = beforeSendModifiedEvent(capturedOptions, testEvent)
 
@@ -193,13 +193,13 @@ class SentryCrashLoggingTest {
     }
 
     @Test
-    fun `should stop sending events if user has decided to opt out`() {
-        initialize(userHasOptOut = false)
+    fun `should stop sending events if client has decided to disable crash logging`() {
+        initialize(crashLoggingEnabled = true)
         val options = capturedOptions
 
         assertThat(beforeSendModifiedEvent(options)).isNotNull
 
-        dataProvider.userHasOptOut = true
+        dataProvider.crashLoggingEnabled = false
 
         assertThat(beforeSendModifiedEvent(options)).isNull()
     }
