@@ -20,6 +20,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyZeroInteractions
 import java.util.Locale
 
 class SentryCrashLoggingTest {
@@ -36,12 +37,16 @@ class SentryCrashLoggingTest {
         enableCrashLoggingLogs: Boolean = dataProvider.enableCrashLoggingLogs,
         crashLoggingEnabled: Boolean = dataProvider.crashLoggingEnabled,
         shouldDropException: (String, String, String) -> Boolean = dataProvider.shouldDropException,
+        extraKeys: List<String> = dataProvider.extraKeys,
+        provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = dataProvider.provideExtrasForEvent,
     ) {
         dataProvider = FakeDataProvider(
             locale = locale,
             enableCrashLoggingLogs = enableCrashLoggingLogs,
             crashLoggingEnabled = crashLoggingEnabled,
-            shouldDropException = shouldDropException
+            shouldDropException = shouldDropException,
+            extraKeys = extraKeys,
+            provideExtrasForEvent = provideExtrasForEvent,
         )
 
         crashLogging = SentryCrashLogging(
@@ -219,6 +224,31 @@ class SentryCrashLoggingTest {
         val updatedEvent = beforeSendModifiedEvent(capturedOptions, event)
 
         assertThat(updatedEvent?.exceptions).contains(DO_NOT_DROP).doesNotContain(TO_DROP)
+    }
+
+    @Test
+    fun `should append extra to event before sending it`() {
+        val extraKey = "key"
+        val extraValue = "value"
+
+        initialize(
+            extraKeys = listOf(extraKey),
+            provideExtrasForEvent = { mapOf(extraKey to extraValue) }
+        )
+
+        val updatedEvent = beforeSendModifiedEvent(capturedOptions)
+
+        assertThat(updatedEvent?.getExtra(extraKey)).isEqualTo(extraValue)
+    }
+
+    @Test
+    fun `should not modify events if the client disabled crash logging`() {
+        initialize(crashLoggingEnabled = false)
+        val testEvent: SentryEvent = mock()
+
+        capturedOptions.beforeSend?.execute(testEvent, null)
+
+        verifyZeroInteractions(testEvent)
     }
 
     private val capturedOptions: SentryOptions

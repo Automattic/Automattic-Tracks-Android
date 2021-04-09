@@ -1,4 +1,4 @@
-# Automattic-Tracks-Android [![Automattic](https://circleci.com/gh/Automattic/Automattic-Tracks-Android.svg?style=shield)](https://app.circleci.com/pipelines/github/Automattic/Automattic-Tracks-Android)
+# Automattic-Tracks-Android [![CircleCI](https://circleci.com/gh/Automattic/Automattic-Tracks-Android.svg?style=shield)](https://app.circleci.com/pipelines/github/Automattic/Automattic-Tracks-Android) [![Releases](https://img.shields.io/github/v/release/Automattic/Automattic-Tracks-Android)](https://github.com/Automattic/Automattic-Tracks-Android/releases)
 Client library for tracking user events for later analysis
 
 ## Introduction
