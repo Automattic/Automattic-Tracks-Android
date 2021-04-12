@@ -21,6 +21,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyZeroInteractions
+import org.mockito.kotlin.whenever
 import java.util.Locale
 
 class SentryCrashLoggingTest {
@@ -249,6 +250,28 @@ class SentryCrashLoggingTest {
         capturedOptions.beforeSend?.execute(testEvent, null)
 
         verifyZeroInteractions(testEvent)
+    }
+
+    @Test
+    fun `should map empty values of last exception bundled with an event`() {
+        val mockedShouldDropException = mock<(String, String, String) -> Boolean>()
+        whenever(mockedShouldDropException.invoke(any(), any(), any())).thenReturn(true)
+        dataProvider.shouldDropException = mockedShouldDropException
+        initialize()
+
+        val event = SentryEvent().apply {
+            exceptions = mutableListOf(
+                SentryException().apply {
+                    module = null
+                    type = null
+                    value = null
+                }
+            )
+        }
+
+        capturedOptions.beforeSend?.execute(event, null)
+
+        verify(mockedShouldDropException, times(1)).invoke("", "", "")
     }
 
     private val capturedOptions: SentryOptions

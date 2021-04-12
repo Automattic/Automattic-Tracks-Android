@@ -52,9 +52,9 @@ internal class SentryCrashLogging constructor(
     private fun dropExceptionIfRequired(event: SentryEvent) {
         event.exceptions?.lastOrNull()?.let { lastException ->
             if (dataProvider.shouldDropWrappingException(
-                    lastException.module,
-                    lastException.type,
-                    lastException.value
+                    lastException.module.orEmpty(),
+                    lastException.type.orEmpty(),
+                    lastException.value.orEmpty(),
                 )
             ) {
                 event.exceptions.remove(lastException)
