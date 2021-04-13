@@ -50,7 +50,11 @@ class MainActivity : AppCompatActivity() {
                     currentExtras: Map<ExtraKnownKey, String>,
                     eventLevel: EventLevel
                 ): Map<ExtraKnownKey, String> {
-                    return mapOf("extra" to "value")
+                    return mapOf("extra" to "event value")
+                }
+
+                override fun applicationContextProvider(): Map<String, String> {
+                    return mapOf("extra" to "application context")
                 }
             }
         )

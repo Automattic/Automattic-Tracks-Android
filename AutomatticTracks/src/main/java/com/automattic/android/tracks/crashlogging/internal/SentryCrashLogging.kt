@@ -29,12 +29,20 @@ internal class SentryCrashLogging constructor(
 
                     dropExceptionIfRequired(event)
                     appendExtra(event)
-                    event.apply {
-                        user = dataProvider.userProvider()?.toSentryUser()
-                    }
+                    appendTags(event)
+                    appendUser(event)
+                    event
                 }
             }
         }
+    }
+
+    private fun appendUser(event: SentryEvent) {
+        event.user = dataProvider.userProvider()?.toSentryUser()
+    }
+
+    private fun appendTags(event: SentryEvent) {
+        event.setTags(dataProvider.applicationContextProvider())
     }
 
     private fun appendExtra(event: SentryEvent) {
@@ -59,12 +67,6 @@ internal class SentryCrashLogging constructor(
             ) {
                 event.exceptions.remove(lastException)
             }
-        }
-    }
-
-    override fun appendApplicationContext(newApplicationContext: Map<String, String>) {
-        newApplicationContext.forEach { entry ->
-            sentryWrapper.applyExtra(entry.key, entry.value)
         }
     }
 

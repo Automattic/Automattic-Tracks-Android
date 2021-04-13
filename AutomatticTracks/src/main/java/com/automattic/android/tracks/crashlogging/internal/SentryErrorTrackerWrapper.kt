@@ -25,8 +25,4 @@ internal class SentryErrorTrackerWrapper {
     fun captureMessage(message: String) {
         Sentry.captureMessage(message)
     }
-
-    fun applyExtra(key: String, value: String) {
-        Sentry.setExtra(key, value)
-    }
 }

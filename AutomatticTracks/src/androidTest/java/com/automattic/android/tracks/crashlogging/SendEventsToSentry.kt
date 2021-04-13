@@ -62,13 +62,13 @@ class SendEventsToSentry {
 
     @Test
     fun logMessageWithAppendedApplicationContext() {
-        crashLogging.appendApplicationContext(mapOf("1 application" to "context"))
+        dataProvider.applicationContext = mapOf("1 application" to "context")
         crashLogging.log(OutOfMemoryError())
 
-        crashLogging.appendApplicationContext(mapOf("2 application" to "context"))
+        dataProvider.applicationContext = mapOf("2 application" to "context")
         crashLogging.log(OutOfMemoryError())
 
-        crashLogging.appendApplicationContext(mapOf("1 application" to "updated context"))
+        dataProvider.applicationContext = mapOf("1 application" to "updated context")
         crashLogging.log(OutOfMemoryError())
     }
 
