@@ -17,7 +17,8 @@ class FakeDataProvider(
     var crashLoggingEnabled: Boolean = true,
     var shouldDropException: (String, String, String) -> Boolean = { _: String, _: String, _: String -> false },
     var extraKeys: List<String> = emptyList(),
-    var provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = { emptyMap() }
+    var provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = { emptyMap() },
+    var applicationContext: Map<String, String> = emptyMap(),
 ) : CrashLoggingDataProvider {
 
     override fun userProvider(): CrashLoggingUser? {
@@ -37,6 +38,10 @@ class FakeDataProvider(
         eventLevel: EventLevel
     ): Map<ExtraKnownKey, String> {
         return provideExtrasForEvent(currentExtras)
+    }
+
+    override fun applicationContextProvider(): Map<String, String> {
+        return applicationContext
     }
 
     override fun shouldDropWrappingException(module: String, type: String, value: String): Boolean {

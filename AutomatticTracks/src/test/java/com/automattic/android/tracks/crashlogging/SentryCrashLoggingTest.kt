@@ -40,6 +40,7 @@ class SentryCrashLoggingTest {
         shouldDropException: (String, String, String) -> Boolean = dataProvider.shouldDropException,
         extraKeys: List<String> = dataProvider.extraKeys,
         provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = dataProvider.provideExtrasForEvent,
+        applicationContext: Map<String, String> = dataProvider.applicationContext,
     ) {
         dataProvider = FakeDataProvider(
             locale = locale,
@@ -48,6 +49,7 @@ class SentryCrashLoggingTest {
             shouldDropException = shouldDropException,
             extraKeys = extraKeys,
             provideExtrasForEvent = provideExtrasForEvent,
+            applicationContext = applicationContext,
         )
 
         crashLogging = SentryCrashLogging(
@@ -125,13 +127,40 @@ class SentryCrashLoggingTest {
     }
 
     @Test
-    fun `should apply application context after initialization`() {
+    fun `should apply application context to event tags`() {
         val testApplicationContext = mapOf("app" to "context")
+        dataProvider.applicationContext = testApplicationContext
         initialize()
-        crashLogging.appendApplicationContext(testApplicationContext)
+
+        val event = capturedOptions.beforeSend?.execute(SentryEvent(), null)
 
         testApplicationContext.forEach { (key, value) ->
-            verify(mockedWrapper, times(1)).applyExtra(key, value)
+            assertThat(event?.getTag(key)).isEqualTo(value)
+        }
+    }
+
+    @Test
+    fun `should update application context before sending new event if context has been changed`() {
+        val testApplicationContext = mapOf("app" to "context", "another" to "value")
+        val updatedApplicationContext = mapOf("app" to "updated context", "another" to "value")
+        initialize()
+        val options = capturedOptions
+
+        assertAppliedTags(testApplicationContext, options)
+
+        assertAppliedTags(updatedApplicationContext, options)
+    }
+
+    private fun assertAppliedTags(
+        testApplicationContext: Map<String, String>,
+        options: SentryOptions
+    ) {
+        dataProvider.applicationContext = testApplicationContext
+
+        val event: SentryEvent? = options.beforeSend?.execute(SentryEvent(), null)
+
+        testApplicationContext.forEach { (key, value) ->
+            assertThat(event?.getTag(key)).isEqualTo(value)
         }
     }
 

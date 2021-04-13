@@ -65,6 +65,11 @@ interface CrashLoggingDataProvider {
         currentExtras: Map<ExtraKnownKey, String>,
         eventLevel: EventLevel
     ): Map<ExtraKnownKey, String>
+
+    /**
+     * Provides the {@link CrashLogging} with information about the current application state.
+     */
+    fun applicationContextProvider(): Map<String, String>
 }
 
 typealias ExtraKnownKey = String
