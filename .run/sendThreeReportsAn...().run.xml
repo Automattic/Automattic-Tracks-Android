@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="logMessage()" type="AndroidTestRunConfigurationType" factoryName="Android Instrumented Tests" nameIsGenerated="true">
+  <configuration default="false" name="sendThreeReportsAn...()" type="AndroidTestRunConfigurationType" factoryName="Android Instrumented Tests" nameIsGenerated="true">
     <module name="Automattic-Tracks-Android.AutomatticTracks" />
     <option name="TESTING_TYPE" value="3" />
-    <option name="METHOD_NAME" value="logMessage" />
+    <option name="METHOD_NAME" value="sendThreeReportsAndChangeApplicationContextBetween" />
     <option name="CLASS_NAME" value="com.automattic.android.tracks.crashlogging.SendEventsToSentry" />
     <option name="PACKAGE_NAME" value="" />
     <option name="INSTRUMENTATION_RUNNER_CLASS" value="" />

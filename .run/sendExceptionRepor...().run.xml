@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="shouldAppendExtraF...()" type="AndroidTestRunConfigurationType" factoryName="Android Instrumented Tests" nameIsGenerated="true">
+  <configuration default="false" name="sendExceptionRepor...()" type="AndroidTestRunConfigurationType" factoryName="Android Instrumented Tests" nameIsGenerated="true">
     <module name="Automattic-Tracks-Android.AutomatticTracks" />
     <option name="TESTING_TYPE" value="3" />
-    <option name="METHOD_NAME" value="shouldAppendExtraForKeyIfRequested" />
+    <option name="METHOD_NAME" value="sendExceptionReportWithTags" />
     <option name="CLASS_NAME" value="com.automattic.android.tracks.crashlogging.SendEventsToSentry" />
     <option name="PACKAGE_NAME" value="" />
     <option name="INSTRUMENTATION_RUNNER_CLASS" value="" />

@@ -63,15 +63,15 @@ class MainActivity : AppCompatActivity() {
             setContentView(root)
 
             logMessage.setOnClickListener {
-                crashLogging.log("Message from Tracks test app")
+                crashLogging.sendReport("Message from Tracks test app")
             }
 
             logException.setOnClickListener {
-                crashLogging.log(Exception("Exception from Tracks test app"))
+                crashLogging.sendReport(Exception("Exception from Tracks test app"))
             }
 
             logExceptionWithExtra.setOnClickListener {
-                crashLogging.log(
+                crashLogging.reportException(
                     throwable = Exception("Exception from Tracks test app with extra data"),
                     data = mapOf("extra" to "data bundled with exception")
                 )

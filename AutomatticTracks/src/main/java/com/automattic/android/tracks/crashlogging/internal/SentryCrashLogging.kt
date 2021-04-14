@@ -4,6 +4,7 @@ import android.content.Context
 import com.automattic.android.tracks.crashlogging.CrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.eventLevel
+import io.sentry.Breadcrumb
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
@@ -70,22 +71,32 @@ internal class SentryCrashLogging constructor(
         }
     }
 
-    override fun log(throwable: Throwable) {
-        sentryWrapper.captureException(throwable)
+    override fun recordEvent(message: String, category: String?) {
+        val breadcrumb = Breadcrumb().apply {
+            this.category = category
+            this.type = "default"
+            this.message = message
+            this.level = SentryLevel.INFO
+        }
+        sentryWrapper.addBreadcrumb(breadcrumb)
     }
 
-    override fun log(throwable: Throwable, data: Map<String, String?>) {
-        val event = SentryEvent().apply {
-            message = Message().apply {
-                message = throwable.message
-            }
-            level = SentryLevel.ERROR
-            setExtras(data.toMutableMap() as Map<String, String?>)
+    override fun recordException(exception: Throwable, category: String?) {
+        val breadcrumb = Breadcrumb().apply {
+            this.category = category
+            this.type = "error"
+            this.message = exception.toString()
+            this.level = SentryLevel.ERROR
+        }
+        sentryWrapper.addBreadcrumb(breadcrumb)
+    }
+
+    override fun sendReport(exception: Throwable?, tags: Map<String, String>, message: String?) {
+        val event = SentryEvent(exception).apply {
+            this.message = Message().apply { this.message = message }
+            this.level = if (exception != null) SentryLevel.ERROR else SentryLevel.INFO
+            setTags(tags)
         }
         sentryWrapper.captureEvent(event)
-    }
-
-    override fun log(message: String) {
-        sentryWrapper.captureMessage(message)
     }
 }
