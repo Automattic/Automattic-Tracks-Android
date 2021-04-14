@@ -46,10 +46,11 @@ class SendEventsToSentry {
 
     @Test
     fun sendExceptionReportWithTags() {
+        dataProvider.applicationContext = mapOf("application" to "context")
         crashLogging.sendReport(
             exception = IllegalThreadStateException(),
             tags = mapOf("test key" to "test value"),
-            message = "This should report IllegalThreadStateException and add `test key: test value` to tags"
+            message = "This should report IllegalThreadStateException and add `test key: test value` and `application: context` to tags"
         )
     }
 
@@ -124,7 +125,7 @@ class SendEventsToSentry {
 
         crashLogging.sendReport(
             exception = NegativeArraySizeException(),
-            message = "This should show `SentryTestException` in event's breadcrumbs"
+            message = "This should show `NotImplementedError` in event's breadcrumbs"
         )
     }
 

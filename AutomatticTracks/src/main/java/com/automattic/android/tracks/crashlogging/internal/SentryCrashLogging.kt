@@ -30,7 +30,7 @@ internal class SentryCrashLogging constructor(
 
                     dropExceptionIfRequired(event)
                     appendExtra(event)
-                    appendTags(event)
+                    appendApplicationContext(event)
                     appendUser(event)
                     event
                 }
@@ -42,8 +42,8 @@ internal class SentryCrashLogging constructor(
         event.user = dataProvider.userProvider()?.toSentryUser()
     }
 
-    private fun appendTags(event: SentryEvent) {
-        event.setTags(dataProvider.applicationContextProvider())
+    private fun appendApplicationContext(event: SentryEvent) {
+        event.appendTags(dataProvider.applicationContextProvider())
     }
 
     private fun appendExtra(event: SentryEvent) {
@@ -95,7 +95,7 @@ internal class SentryCrashLogging constructor(
         val event = SentryEvent(exception).apply {
             this.message = Message().apply { this.message = message }
             this.level = if (exception != null) SentryLevel.ERROR else SentryLevel.INFO
-            setTags(tags)
+            this.appendTags(tags)
         }
         sentryWrapper.captureEvent(event)
     }

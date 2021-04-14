@@ -344,6 +344,23 @@ class SentryCrashLoggingTest {
         }
     }
 
+    @Test
+    fun `should apply both application context and single event tags`() {
+        initialize()
+        val applicationContext = mapOf("application" to "context")
+        val eventTags = mapOf("event" to "tags")
+        dataProvider.applicationContext = applicationContext
+
+        crashLogging.sendReport(tags = eventTags)
+        val updatedEvent = beforeSendModifiedEvent(capturedOptions, event = capturedEvent)
+
+        SoftAssertions().apply {
+            (applicationContext + eventTags).forEach { (key, value) ->
+                assertThat(updatedEvent?.getTag(key)).isEqualTo(value)
+            }
+        }.assertAll()
+    }
+
     private val capturedOptions: SentryOptions
         get() = argumentCaptor<(SentryOptions) -> Unit>().let { captor ->
             verify(mockedWrapper).initialize(any(), captor.capture())
