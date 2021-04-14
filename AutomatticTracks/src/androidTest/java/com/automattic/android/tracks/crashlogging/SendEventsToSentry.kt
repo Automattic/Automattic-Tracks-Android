@@ -99,7 +99,7 @@ class SendEventsToSentry {
         val extraKey = "key"
         dataProvider.extraKeys = listOf(extraKey)
         dataProvider.provideExtrasForEvent = { _ ->
-            mapOf("key" to "value")
+            mapOf(extraKey to "value")
         }
 
         crashLogging.sendReport(
