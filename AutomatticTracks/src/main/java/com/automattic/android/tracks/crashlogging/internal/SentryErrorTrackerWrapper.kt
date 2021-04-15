@@ -1,6 +1,7 @@
 package com.automattic.android.tracks.crashlogging.internal
 
 import android.content.Context
+import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryOptions
@@ -14,15 +15,11 @@ internal class SentryErrorTrackerWrapper {
         }
     }
 
-    fun captureException(exception: Throwable) {
-        Sentry.captureException(exception)
-    }
-
     fun captureEvent(event: SentryEvent) {
         Sentry.captureEvent(event)
     }
 
-    fun captureMessage(message: String) {
-        Sentry.captureMessage(message)
+    fun addBreadcrumb(breadcrumb: Breadcrumb) {
+        Sentry.addBreadcrumb(breadcrumb)
     }
 }

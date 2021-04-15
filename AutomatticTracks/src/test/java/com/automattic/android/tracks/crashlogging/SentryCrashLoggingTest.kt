@@ -6,6 +6,7 @@ import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWra
 import com.automattic.android.tracks.fakes.FakeDataProvider
 import com.automattic.android.tracks.fakes.testUser1
 import com.automattic.android.tracks.fakes.testUser2
+import io.sentry.Breadcrumb
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
@@ -165,27 +166,28 @@ class SentryCrashLoggingTest {
     }
 
     @Test
-    fun `should log exception`() {
+    fun `should sent a report with exception`() {
         initialize()
 
-        crashLogging.log(TEST_THROWABLE)
+        crashLogging.sendReport(TEST_THROWABLE)
 
-        verify(mockedWrapper, times(1)).captureException(TEST_THROWABLE)
+        assertThat(capturedEvent.throwable).isEqualTo(TEST_THROWABLE)
     }
 
     @Test
-    fun `should log exception with additional data`() {
-        val additionalData = mapOf<String, String?>("additional" to "data", "another" to "extra")
+    fun `should send a report with exception, tags and message`() {
+        val additionalData = mapOf("additional" to "data", "another" to "extra")
+        val testMessage = "test message"
         initialize()
 
-        crashLogging.log(TEST_THROWABLE, additionalData)
+        crashLogging.sendReport(TEST_THROWABLE, tags = additionalData, message = testMessage)
 
         capturedEvent.let { event ->
             SoftAssertions().apply {
-                assertThat(event.message?.message).isEqualTo(TEST_THROWABLE.message)
+                assertThat(event.message?.message).isEqualTo(testMessage)
                 assertThat(event.level).isEqualTo(SentryLevel.ERROR)
                 additionalData.forEach { additionalDataEntry ->
-                    assertThat(event.getExtra(additionalDataEntry.key))
+                    assertThat(event.getTag(additionalDataEntry.key))
                         .isEqualTo(additionalDataEntry.value)
                 }
             }.assertAll()
@@ -193,13 +195,18 @@ class SentryCrashLoggingTest {
     }
 
     @Test
-    fun `should log message`() {
+    fun `should send a report with message`() {
         val testMessage = "test message"
         initialize()
 
-        crashLogging.log(testMessage)
+        crashLogging.sendReport(message = testMessage)
 
-        verify(mockedWrapper, times(1)).captureMessage(testMessage)
+        capturedEvent.let { event ->
+            SoftAssertions().apply {
+                assertThat(event.message?.message).isEqualTo(testMessage)
+                assertThat(event.level).isEqualTo(SentryLevel.INFO)
+            }.assertAll()
+        }
     }
 
     @Test
@@ -303,6 +310,57 @@ class SentryCrashLoggingTest {
         verify(mockedShouldDropException, times(1)).invoke("", "", "")
     }
 
+    @Test
+    fun `should record exception to breadcrumbs`() {
+        initialize()
+
+        crashLogging.recordException(TEST_THROWABLE)
+
+        capturedBreadcrumb.let { breadcrumb ->
+            SoftAssertions().apply {
+                assertThat(breadcrumb.message).isEqualTo(TEST_THROWABLE.toString())
+                assertThat(breadcrumb.type).isEqualTo("error")
+                assertThat(breadcrumb.category).isEqualTo(null)
+                assertThat(breadcrumb.level).isEqualTo(SentryLevel.ERROR)
+            }
+        }
+    }
+
+    @Test
+    fun `should record event with message and category to breadcrumbs`() {
+        val testMessage = "test message"
+        val testCategory = "test category"
+        initialize()
+
+        crashLogging.recordEvent(message = testMessage, category = testCategory)
+
+        capturedBreadcrumb.let { breadcrumb ->
+            SoftAssertions().apply {
+                assertThat(breadcrumb.message).isEqualTo(testMessage)
+                assertThat(breadcrumb.type).isEqualTo("default")
+                assertThat(breadcrumb.category).isEqualTo(testCategory)
+                assertThat(breadcrumb.level).isEqualTo(SentryLevel.INFO)
+            }
+        }
+    }
+
+    @Test
+    fun `should apply both application context and single event tags`() {
+        initialize()
+        val applicationContext = mapOf("application" to "context")
+        val eventTags = mapOf("event" to "tags")
+        dataProvider.applicationContext = applicationContext
+
+        crashLogging.sendReport(tags = eventTags)
+        val updatedEvent = beforeSendModifiedEvent(capturedOptions, event = capturedEvent)
+
+        SoftAssertions().apply {
+            (applicationContext + eventTags).forEach { (key, value) ->
+                assertThat(updatedEvent?.getTag(key)).isEqualTo(value)
+            }
+        }.assertAll()
+    }
+
     private val capturedOptions: SentryOptions
         get() = argumentCaptor<(SentryOptions) -> Unit>().let { captor ->
             verify(mockedWrapper).initialize(any(), captor.capture())
@@ -315,6 +373,12 @@ class SentryCrashLoggingTest {
     private val capturedEvent: SentryEvent
         get() = argumentCaptor<SentryEvent>().let { captor ->
             verify(mockedWrapper).captureEvent(captor.capture())
+            captor.lastValue
+        }
+
+    private val capturedBreadcrumb
+        get() = argumentCaptor<Breadcrumb>().let { captor ->
+            verify(mockedWrapper).addBreadcrumb(captor.capture())
             captor.lastValue
         }
 

@@ -8,6 +8,7 @@ import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.example.sampletracksapp.databinding.ActivityMainBinding
+import java.lang.NullPointerException
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -62,19 +63,20 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater).apply {
             setContentView(root)
 
-            logMessage.setOnClickListener {
-                crashLogging.log("Message from Tracks test app")
+            sendReportWithMessage.setOnClickListener {
+                crashLogging.sendReport(message = "Message from Tracks test app")
             }
 
-            logException.setOnClickListener {
-                crashLogging.log(Exception("Exception from Tracks test app"))
+            sendReportWithException.setOnClickListener {
+                crashLogging.sendReport(exception = Exception("Exception from Tracks test app"))
             }
 
-            logExceptionWithExtra.setOnClickListener {
-                crashLogging.log(
-                    throwable = Exception("Exception from Tracks test app with extra data"),
-                    data = mapOf("extra" to "data bundled with exception")
-                )
+            recordBreadcrumbWithMessage.setOnClickListener {
+                crashLogging.recordEvent(message = "Custom breadcrumb", category = "Custom category")
+            }
+
+            recordBreadcrumbWithException.setOnClickListener {
+                crashLogging.recordException(exception = NullPointerException(), category = "Custom exception category")
             }
         }
     }
