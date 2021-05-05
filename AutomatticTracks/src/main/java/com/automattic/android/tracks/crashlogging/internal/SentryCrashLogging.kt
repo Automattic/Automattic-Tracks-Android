@@ -3,6 +3,7 @@ package com.automattic.android.tracks.crashlogging.internal
 import android.content.Context
 import com.automattic.android.tracks.crashlogging.CrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
+import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.eventLevel
 import io.sentry.Breadcrumb
 import io.sentry.SentryEvent
@@ -55,8 +56,11 @@ internal class SentryCrashLogging constructor(
         )
     }
 
-    private fun mergeKnownKeysWithValues(event: SentryEvent) = dataProvider.extraKnownKeys()
-        .associateWith { knownKey -> event.getExtra(knownKey).toString() }
+    private fun mergeKnownKeysWithValues(event: SentryEvent): Map<ExtraKnownKey, String> =
+        dataProvider.extraKnownKeys()
+            .associateWith { knownKey -> event.getExtra(knownKey) }
+            .filterValues { it != null }
+            .mapValues(Any::toString)
 
     private fun dropExceptionIfRequired(event: SentryEvent) {
         event.exceptions?.lastOrNull()?.let { lastException ->

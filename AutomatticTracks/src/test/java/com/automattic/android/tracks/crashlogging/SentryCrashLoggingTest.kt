@@ -279,6 +279,16 @@ class SentryCrashLoggingTest {
     }
 
     @Test
+    fun `should return a null for extra key value if value is not applied`() {
+        val extraKey = "key"
+        initialize(extraKeys = listOf(extraKey))
+
+        val updatedEvent = beforeSendModifiedEvent(capturedOptions)
+
+        assertThat(requireNotNull(updatedEvent).getExtra(extraKey)).isNull()
+    }
+
+    @Test
     fun `should not modify events if the client disabled crash logging`() {
         initialize(crashLoggingEnabled = false)
         val testEvent: SentryEvent = mock()
