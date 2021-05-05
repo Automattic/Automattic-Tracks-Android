@@ -17,7 +17,7 @@ class FakeDataProvider(
     var crashLoggingEnabled: Boolean = true,
     var shouldDropException: (String, String, String) -> Boolean = { _: String, _: String, _: String -> false },
     var extraKeys: List<String> = emptyList(),
-    var provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = { emptyMap() },
+    var provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = { currentExtras -> currentExtras },
     var applicationContext: Map<String, String> = emptyMap(),
 ) : CrashLoggingDataProvider {
 
