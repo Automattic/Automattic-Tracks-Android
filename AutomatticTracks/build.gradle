@@ -28,7 +28,7 @@ android {
 
     defaultConfig {
         versionName "2.0.1"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 30
         buildConfigField "String", "SENTRY_TEST_PROJECT_DSN", project.properties.get("sentryTestProjectDSN")
 
