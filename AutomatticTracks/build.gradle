@@ -9,9 +9,13 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    sentryVersion = "5.0.0"
+}
+
 dependencies {
-    implementation 'io.sentry:sentry-android:5.0.0'
-    implementation 'io.sentry:sentry-android-okhttp:5.0.0'
+    implementation "io.sentry:sentry-android:$sentryVersion"
+    implementation "io.sentry:sentry-android-okhttp:$sentryVersion"
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 
