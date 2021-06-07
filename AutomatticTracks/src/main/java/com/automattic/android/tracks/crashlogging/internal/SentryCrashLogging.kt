@@ -70,7 +70,7 @@ internal class SentryCrashLogging constructor(
                     lastException.value.orEmpty(),
                 )
             ) {
-                event.exceptions.remove(lastException)
+                event.exceptions?.remove(lastException)
             }
         }
     }

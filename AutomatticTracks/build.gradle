@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.sentry:sentry-android:4.3.0'
+    implementation 'io.sentry:sentry-android:5.0.0'
     implementation 'androidx.annotation:annotation:1.1.0'
 
     testImplementation 'junit:junit:4.13.2'
