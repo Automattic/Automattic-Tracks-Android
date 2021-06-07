@@ -134,22 +134,13 @@ import java.util.Locale;
             mWidthPixels = mDisplayMetrics.widthPixels;
             mHeightPixels = mDisplayMetrics.heightPixels;
             // Try to load the real screen size now - This does include window decorations (statusbar bar/menu bar)
-            if (Build.VERSION.SDK_INT < 17) {
-                try {
-                    mWidthPixels = (int) Display.class.getMethod("getRawWidth").invoke(display);
-                    mHeightPixels = (int) Display.class.getMethod("getRawHeight").invoke(display);
-                } catch (Exception ignored) {
-                    Log.w(LOGTAG, "Unable to call getRawWidth/getRawHeight: " + ignored.getMessage());
-                }
-            } else {
-                try {
-                    Point realSize = new Point();
-                    display.getRealSize(realSize);
-                    mWidthPixels = realSize.x;
-                    mHeightPixels = realSize.y;
-                } catch (Exception ignored) {
-                    Log.w(LOGTAG, "Unable to call getRealSize: " + ignored.getMessage());
-                }
+            try {
+                Point realSize = new Point();
+                display.getRealSize(realSize);
+                mWidthPixels = realSize.x;
+                mHeightPixels = realSize.y;
+            } catch (final Exception exception) {
+                Log.w(LOGTAG, "Unable to call getRealSize: " + exception.getMessage());
             }
         }
 
@@ -371,12 +362,6 @@ import java.util.Locale;
     }
 
     public Boolean isBluetoothEnabled() {
-        // Do not retrieve bluetooth info on older Android versions.
-        // See: https://github.com/Automattic/Automattic-Tracks-Android/issues/20
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            return null;
-        }
-
         Boolean isBluetoothEnabled = null;
         if (PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(Manifest.permission.BLUETOOTH)) {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -389,8 +374,7 @@ import java.util.Locale;
 
     public String getBluetoothVersion() {
         String bluetoothVersion = "none";
-        if (Build.VERSION.SDK_INT >= 18 &&
-                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             bluetoothVersion = "ble";
         } else if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH)) {
             bluetoothVersion = "classic";
@@ -399,14 +383,10 @@ import java.util.Locale;
     }
 
     /**
-     * @return True if the default locale is Right-to-left, false otherwise. For SDK < 17 always returns false.
+     * @return True if the default locale is Right-to-left, false otherwise.
      */
     public boolean isRtlLanguage() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return TextUtils.getLayoutDirectionFromLocale(mLocale) == View.LAYOUT_DIRECTION_RTL;
-        } else {
-            return false;
-        }
+        return TextUtils.getLayoutDirectionFromLocale(mLocale) == View.LAYOUT_DIRECTION_RTL;
     }
 
     public String getDeviceLanguage() {
