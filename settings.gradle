@@ -1,10 +1,12 @@
 pluginManagement {
     plugins {
         id 'org.jetbrains.kotlin.android' version '1.4.31'
+        id 'com.automattic.android.publish-library-to-s3' version "0.4.1"
     }
     repositories {
         google()
         gradlePluginPortal()
+        maven { url 'https://maventests.s3.eu-central-1.amazonaws.com' }
     }
     resolutionStrategy {
         eachPlugin {

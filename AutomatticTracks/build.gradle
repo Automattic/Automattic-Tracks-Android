@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'maven-publish'
+    id 'com.automattic.android.publish-library-to-s3'
 }
 
 repositories {
@@ -11,6 +12,16 @@ repositories {
 
 ext {
     sentryVersion = "5.0.0"
+}
+
+configurations {
+    compileClasspath
+}
+
+s3PublishLibrary {
+    groupId = "test"
+    artifactId = "test"
+    from = "release" // component name
 }
 
 dependencies {
