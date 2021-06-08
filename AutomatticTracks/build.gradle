@@ -9,9 +9,15 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    sentryVersion = "5.0.0"
+}
+
 dependencies {
-    implementation 'io.sentry:sentry-android:5.0.0'
+    implementation "io.sentry:sentry-android:$sentryVersion"
+    implementation "io.sentry:sentry-android-okhttp:$sentryVersion"
     implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.assertj:assertj-core:3.19.0'
@@ -27,7 +33,7 @@ android {
 
     defaultConfig {
         versionName "2.0.1"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 30
         buildConfigField "String", "SENTRY_TEST_PROJECT_DSN", project.properties.get("sentryTestProjectDSN")
 
