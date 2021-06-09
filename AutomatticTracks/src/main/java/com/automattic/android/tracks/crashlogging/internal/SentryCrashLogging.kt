@@ -1,6 +1,6 @@
 package com.automattic.android.tracks.crashlogging.internal
 
-import android.content.Context
+import android.app.Application
 import com.automattic.android.tracks.crashlogging.CrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
@@ -12,14 +12,15 @@ import io.sentry.SentryOptions
 import io.sentry.protocol.Message
 
 internal class SentryCrashLogging constructor(
-    context: Context,
+    application: Application,
     private val dataProvider: CrashLoggingDataProvider,
     private val sentryWrapper: SentryErrorTrackerWrapper,
 ) : CrashLogging {
 
     init {
-        sentryWrapper.initialize(context) { options ->
+        sentryWrapper.initialize(application) { options ->
             options.apply {
+                addIntegration(FragmentLifecycleIntegration(application))
                 dsn = dataProvider.sentryDSN
                 environment = dataProvider.buildType
                 release = dataProvider.releaseName
