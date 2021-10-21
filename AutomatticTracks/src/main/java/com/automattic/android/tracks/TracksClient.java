@@ -24,8 +24,7 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-
+import java.util.Map;
 
 public class TracksClient {
     public static final String LOGTAG = "NosaraClient";
@@ -246,6 +245,8 @@ public class TracksClient {
                             conn.setDoInput(true);
                             conn.setDoOutput(true);
 
+                            Log.i(LOGTAG, toCurlRequest(conn, currentRequest.requestObj.toString().getBytes(PROTOCOL_CHARSET)));
+
                             //Send request
                             OutputStream wr = conn.getOutputStream();
                             wr.write(currentRequest.requestObj.toString().getBytes(PROTOCOL_CHARSET));
@@ -318,6 +319,30 @@ public class TracksClient {
         });
         networkThread.setPriority(Thread.NORM_PRIORITY);
         networkThread.start();
+    }
+
+    public static String toCurlRequest(HttpURLConnection connection, byte[] body) {
+        StringBuilder builder = new StringBuilder("curl -v ");
+
+        // Method
+        builder.append("-X ").append(connection.getRequestMethod()).append(" \\\n  ");
+
+        // Headers
+        for (Map.Entry<String, List<String>> entry : connection.getRequestProperties().entrySet()) {
+            builder.append("-H \"").append(entry.getKey()).append(":");
+            for (String value : entry.getValue())
+                builder.append(" ").append(value);
+            builder.append("\" \\\n  ");
+        }
+
+        // Body
+        if (body != null)
+            builder.append("-d '").append(new String(body)).append("' \\\n  ");
+
+        // URL
+        builder.append("\"").append(connection.getURL()).append("\"");
+
+        return builder.toString();
     }
 
     private final class NetworkRequestObject {
