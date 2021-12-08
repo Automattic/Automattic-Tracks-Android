@@ -10,6 +10,8 @@ repositories {
 android {
     compileSdkVersion 30
 
+    ndkVersion "21.1.6352462"
+
     defaultConfig {
         applicationId "com.example.sampletracksapp"
         minSdkVersion 21

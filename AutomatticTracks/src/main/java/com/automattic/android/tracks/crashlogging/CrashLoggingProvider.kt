@@ -1,12 +1,12 @@
 package com.automattic.android.tracks.crashlogging
 
-import android.content.Context
+import android.app.Application
 import com.automattic.android.tracks.crashlogging.internal.SentryCrashLogging
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper
 
 object CrashLoggingProvider {
     fun createInstance(
-        context: Context,
+        application: Application,
         dataProvider: CrashLoggingDataProvider
-    ): CrashLogging = SentryCrashLogging(context, dataProvider, SentryErrorTrackerWrapper())
+    ): CrashLogging = SentryCrashLogging(application, dataProvider, SentryErrorTrackerWrapper())
 }

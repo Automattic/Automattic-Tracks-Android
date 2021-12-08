@@ -1,5 +1,6 @@
 package com.automattic.android.tracks.crashlogging.internal
 
+import android.app.Application
 import android.content.Context
 import com.automattic.android.tracks.crashlogging.CrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
@@ -10,21 +11,35 @@ import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.protocol.Message
+import io.sentry.Sentry
+import io.sentry.android.fragment.FragmentLifecycleIntegration
+
 
 internal class SentryCrashLogging constructor(
-    context: Context,
+    application: Application,
     private val dataProvider: CrashLoggingDataProvider,
     private val sentryWrapper: SentryErrorTrackerWrapper,
 ) : CrashLogging {
 
     init {
-        sentryWrapper.initialize(context) { options ->
+        sentryWrapper.initialize(application) { options ->
             options.apply {
                 dsn = dataProvider.sentryDSN
                 environment = dataProvider.buildType
                 release = dataProvider.releaseName
+                tracesSampleRate = dataProvider.performanceMonitoringSampleRate
                 setDebug(dataProvider.enableCrashLoggingLogs)
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
+                setBeforeBreadcrumb { breadcrumb, hint ->
+                    if(breadcrumb.type == "http") null else breadcrumb
+                }
+                addIntegration(
+                    FragmentLifecycleIntegration(
+                        application,
+                        enableFragmentLifecycleBreadcrumbs = false,
+                        enableAutoFragmentLifecycleTracing = true
+                    )
+                )
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
 
                     if (!dataProvider.crashLoggingEnabled()) return@BeforeSendCallback null

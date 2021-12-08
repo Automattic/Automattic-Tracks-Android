@@ -29,6 +29,11 @@ interface CrashLoggingDataProvider {
     val enableCrashLoggingLogs: Boolean
 
     /**
+     * Provides sample rate for performance monitoring. Should be a number between 0 and 1
+     */
+    val performanceMonitoringSampleRate: Double
+
+    /**
      * Provides [CrashLogging] with information about exceptions that should be dropped if is the
      * last one on stack trace
      *

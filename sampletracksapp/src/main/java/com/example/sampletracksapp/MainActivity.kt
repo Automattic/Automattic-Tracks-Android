@@ -16,13 +16,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val crashLogging = CrashLoggingProvider.createInstance(
-            this,
+            application,
             object : CrashLoggingDataProvider {
                 override val sentryDSN = BuildConfig.SENTRY_TEST_PROJECT_DSN
                 override val buildType = BuildConfig.BUILD_TYPE
                 override val releaseName = "test"
                 override val locale = Locale.US
                 override val enableCrashLoggingLogs = true
+                override val performanceMonitoringSampleRate = 1.0
                 override fun shouldDropWrappingException(
                     module: String,
                     type: String,
@@ -79,5 +80,7 @@ class MainActivity : AppCompatActivity() {
                 crashLogging.recordException(exception = NullPointerException(), category = "Custom exception category")
             }
         }
+
+
     }
 }

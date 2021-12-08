@@ -13,6 +13,7 @@ dependencies {
     implementation platform('io.sentry:sentry-bom:6.3.0')
     implementation "io.sentry:sentry-android"
     implementation "io.sentry:sentry-android-okhttp"
+    implementation "io.sentry:sentry-android-fragment"
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 
@@ -27,6 +28,8 @@ dependencies {
 
 android {
     compileSdkVersion 30
+
+    ndkVersion "21.1.6352462"
 
     defaultConfig {
         versionName "2.1.0"
