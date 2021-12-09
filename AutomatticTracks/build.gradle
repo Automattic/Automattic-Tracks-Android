@@ -10,10 +10,9 @@ repositories {
 }
 
 dependencies {
-    def sentryVersion = "5.0.1"
-
-    implementation "io.sentry:sentry-android:$sentryVersion"
-    implementation "io.sentry:sentry-android-okhttp:$sentryVersion"
+    implementation platform('io.sentry:sentry-bom:5.4.3')
+    implementation "io.sentry:sentry-android"
+    implementation "io.sentry:sentry-android-okhttp"
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 
