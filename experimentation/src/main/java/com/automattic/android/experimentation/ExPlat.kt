@@ -50,15 +50,16 @@ class ExPlat(
      * If the provided [Experiment] was not included in [experiments], then [Control] is returned.
      * If [isDebug] is `true`, an [IllegalArgumentException] is thrown instead.
      */
-    internal fun getVariation(experiment: Experiment, shouldRefreshIfStale: Boolean): Variation {
-        if (!experimentNames.contains(experiment.name)) {
-            val message = "ExPlat: experiment not found: \"${experiment.name}\"! " +
+    internal fun getVariation(experimentName: String, shouldRefreshIfStale: Boolean): Variation {
+        if (!experimentNames.contains(experimentName)) {
+            val message = "ExPlat: experiment not found: \"${experimentName}\"! " +
                     "Make sure to include it in the set provided via constructor."
             appLogWrapper.e(T.API, message)
             if (isDebug) throw IllegalArgumentException(message) else return Control
         }
-        return activeVariations.getOrPut(experiment.name) {
-            getAssignments(if (shouldRefreshIfStale) IF_STALE else NEVER).getVariationForExperiment(experiment.name)
+        return activeVariations.getOrPut(experimentName) {
+            getAssignments(if (shouldRefreshIfStale) IF_STALE else NEVER)
+                    .getVariationForExperiment(experimentName)
         }
     }
 

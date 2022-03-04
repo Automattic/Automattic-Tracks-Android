@@ -2,11 +2,16 @@ package com.automattic.android.experimentation
 
 import org.wordpress.android.fluxc.model.experiments.Variation
 
-abstract class Experiment(
-    val name: String,
-    private val exPlat: ExPlat
+open class Experiment(
+        val name: String,
+        private val exPlat: ExPlat
 ) {
-    @JvmOverloads fun getVariation(shouldRefreshIfStale: Boolean = false): Variation {
-        return exPlat.getVariation(this, shouldRefreshIfStale)
+    @Suppress("unused")
+    @JvmOverloads
+    fun getVariation(shouldRefreshIfStale: Boolean = false): Variation {
+        return exPlat.getVariation(
+                experimentName = name,
+                shouldRefreshIfStale = shouldRefreshIfStale
+        )
     }
 }
