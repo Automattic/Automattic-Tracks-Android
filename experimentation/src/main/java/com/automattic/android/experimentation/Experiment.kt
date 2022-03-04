@@ -1,4 +1,4 @@
-package com.automattic.android.tracks.experiment
+package com.automattic.android.experimentation
 
 import org.wordpress.android.fluxc.model.experiments.Variation
 

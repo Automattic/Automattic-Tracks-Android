@@ -1,4 +1,4 @@
-package com.automattic.android.tracks.experiment
+package com.automattic.android.experimentation
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

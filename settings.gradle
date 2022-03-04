@@ -17,3 +17,4 @@ pluginManagement {
 
 include ':AutomatticTracks'
 include ':sampletracksapp'
+include ':experimentation'

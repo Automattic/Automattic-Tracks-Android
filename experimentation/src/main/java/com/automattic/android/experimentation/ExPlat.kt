@@ -1,6 +1,8 @@
-package com.automattic.android.tracks.experiment
+package com.automattic.android.experimentation
 
-import com.automattic.android.tracks.experiment.ExPlat.RefreshStrategy.*
+import com.automattic.android.experimentation.ExPlat.RefreshStrategy.ALWAYS
+import com.automattic.android.experimentation.ExPlat.RefreshStrategy.IF_STALE
+import com.automattic.android.experimentation.ExPlat.RefreshStrategy.NEVER
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.wordpress.android.fluxc.model.experiments.Assignments
@@ -45,8 +47,8 @@ class ExPlat(
      * is stale and [shouldRefreshIfStale] is `true`, then new [Assignments] are fetched and their
      * variations are going to be returned by this method on the next session.
      *
-     * If the provided [Experiment] was not included in [ExPlat.start], then [Control] is returned.
-     * If [BuildConfig.DEBUG] is `true`, an [IllegalArgumentException] is thrown instead.
+     * If the provided [Experiment] was not included in [experiments], then [Control] is returned.
+     * If [isDebug] is `true`, an [IllegalArgumentException] is thrown instead.
      */
     internal fun getVariation(experiment: Experiment, shouldRefreshIfStale: Boolean): Variation {
         if (!experimentNames.contains(experiment.name)) {
