@@ -14,13 +14,13 @@ import org.wordpress.android.fluxc.utils.AppLogWrapper
 import org.wordpress.android.util.AppLog.T
 
 class ExPlat(
+    private val platform: Platform,
     private val experiments: Set<Experiment>,
     private val experimentStore: ExperimentStore,
     private val appLogWrapper: AppLogWrapper,
     private val coroutineScope: CoroutineScope,
     private val isDebug: Boolean
 ) {
-    private val platform = Platform.WORDPRESS_ANDROID
     private val activeVariations = mutableMapOf<String, Variation>()
     private val experimentNames: List<String> by lazy { experiments.map { it.name } }
 

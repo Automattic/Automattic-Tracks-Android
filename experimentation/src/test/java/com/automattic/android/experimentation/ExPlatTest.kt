@@ -8,6 +8,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -20,11 +21,13 @@ import org.wordpress.android.fluxc.model.experiments.Variation.Control
 import org.wordpress.android.fluxc.model.experiments.Variation.Treatment
 import org.wordpress.android.fluxc.store.ExperimentStore
 import org.wordpress.android.fluxc.store.ExperimentStore.OnAssignmentsFetched
+import org.wordpress.android.fluxc.store.ExperimentStore.Platform
 import org.wordpress.android.fluxc.utils.AppLogWrapper
 import java.util.Date
 
 @ExperimentalCoroutinesApi
 class ExPlatTest {
+    private val platform = Platform.WORDPRESS_ANDROID
     private val experimentStore: ExperimentStore = mock()
     private val appLogWrapper: AppLogWrapper = mock()
     private var exPlat: ExPlat = createExPlat(
@@ -43,7 +46,7 @@ class ExPlatTest {
 
         exPlat.refreshIfNeeded()
 
-        verify(experimentStore, times(1)).fetchAssignments(any(), any(), anyOrNull())
+        verify(experimentStore, times(1)).fetchAssignments(eq(platform), any(), anyOrNull())
     }
 
     @Test
@@ -56,7 +59,7 @@ class ExPlatTest {
 
         exPlat.refreshIfNeeded()
 
-        verify(experimentStore, times(1)).fetchAssignments(any(), any(), anyOrNull())
+        verify(experimentStore, times(1)).fetchAssignments(eq(platform), any(), anyOrNull())
     }
 
     @Test
@@ -65,7 +68,7 @@ class ExPlatTest {
 
         exPlat.refreshIfNeeded()
 
-        verify(experimentStore, never()).fetchAssignments(any(), any(), anyOrNull())
+        verify(experimentStore, never()).fetchAssignments(eq(platform), any(), anyOrNull())
     }
 
     @Test
@@ -78,7 +81,7 @@ class ExPlatTest {
 
         exPlat.forceRefresh()
 
-        verify(experimentStore, times(1)).fetchAssignments(any(), any(), anyOrNull())
+        verify(experimentStore, times(1)).fetchAssignments(eq(platform), any(), anyOrNull())
     }
 
     @Test
@@ -98,7 +101,7 @@ class ExPlatTest {
 
         exPlat.getVariation(dummyExperiment.name, shouldRefreshIfStale = true)
 
-        verify(experimentStore, times(1)).fetchAssignments(any(), any(), anyOrNull())
+        verify(experimentStore, times(1)).fetchAssignments(eq(platform), any(), anyOrNull())
     }
 
     @Test
@@ -111,7 +114,7 @@ class ExPlatTest {
 
         exPlat.getVariation(dummyExperiment.name, shouldRefreshIfStale = true)
 
-        verify(experimentStore, times(1)).fetchAssignments(any(), any(), anyOrNull())
+        verify(experimentStore, times(1)).fetchAssignments(eq(platform), any(), anyOrNull())
     }
 
     @Test
@@ -120,7 +123,7 @@ class ExPlatTest {
 
         exPlat.getVariation(dummyExperiment.name, shouldRefreshIfStale = true)
 
-        verify(experimentStore, never()).fetchAssignments(any(), any(), anyOrNull())
+        verify(experimentStore, never()).fetchAssignments(eq(platform), any(), anyOrNull())
     }
 
     @Test
@@ -129,7 +132,7 @@ class ExPlatTest {
 
         exPlat.getVariation(dummyExperiment.name, shouldRefreshIfStale = false)
 
-        verify(experimentStore, never()).fetchAssignments(any(), any(), anyOrNull())
+        verify(experimentStore, never()).fetchAssignments(eq(platform), any(), anyOrNull())
     }
 
     @Test
@@ -138,7 +141,7 @@ class ExPlatTest {
 
         exPlat.getVariation(dummyExperiment.name, shouldRefreshIfStale = false)
 
-        verify(experimentStore, never()).fetchAssignments(any(), any(), anyOrNull())
+        verify(experimentStore, never()).fetchAssignments(eq(platform), any(), anyOrNull())
     }
 
     @Test
@@ -169,7 +172,7 @@ class ExPlatTest {
         )
         exPlat.forceRefresh()
 
-        verify(experimentStore, times(1)).fetchAssignments(any(), any(), anyOrNull())
+        verify(experimentStore, times(1)).fetchAssignments(eq(platform), any(), anyOrNull())
     }
 
     @Test
@@ -210,6 +213,7 @@ class ExPlatTest {
 
     private fun createExPlat(isDebug: Boolean, experiments: Set<Experiment>): ExPlat =
         ExPlat(
+            platform = platform,
             experiments = experiments,
             experimentStore = experimentStore,
             appLogWrapper = appLogWrapper,
@@ -219,7 +223,7 @@ class ExPlatTest {
 
     private suspend fun setupAssignments(cachedAssignments: Assignments?, fetchedAssignments: Assignments) {
         whenever(experimentStore.getCachedAssignments()).thenReturn(cachedAssignments)
-        whenever(experimentStore.fetchAssignments(any(), any(), anyOrNull()))
+        whenever(experimentStore.fetchAssignments(eq(platform), any(), anyOrNull()))
             .thenReturn(OnAssignmentsFetched(fetchedAssignments))
     }
 
