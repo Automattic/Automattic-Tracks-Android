@@ -14,11 +14,11 @@ import org.wordpress.android.fluxc.utils.AppLogWrapper
 import org.wordpress.android.util.AppLog.T
 
 class ExPlat(
-        private val experiments: Set<Experiment>,
-        private val experimentStore: ExperimentStore,
-        private val appLogWrapper: AppLogWrapper,
-        private val coroutineScope: CoroutineScope,
-        private val isDebug: Boolean
+    private val experiments: Set<Experiment>,
+    private val experimentStore: ExperimentStore,
+    private val appLogWrapper: AppLogWrapper,
+    private val coroutineScope: CoroutineScope,
+    private val isDebug: Boolean
 ) {
     private val platform = Platform.WORDPRESS_ANDROID
     private val activeVariations = mutableMapOf<String, Variation>()
@@ -53,13 +53,13 @@ class ExPlat(
     internal fun getVariation(experimentName: String, shouldRefreshIfStale: Boolean): Variation {
         if (!experimentNames.contains(experimentName)) {
             val message = "ExPlat: experiment not found: \"${experimentName}\"! " +
-                    "Make sure to include it in the set provided via constructor."
+                "Make sure to include it in the set provided via constructor."
             appLogWrapper.e(T.API, message)
             if (isDebug) throw IllegalArgumentException(message) else return Control
         }
         return activeVariations.getOrPut(experimentName) {
             getAssignments(if (shouldRefreshIfStale) IF_STALE else NEVER)
-                    .getVariationForExperiment(experimentName)
+                .getVariationForExperiment(experimentName)
         }
     }
 
