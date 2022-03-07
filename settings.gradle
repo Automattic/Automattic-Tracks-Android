@@ -15,6 +15,10 @@ pluginManagement {
     }
 }
 
+plugins {
+    id 'com.gradle.enterprise' version '3.8.1'
+}
+
 include ':AutomatticTracks'
 include ':sampletracksapp'
 include ':experimentation'
