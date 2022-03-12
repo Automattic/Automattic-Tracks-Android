@@ -3,6 +3,12 @@ common-params:
   docker#v3.8.0:
     image: "public.ecr.aws/automattic/android-build-image:v1.2.0"
     propagate-environment: true
+    propagate-environment: true
+    environment:
+      # DO NOT MANUALLY SET THESE VALUES!
+      # They are passed from the Buildkite agent to the Docker container
+      - "AWS_ACCESS_KEY"
+      - "AWS_SECRET_KEY"
 
 steps:
   - label: "Lint"
@@ -23,3 +29,18 @@ steps:
     command: |
       cp gradle.properties-example gradle.properties
       ./gradlew test
+
+  - label: "Publish {{matrix}} to S3"
+    depends_on:
+      - "lint"
+      - "test"
+    plugins:
+      - *docker-container
+    matrix:
+      - AutomatticTracks
+      - experimentation
+    command: |
+      cp gradle.properties-example gradle.properties
+      ./gradlew \
+          :{{matrix}}:prepareToPublishToS3 $(prepare_to_publish_to_s3_params) \
+          :{{matrix}}:publish
