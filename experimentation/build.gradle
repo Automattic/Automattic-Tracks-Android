@@ -60,7 +60,6 @@ afterEvaluate {
 
                 groupId 'com.automattic.tracks'
                 artifactId 'experimentation'
-                artifact tasks.named("androidSourcesJar")
                 // version is set by 'publish-to-s3' plugin
             }
         }

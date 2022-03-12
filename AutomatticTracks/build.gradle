@@ -67,7 +67,6 @@ afterEvaluate {
 
                 groupId 'com.automattic'
                 artifactId 'Automattic-Tracks-Android'
-                artifact tasks.named("androidSourcesJar")
                 // version is set by 'publish-to-s3' plugin
 
                 description 'Android client for Nosara tracks (event tracking and analytics)'
