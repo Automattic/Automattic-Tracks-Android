@@ -1,0 +1,25 @@
+common-params:
+  &docker-container
+  docker#v3.8.0:
+    image: "public.ecr.aws/automattic/android-build-image:v1.2.0"
+    propagate-environment: true
+
+steps:
+  - label: "Lint"
+    key: "lint"
+    plugins:
+      - *docker-container
+    command: |
+      cp gradle.properties-example gradle.properties
+      ./gradlew lintRelease ciktlint
+    artifact_paths:
+      - "**/build/reports/lint-results.*"
+      - "**/build/ktlint.xml"
+
+  - label: "Test"
+    key: "test"
+    plugins:
+      - *docker-container
+    command: |
+      cp gradle.properties-example gradle.properties
+      ./gradlew test
