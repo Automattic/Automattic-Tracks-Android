@@ -1,4 +1,4 @@
-# Automattic-Tracks-Android [![CircleCI](https://circleci.com/gh/Automattic/Automattic-Tracks-Android.svg?style=shield)](https://app.circleci.com/pipelines/github/Automattic/Automattic-Tracks-Android) [![Releases](https://img.shields.io/github/v/release/Automattic/Automattic-Tracks-Android)](https://github.com/Automattic/Automattic-Tracks-Android/releases)
+# Automattic-Tracks-Android
 Client library for tracking user events for later analysis
 
 ## Introduction
@@ -11,15 +11,39 @@ projects but the idea is to share what we've made.
 
 ## Build
 
-* Build:
-
 ```sh
 $ ./gradlew assemble
 ```
 
 ## Usage
 
-Follow instructions under `How to` section on [jitpack.com/Automattic/Automattic-Tracks-Android](https://jitpack.io/#Automattic/Automattic-Tracks-Android/)
+```groovy
+repositories {
+    maven {
+        url 'https://a8c-libs.s3.amazonaws.com/android'
+        content {
+            includeGroup 'com.automattic'
+            includeGroup 'com.automattic.tracks'
+        }
+    }
+}
+
+dependencies {
+    // For 'tracks' module
+    implementation 'com.automattic:Automattic-Tracks-Android:{version}'
+
+    // For 'experimentation' module
+    implementation 'com.automattic.tracks:experimentation:{version}'
+}
+```
+
+## Publishing a new version
+
+In the following cases, the CI will publish a new version with the following format to our S3 Maven repo:
+
+* For each commit in an open PR: `<PR-number>-<commit full SHA1>`
+* Each time a PR is merged to `trunk`: `trunk-<commit full SHA1>`
+* Each time a new tag is created: `{tag-name}`
 
 ## License
 
