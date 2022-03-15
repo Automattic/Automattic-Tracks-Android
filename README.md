@@ -9,12 +9,6 @@ storing them locally, and on a schedule send them out to the Automattic
 servers. Realistically this library is only useful for Automattic-based
 projects but the idea is to share what we've made.
 
-## Build
-
-```sh
-$ ./gradlew assemble
-```
-
 ## Usage
 
 ```groovy
