@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
-    id 'maven-publish'
+    id 'com.automattic.android.publish-to-s3'
 }
 
 repositories {
@@ -63,10 +63,13 @@ afterEvaluate {
     publishing {
         publications {
             maven(MavenPublication) {
-                artifactId 'Automattic-Tracks-Android'
-                description 'Android client for Nosara tracks (event tracking and analytics)'
                 from components.release
+
                 groupId 'com.automattic'
+                artifactId 'Automattic-Tracks-Android'
+                // version is set by 'publish-to-s3' plugin
+
+                description 'Android client for Nosara tracks (event tracking and analytics)'
                 pom {
                     licenses {
                         license {

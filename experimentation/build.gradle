@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'com.automattic.android.publish-to-s3'
 }
 
 repositories {
@@ -50,3 +51,18 @@ dependencies {
     testImplementation 'org.mockito.kotlin:mockito-kotlin:2.2.11'
     testImplementation 'org.mockito:mockito-inline:3.8.0'
 }
+
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from components.release
+
+                groupId 'com.automattic.tracks'
+                artifactId 'experimentation'
+                // version is set by 'publish-to-s3' plugin
+            }
+        }
+    }
+}
+
