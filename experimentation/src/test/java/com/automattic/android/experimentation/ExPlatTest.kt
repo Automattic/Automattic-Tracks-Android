@@ -214,7 +214,7 @@ class ExPlatTest {
     private fun createExPlat(isDebug: Boolean, experiments: Set<Experiment>): ExPlat =
         ExPlat(
             platform = platform,
-            experiments = experiments,
+            experiments = { experiments },
             experimentStore = experimentStore,
             appLogWrapper = appLogWrapper,
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
