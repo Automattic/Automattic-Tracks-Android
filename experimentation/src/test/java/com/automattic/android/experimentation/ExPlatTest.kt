@@ -101,7 +101,7 @@ class ExPlatTest {
         )
         setupAssignments(cachedAssignments = null, fetchedAssignments = buildAssignments())
 
-        exPlat.getVariation(dummyExperiment.name(), shouldRefreshIfStale = true)
+        exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = true)
 
         verify(experimentStore, times(1)).fetchAssignments(eq(platform), any(), anyOrNull())
     }
@@ -114,7 +114,7 @@ class ExPlatTest {
         )
         setupAssignments(cachedAssignments = buildAssignments(isStale = true), fetchedAssignments = buildAssignments())
 
-        exPlat.getVariation(dummyExperiment.name(), shouldRefreshIfStale = true)
+        exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = true)
 
         verify(experimentStore, times(1)).fetchAssignments(eq(platform), any(), anyOrNull())
     }
@@ -123,7 +123,7 @@ class ExPlatTest {
     fun `getVariation does not fetch assignments if cache is fresh`() = runBlockingTest {
         setupAssignments(cachedAssignments = buildAssignments(isStale = false), fetchedAssignments = buildAssignments())
 
-        exPlat.getVariation(dummyExperiment.name(), shouldRefreshIfStale = true)
+        exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = true)
 
         verify(experimentStore, never()).fetchAssignments(eq(platform), any(), anyOrNull())
     }
@@ -132,7 +132,7 @@ class ExPlatTest {
     fun `getVariation does not fetch assignments if cache is null but shouldRefreshIfStale is false`() = runBlockingTest {
         setupAssignments(cachedAssignments = null, fetchedAssignments = buildAssignments())
 
-        exPlat.getVariation(dummyExperiment.name(), shouldRefreshIfStale = false)
+        exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = false)
 
         verify(experimentStore, never()).fetchAssignments(eq(platform), any(), anyOrNull())
     }
@@ -141,7 +141,7 @@ class ExPlatTest {
     fun `getVariation does not fetch assignments if cache is stale but shouldRefreshIfStale is false`() = runBlockingTest {
         setupAssignments(cachedAssignments = null, fetchedAssignments = buildAssignments())
 
-        exPlat.getVariation(dummyExperiment.name(), shouldRefreshIfStale = false)
+        exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = false)
 
         verify(experimentStore, never()).fetchAssignments(eq(platform), any(), anyOrNull())
     }
@@ -155,14 +155,14 @@ class ExPlatTest {
 
         setupAssignments(cachedAssignments = null, fetchedAssignments = treatmentAssignments)
 
-        val firstVariation = exPlat.getVariation(dummyExperiment.name(), shouldRefreshIfStale = false)
+        val firstVariation = exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = false)
         assertThat(firstVariation).isEqualTo(controlVariation)
 
         exPlat.forceRefresh()
 
         setupAssignments(cachedAssignments = treatmentAssignments, fetchedAssignments = treatmentAssignments)
 
-        val secondVariation = exPlat.getVariation(dummyExperiment.name(), shouldRefreshIfStale = false)
+        val secondVariation = exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = false)
         assertThat(secondVariation).isEqualTo(controlVariation)
     }
 
@@ -194,7 +194,7 @@ class ExPlatTest {
     @Test
     fun `getVariation does not interact with store if experiments is empty`() = runBlockingTest {
         try {
-            exPlat.getVariation(dummyExperiment.name(), false)
+            exPlat.getVariation(dummyExperiment, false)
         } catch (e: IllegalArgumentException) {
             // Do nothing.
         } finally {
@@ -209,7 +209,7 @@ class ExPlatTest {
                 isDebug = true,
                 experiments = emptySet()
             )
-            exPlat.getVariation(dummyExperiment.name(), false)
+            exPlat.getVariation(dummyExperiment, false)
         }
     }
 

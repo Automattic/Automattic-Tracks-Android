@@ -24,12 +24,33 @@ class ExPlat(
     private val activeVariations = mutableMapOf<String, Variation>()
     private val experimentNames: List<String> = experiments.map { it.name() }
 
-    @JvmOverloads
-    fun getVariation(experiment: Experiment, shouldRefreshIfStale: Boolean = false): Variation {
-        return getVariation(
-                experimentName = experiment.name(),
-                shouldRefreshIfStale = shouldRefreshIfStale
-        )
+    /**
+     * This returns the current active [Variation] for the provided [Experiment].
+     *
+     * If no active [Variation] is found, we can assume this is the first time this method is being
+     * called for the provided [Experiment] during the current session. In this case, the [Variation]
+     * is returned from the cached [Assignments] and then set as active. If the cached [Assignments]
+     * is stale and [shouldRefreshIfStale] is `true`, then new [Assignments] are fetched and their
+     * variations are going to be returned by this method on the next session.
+     *
+     * If the provided [Experiment] was not included in [experiments], then [Control] is returned.
+     * If [isDebug] is `true`, an [IllegalArgumentException] is thrown instead.
+     */
+    fun getVariation(
+        experiment: Experiment,
+        shouldRefreshIfStale: Boolean = false
+    ): Variation {
+        val experimentName = experiment.name()
+        if (!experimentNames.contains(experimentName)) {
+            val message = "ExPlat: experiment not found: \"${experimentName}\"! " +
+                "Make sure to include it in the set provided via constructor."
+            appLogWrapper.e(T.API, message)
+            if (isDebug) throw IllegalArgumentException(message) else return Control
+        }
+        return activeVariations.getOrPut(experimentName) {
+            getAssignments(if (shouldRefreshIfStale) IF_STALE else NEVER)
+                .getVariationForExperiment(experimentName)
+        }
     }
 
     fun refreshIfNeeded() {
@@ -44,31 +65,6 @@ class ExPlat(
         appLogWrapper.d(T.API, "ExPlat: clearing cached assignments and active variations")
         activeVariations.clear()
         experimentStore.clearCachedAssignments()
-    }
-
-    /**
-     * This returns the current active [Variation] for the provided [Experiment].
-     *
-     * If no active [Variation] is found, we can assume this is the first time this method is being
-     * called for the provided [Experiment] during the current session. In this case, the [Variation]
-     * is returned from the cached [Assignments] and then set as active. If the cached [Assignments]
-     * is stale and [shouldRefreshIfStale] is `true`, then new [Assignments] are fetched and their
-     * variations are going to be returned by this method on the next session.
-     *
-     * If the provided [Experiment] was not included in [experiments], then [Control] is returned.
-     * If [isDebug] is `true`, an [IllegalArgumentException] is thrown instead.
-     */
-    internal fun getVariation(experimentName: String, shouldRefreshIfStale: Boolean): Variation {
-        if (!experimentNames.contains(experimentName)) {
-            val message = "ExPlat: experiment not found: \"${experimentName}\"! " +
-                "Make sure to include it in the set provided via constructor."
-            appLogWrapper.e(T.API, message)
-            if (isDebug) throw IllegalArgumentException(message) else return Control
-        }
-        return activeVariations.getOrPut(experimentName) {
-            getAssignments(if (shouldRefreshIfStale) IF_STALE else NEVER)
-                .getVariationForExperiment(experimentName)
-        }
     }
 
     private fun refresh(refreshStrategy: RefreshStrategy) {
