@@ -22,7 +22,15 @@ class ExPlat(
     private val isDebug: Boolean
 ) {
     private val activeVariations = mutableMapOf<String, Variation>()
-    private val experimentNames: List<String> = experiments.map { it.name }
+    private val experimentNames: List<String> = experiments.map { it.name() }
+
+    @JvmOverloads
+    fun getVariation(experiment: Experiment, shouldRefreshIfStale: Boolean = false): Variation {
+        return getVariation(
+                experimentName = experiment.name(),
+                shouldRefreshIfStale = shouldRefreshIfStale
+        )
+    }
 
     fun refreshIfNeeded() {
         refresh(refreshStrategy = IF_STALE)
