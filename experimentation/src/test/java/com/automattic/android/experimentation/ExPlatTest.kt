@@ -35,7 +35,7 @@ class ExPlatTest {
         experiments = emptySet()
     )
     private val dummyExperiment = object : Experiment {
-        override fun name(): String = "dummy"
+        override val name: String = "dummy"
     }
 
     @Test
@@ -151,7 +151,7 @@ class ExPlatTest {
         val controlVariation = Control
         val treatmentVariation = Treatment("treatment")
 
-        val treatmentAssignments = buildAssignments(variations = mapOf(dummyExperiment.name() to treatmentVariation))
+        val treatmentAssignments = buildAssignments(variations = mapOf(dummyExperiment.name to treatmentVariation))
 
         setupAssignments(cachedAssignments = null, fetchedAssignments = treatmentAssignments)
 

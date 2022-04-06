@@ -22,7 +22,7 @@ class ExPlat(
     private val isDebug: Boolean
 ) {
     private val activeVariations = mutableMapOf<String, Variation>()
-    private val experimentNames: List<String> = experiments.map { it.name() }
+    private val experimentNames: List<String> = experiments.map { it.name }
 
     /**
      * This returns the current active [Variation] for the provided [Experiment].
@@ -40,7 +40,7 @@ class ExPlat(
         experiment: Experiment,
         shouldRefreshIfStale: Boolean = false
     ): Variation {
-        val experimentName = experiment.name()
+        val experimentName = experiment.name
         if (!experimentNames.contains(experimentName)) {
             val message = "ExPlat: experiment not found: \"${experimentName}\"! " +
                 "Make sure to include it in the set provided via constructor."
