@@ -3,7 +3,6 @@ package com.automattic.android.experimentation
 import com.automattic.android.experimentation.ExPlat.RefreshStrategy.ALWAYS
 import com.automattic.android.experimentation.ExPlat.RefreshStrategy.IF_STALE
 import com.automattic.android.experimentation.ExPlat.RefreshStrategy.NEVER
-import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.wordpress.android.fluxc.model.experiments.Assignments
@@ -16,14 +15,14 @@ import org.wordpress.android.util.AppLog.T
 
 class ExPlat(
     private val platform: Platform,
-    private val experiments: Lazy<Set<Experiment>>,
+    private val experiments: Set<Experiment>,
     private val experimentStore: ExperimentStore,
     private val appLogWrapper: AppLogWrapper,
     private val coroutineScope: CoroutineScope,
     private val isDebug: Boolean
 ) {
     private val activeVariations = mutableMapOf<String, Variation>()
-    private val experimentNames: List<String> by lazy { experiments.get().map { it.name } }
+    private val experimentNames: List<String> = experiments.map { it.name }
 
     fun refreshIfNeeded() {
         refresh(refreshStrategy = IF_STALE)
