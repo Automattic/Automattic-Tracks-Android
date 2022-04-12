@@ -22,7 +22,36 @@ class ExPlat(
     private val isDebug: Boolean
 ) {
     private val activeVariations = mutableMapOf<String, Variation>()
-    private val experimentNames: List<String> by lazy { experiments.map { it.name } }
+    private val experimentIdentifiers: List<String> = experiments.map { it.identifier }
+
+    /**
+     * This returns the current active [Variation] for the provided [Experiment].
+     *
+     * If no active [Variation] is found, we can assume this is the first time this method is being
+     * called for the provided [Experiment] during the current session. In this case, the [Variation]
+     * is returned from the cached [Assignments] and then set as active. If the cached [Assignments]
+     * is stale and [shouldRefreshIfStale] is `true`, then new [Assignments] are fetched and their
+     * variations are going to be returned by this method on the next session.
+     *
+     * If the provided [Experiment] was not included in [experiments], then [Control] is returned.
+     * If [isDebug] is `true`, an [IllegalArgumentException] is thrown instead.
+     */
+    fun getVariation(
+        experiment: Experiment,
+        shouldRefreshIfStale: Boolean = false
+    ): Variation {
+        val experimentIdentifier = experiment.identifier
+        if (!experimentIdentifiers.contains(experimentIdentifier)) {
+            val message = "ExPlat: experiment not found: \"${experimentIdentifier}\"! " +
+                "Make sure to include it in the set provided via constructor."
+            appLogWrapper.e(T.API, message)
+            if (isDebug) throw IllegalArgumentException(message) else return Control
+        }
+        return activeVariations.getOrPut(experimentIdentifier) {
+            getAssignments(if (shouldRefreshIfStale) IF_STALE else NEVER)
+                .getVariationForExperiment(experimentIdentifier)
+        }
+    }
 
     fun refreshIfNeeded() {
         refresh(refreshStrategy = IF_STALE)
@@ -38,33 +67,8 @@ class ExPlat(
         experimentStore.clearCachedAssignments()
     }
 
-    /**
-     * This returns the current active [Variation] for the provided [Experiment].
-     *
-     * If no active [Variation] is found, we can assume this is the first time this method is being
-     * called for the provided [Experiment] during the current session. In this case, the [Variation]
-     * is returned from the cached [Assignments] and then set as active. If the cached [Assignments]
-     * is stale and [shouldRefreshIfStale] is `true`, then new [Assignments] are fetched and their
-     * variations are going to be returned by this method on the next session.
-     *
-     * If the provided [Experiment] was not included in [experiments], then [Control] is returned.
-     * If [isDebug] is `true`, an [IllegalArgumentException] is thrown instead.
-     */
-    internal fun getVariation(experimentName: String, shouldRefreshIfStale: Boolean): Variation {
-        if (!experimentNames.contains(experimentName)) {
-            val message = "ExPlat: experiment not found: \"${experimentName}\"! " +
-                "Make sure to include it in the set provided via constructor."
-            appLogWrapper.e(T.API, message)
-            if (isDebug) throw IllegalArgumentException(message) else return Control
-        }
-        return activeVariations.getOrPut(experimentName) {
-            getAssignments(if (shouldRefreshIfStale) IF_STALE else NEVER)
-                .getVariationForExperiment(experimentName)
-        }
-    }
-
     private fun refresh(refreshStrategy: RefreshStrategy) {
-        if (experimentNames.isNotEmpty()) {
+        if (experimentIdentifiers.isNotEmpty()) {
             getAssignments(refreshStrategy)
         }
     }
@@ -77,7 +81,7 @@ class ExPlat(
         return cachedAssignments
     }
 
-    private suspend fun fetchAssignments() = experimentStore.fetchAssignments(platform, experimentNames).also {
+    private suspend fun fetchAssignments() = experimentStore.fetchAssignments(platform, experimentIdentifiers).also {
         if (it.isError) {
             appLogWrapper.d(T.API, "ExPlat: fetching assignments failed with result: ${it.error}")
         } else {
