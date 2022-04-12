@@ -22,7 +22,7 @@ class ExPlat(
     private val isDebug: Boolean
 ) {
     private val activeVariations = mutableMapOf<String, Variation>()
-    private val experimentNames: List<String> = experiments.map { it.name }
+    private val experimentIdentifiers: List<String> = experiments.map { it.identifier }
 
     /**
      * This returns the current active [Variation] for the provided [Experiment].
@@ -40,16 +40,16 @@ class ExPlat(
         experiment: Experiment,
         shouldRefreshIfStale: Boolean = false
     ): Variation {
-        val experimentName = experiment.name
-        if (!experimentNames.contains(experimentName)) {
-            val message = "ExPlat: experiment not found: \"${experimentName}\"! " +
+        val experimentIdentifier = experiment.identifier
+        if (!experimentIdentifiers.contains(experimentIdentifier)) {
+            val message = "ExPlat: experiment not found: \"${experimentIdentifier}\"! " +
                 "Make sure to include it in the set provided via constructor."
             appLogWrapper.e(T.API, message)
             if (isDebug) throw IllegalArgumentException(message) else return Control
         }
-        return activeVariations.getOrPut(experimentName) {
+        return activeVariations.getOrPut(experimentIdentifier) {
             getAssignments(if (shouldRefreshIfStale) IF_STALE else NEVER)
-                .getVariationForExperiment(experimentName)
+                .getVariationForExperiment(experimentIdentifier)
         }
     }
 
@@ -68,7 +68,7 @@ class ExPlat(
     }
 
     private fun refresh(refreshStrategy: RefreshStrategy) {
-        if (experimentNames.isNotEmpty()) {
+        if (experimentIdentifiers.isNotEmpty()) {
             getAssignments(refreshStrategy)
         }
     }
@@ -81,7 +81,7 @@ class ExPlat(
         return cachedAssignments
     }
 
-    private suspend fun fetchAssignments() = experimentStore.fetchAssignments(platform, experimentNames).also {
+    private suspend fun fetchAssignments() = experimentStore.fetchAssignments(platform, experimentIdentifiers).also {
         if (it.isError) {
             appLogWrapper.d(T.API, "ExPlat: fetching assignments failed with result: ${it.error}")
         } else {
