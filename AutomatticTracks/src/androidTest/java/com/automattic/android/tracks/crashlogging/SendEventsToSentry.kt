@@ -19,7 +19,7 @@ import java.lang.invoke.WrongMethodTypeException
  * events by Tracks. Correctness assertion is done by a developer by visiting Sentry dashboard.
  *
  * To start using this class, please change a `sentryTestProjectDSN` property in gradle.properties
- * to DSN of a test project. Then run this class. In a few seconds you should expect 3 new events
+ * to DSN of a test project. Then run this class. In a few seconds you should expect new events
  * on Sentry dashboard.
  *
  * Troubleshooting: if running this "test" results with `Test framework quit unexpectedly` make
