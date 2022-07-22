@@ -1,6 +1,6 @@
 pluginManagement {
     plugins {
-        id 'org.jetbrains.kotlin.android' version '1.4.31'
+        id 'org.jetbrains.kotlin.android' version '1.6.21'
         id 'com.automattic.android.publish-to-s3' version '0.7.0'
     }
     repositories {
