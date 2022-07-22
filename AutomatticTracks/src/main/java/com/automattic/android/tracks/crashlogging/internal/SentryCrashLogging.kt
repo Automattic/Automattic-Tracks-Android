@@ -34,9 +34,9 @@ internal class SentryCrashLogging constructor(
                     }
                 isDebug = dataProvider.enableCrashLoggingLogs
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
-                setBeforeBreadcrumb { breadcrumb, hint ->
-                    if(breadcrumb.type == "http") null else breadcrumb
-                }
+//                setBeforeBreadcrumb { breadcrumb, hint ->
+//                    if(breadcrumb.type == "http") null else breadcrumb
+//                }
                 addIntegration(
                     FragmentLifecycleIntegration(
                         application,
