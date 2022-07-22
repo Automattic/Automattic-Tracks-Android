@@ -5,6 +5,8 @@ import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
+import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
+import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Enabled
 import java.util.Locale
 
 class FakeDataProvider(
@@ -19,6 +21,7 @@ class FakeDataProvider(
     var extraKeys: List<String> = emptyList(),
     var provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = { currentExtras -> currentExtras },
     var applicationContext: Map<String, String> = emptyMap(),
+    override val performanceMonitoringConfig: PerformanceMonitoringConfig = Enabled(1.0),
 ) : CrashLoggingDataProvider {
 
     override fun userProvider(): CrashLoggingUser? {

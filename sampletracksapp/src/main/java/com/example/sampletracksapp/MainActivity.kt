@@ -81,7 +81,5 @@ class MainActivity : AppCompatActivity() {
                 crashLogging.recordException(exception = NullPointerException(), category = "Custom exception category")
             }
         }
-
-
     }
 }

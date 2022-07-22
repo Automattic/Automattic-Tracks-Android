@@ -14,7 +14,6 @@ import io.sentry.SentryOptions
 import io.sentry.android.fragment.FragmentLifecycleIntegration
 import io.sentry.protocol.Message
 
-
 internal class SentryCrashLogging constructor(
     application: Application,
     private val dataProvider: CrashLoggingDataProvider,

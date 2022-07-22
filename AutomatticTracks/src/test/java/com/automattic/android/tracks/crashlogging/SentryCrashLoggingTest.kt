@@ -1,6 +1,6 @@
 package com.automattic.android.tracks.crashlogging
 
-import android.app.Activity
+import android.app.Application
 import com.automattic.android.tracks.crashlogging.internal.SentryCrashLogging
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper
 import com.automattic.android.tracks.fakes.FakeDataProvider
@@ -29,7 +29,7 @@ import java.util.Locale
 class SentryCrashLoggingTest {
 
     private val mockedWrapper: SentryErrorTrackerWrapper = mock()
-    private val mockedContext = Activity()
+    private val mockedContext = Application()
 
     private var dataProvider = FakeDataProvider()
 
@@ -42,7 +42,7 @@ class SentryCrashLoggingTest {
         shouldDropException: (String, String, String) -> Boolean = dataProvider.shouldDropException,
         extraKeys: List<String> = dataProvider.extraKeys,
         provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = dataProvider.provideExtrasForEvent,
-        applicationContext: Map<String, String> = dataProvider.applicationContext,
+        applicationContext: Map<String, String> = dataProvider.applicationContext
     ) {
         dataProvider = FakeDataProvider(
             locale = locale,
@@ -55,7 +55,7 @@ class SentryCrashLoggingTest {
         )
 
         crashLogging = SentryCrashLogging(
-            context = mockedContext,
+            application = mockedContext,
             dataProvider = dataProvider,
             sentryWrapper = mockedWrapper,
         )
