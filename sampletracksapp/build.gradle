@@ -13,6 +13,7 @@ android {
     defaultConfig {
         applicationId "com.example.sampletracksapp"
         minSdkVersion 21
+        //noinspection OldTargetApi
         targetSdkVersion 30
         buildConfigField "String", "SENTRY_TEST_PROJECT_DSN", project.properties.get("sentryTestProjectDSN")
 
