@@ -29,9 +29,9 @@ interface CrashLoggingDataProvider {
     val enableCrashLoggingLogs: Boolean
 
     /**
-     * Provides sample rate for performance monitoring. Should be a number between 0 and 1
+     * Provides configuration for Sentry Performance Monitoring
      */
-    val performanceMonitoringSampleRate: Double
+    val performanceMonitoringConfig: PerformanceMonitoringConfig
 
     /**
      * Provides [CrashLogging] with information about exceptions that should be dropped if is the
@@ -78,3 +78,19 @@ interface CrashLoggingDataProvider {
 }
 
 typealias ExtraKnownKey = String
+
+sealed class PerformanceMonitoringConfig {
+    object Disabled : PerformanceMonitoringConfig()
+
+    data class Enabled(
+        /**
+         * Provides sample rate for performance monitoring. Indicates how often do we measure performance.
+         * Has to be between 0 and 1.
+         */
+        val sampleRate: Double
+    ) : PerformanceMonitoringConfig() {
+        init {
+            assert(sampleRate in 0.0..1.0)
+        }
+    }
+}

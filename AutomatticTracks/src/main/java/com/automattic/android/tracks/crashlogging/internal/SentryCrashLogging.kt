@@ -1,18 +1,18 @@
 package com.automattic.android.tracks.crashlogging.internal
 
 import android.app.Application
-import android.content.Context
 import com.automattic.android.tracks.crashlogging.CrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
+import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Disabled
+import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Enabled
 import com.automattic.android.tracks.crashlogging.eventLevel
 import io.sentry.Breadcrumb
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
-import io.sentry.protocol.Message
-import io.sentry.Sentry
 import io.sentry.android.fragment.FragmentLifecycleIntegration
+import io.sentry.protocol.Message
 
 
 internal class SentryCrashLogging constructor(
@@ -27,8 +27,12 @@ internal class SentryCrashLogging constructor(
                 dsn = dataProvider.sentryDSN
                 environment = dataProvider.buildType
                 release = dataProvider.releaseName
-                tracesSampleRate = dataProvider.performanceMonitoringSampleRate
-                setDebug(dataProvider.enableCrashLoggingLogs)
+                tracesSampleRate =
+                    when (val perfConfig = dataProvider.performanceMonitoringConfig) {
+                        Disabled -> null
+                        is Enabled -> perfConfig.sampleRate
+                    }
+                isDebug = dataProvider.enableCrashLoggingLogs
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
                 setBeforeBreadcrumb { breadcrumb, hint ->
                     if(breadcrumb.type == "http") null else breadcrumb
@@ -36,7 +40,7 @@ internal class SentryCrashLogging constructor(
                 addIntegration(
                     FragmentLifecycleIntegration(
                         application,
-                        enableFragmentLifecycleBreadcrumbs = false,
+                        enableFragmentLifecycleBreadcrumbs = true,
                         enableAutoFragmentLifecycleTracing = true
                     )
                 )

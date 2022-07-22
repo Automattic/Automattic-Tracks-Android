@@ -7,6 +7,7 @@ import com.automattic.android.tracks.crashlogging.CrashLoggingProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
+import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
 import com.example.sampletracksapp.databinding.ActivityMainBinding
 import java.lang.NullPointerException
 import java.util.Locale
@@ -23,7 +24,7 @@ class MainActivity : AppCompatActivity() {
                 override val releaseName = "test"
                 override val locale = Locale.US
                 override val enableCrashLoggingLogs = true
-                override val performanceMonitoringSampleRate = 1.0
+                override val performanceMonitoringConfig = PerformanceMonitoringConfig.Enabled(1.0)
                 override fun shouldDropWrappingException(
                     module: String,
                     type: String,
