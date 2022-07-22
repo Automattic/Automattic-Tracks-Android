@@ -29,8 +29,6 @@ dependencies {
 android {
     compileSdkVersion 30
 
-    ndkVersion "21.1.6352462"
-
     defaultConfig {
         versionName "2.1.0"
         minSdkVersion 21
