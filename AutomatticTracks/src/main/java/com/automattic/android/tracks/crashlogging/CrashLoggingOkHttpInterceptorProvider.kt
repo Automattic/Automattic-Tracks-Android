@@ -5,8 +5,9 @@ import okhttp3.Interceptor
 
 object CrashLoggingOkHttpInterceptorProvider {
     fun createInstance(requestFormatter: RequestFormatter): Interceptor =
-        SentryOkHttpInterceptor { span, request, response ->
-            requestFormatter.beforeRequestReported(request, response)
-            span
+        SentryOkHttpInterceptor { span, request, _ ->
+            span.apply {
+                description = requestFormatter.formatRequestUrl(request)
+            }
         }
 }
