@@ -46,27 +46,19 @@ internal class SentryCrashLogging constructor(
                 )
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
 
+                    Sentry.setUser(dataProvider.userProvider()?.toSentryUser())
+                    dataProvider.applicationContextProvider().forEach { key, value ->
+                        Sentry.setTag(key, value)
+                    }
+
                     if (!dataProvider.crashLoggingEnabled()) return@BeforeSendCallback null
 
                     dropExceptionIfRequired(event)
                     appendExtra(event)
-                    appendApplicationContext(event)
-                    appendUser(event)
                     event
                 }
             }
         }
-        Sentry.setUser(
-            dataProvider.userProvider()?.toSentryUser()
-        )
-    }
-
-    private fun appendUser(event: SentryEvent) {
-        event.user = dataProvider.userProvider()?.toSentryUser()
-    }
-
-    private fun appendApplicationContext(event: SentryEvent) {
-        event.appendTags(dataProvider.applicationContextProvider())
     }
 
     private fun appendExtra(event: SentryEvent) {
