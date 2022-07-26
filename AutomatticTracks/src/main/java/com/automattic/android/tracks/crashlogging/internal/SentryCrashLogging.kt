@@ -47,7 +47,7 @@ internal class SentryCrashLogging constructor(
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
 
                     Sentry.setUser(dataProvider.userProvider()?.toSentryUser())
-                    dataProvider.applicationContextProvider().forEach { key, value ->
+                    dataProvider.applicationContextProvider().forEach { (key, value) ->
                         Sentry.setTag(key, value)
                     }
 
