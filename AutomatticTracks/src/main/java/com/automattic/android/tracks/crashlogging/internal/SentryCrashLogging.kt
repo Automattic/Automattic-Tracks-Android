@@ -8,6 +8,7 @@ import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Di
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Enabled
 import com.automattic.android.tracks.crashlogging.eventLevel
 import io.sentry.Breadcrumb
+import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
@@ -33,13 +34,13 @@ internal class SentryCrashLogging constructor(
                     }
                 isDebug = dataProvider.enableCrashLoggingLogs
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
-//                setBeforeBreadcrumb { breadcrumb, hint ->
-//                    if(breadcrumb.type == "http") null else breadcrumb
-//                }
+                setBeforeBreadcrumb { breadcrumb, _ ->
+                    if (breadcrumb.type == "http") null else breadcrumb
+                }
                 addIntegration(
                     FragmentLifecycleIntegration(
                         application,
-                        enableFragmentLifecycleBreadcrumbs = true,
+                        enableFragmentLifecycleBreadcrumbs = false,
                         enableAutoFragmentLifecycleTracing = true
                     )
                 )
@@ -55,6 +56,9 @@ internal class SentryCrashLogging constructor(
                 }
             }
         }
+        Sentry.setUser(
+            dataProvider.userProvider()?.toSentryUser()
+        )
     }
 
     private fun appendUser(event: SentryEvent) {
