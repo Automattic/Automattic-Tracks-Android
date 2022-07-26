@@ -1,32 +1,32 @@
-//package com.automattic.android.tracks.crashlogging
+// package com.automattic.android.tracks.crashlogging
 //
-//import android.app.Application
-//import com.automattic.android.tracks.crashlogging.internal.SentryCrashLogging
-//import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper
-//import com.automattic.android.tracks.fakes.FakeDataProvider
-//import com.automattic.android.tracks.fakes.testUser1
-//import com.automattic.android.tracks.fakes.testUser2
-//import io.sentry.Breadcrumb
-//import io.sentry.Hint
-//import io.sentry.SentryEvent
-//import io.sentry.SentryLevel
-//import io.sentry.SentryOptions
-//import io.sentry.protocol.SentryException
-//import io.sentry.protocol.User
-//import org.assertj.core.api.Assertions.assertThat
-//import org.assertj.core.api.SoftAssertions
-//import org.junit.Test
-//import org.mockito.kotlin.any
-//import org.mockito.kotlin.argumentCaptor
-//import org.mockito.kotlin.doReturn
-//import org.mockito.kotlin.mock
-//import org.mockito.kotlin.times
-//import org.mockito.kotlin.verify
-//import org.mockito.kotlin.verifyZeroInteractions
-//import org.mockito.kotlin.whenever
-//import java.util.Locale
+// import android.app.Application
+// import com.automattic.android.tracks.crashlogging.internal.SentryCrashLogging
+// import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper
+// import com.automattic.android.tracks.fakes.FakeDataProvider
+// import com.automattic.android.tracks.fakes.testUser1
+// import com.automattic.android.tracks.fakes.testUser2
+// import io.sentry.Breadcrumb
+// import io.sentry.Hint
+// import io.sentry.SentryEvent
+// import io.sentry.SentryLevel
+// import io.sentry.SentryOptions
+// import io.sentry.protocol.SentryException
+// import io.sentry.protocol.User
+// import org.assertj.core.api.Assertions.assertThat
+// import org.assertj.core.api.SoftAssertions
+// import org.junit.Test
+// import org.mockito.kotlin.any
+// import org.mockito.kotlin.argumentCaptor
+// import org.mockito.kotlin.doReturn
+// import org.mockito.kotlin.mock
+// import org.mockito.kotlin.times
+// import org.mockito.kotlin.verify
+// import org.mockito.kotlin.verifyZeroInteractions
+// import org.mockito.kotlin.whenever
+// import java.util.Locale
 //
-//class SentryCrashLoggingTest {
+// class SentryCrashLoggingTest {
 //
 //    private val mockedWrapper: SentryErrorTrackerWrapper = mock()
 //    private val mockedContext = Application()
@@ -420,4 +420,4 @@
 //            value = "me"
 //        }
 //    }
-//}
+// }
