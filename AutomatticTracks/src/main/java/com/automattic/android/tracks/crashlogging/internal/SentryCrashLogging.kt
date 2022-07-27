@@ -61,6 +61,8 @@ internal class SentryCrashLogging constructor(
             dataProvider.user.collect {
                 Sentry.setUser(it.toSentryUser())
             }
+        }
+        applicationScope.launch {
             dataProvider.applicationContextProvider.collect {
                 it.forEach { (key, value) ->
                     Sentry.setTag(key, value)
