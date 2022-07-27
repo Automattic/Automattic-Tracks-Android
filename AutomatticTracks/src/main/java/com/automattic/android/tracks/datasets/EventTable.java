@@ -135,39 +135,39 @@ public class EventTable {
             if (cursor != null && cursor.moveToFirst()) {
                 do {
                     // mark the row for deletion asap
-                    idToDelete.add(cursor.getLong(cursor.getColumnIndex("event_id")));
+                    idToDelete.add(cursor.getLong(cursor.getColumnIndexOrThrow("event_id")));
 
-                    final String eventName = cursor.getString(cursor.getColumnIndex("event_name"));
-                    final String user = cursor.getString(cursor.getColumnIndex("user"));
+                    final String eventName = cursor.getString(cursor.getColumnIndexOrThrow("event_name"));
+                    final String user = cursor.getString(cursor.getColumnIndexOrThrow("user"));
                     final String userAgent;
-                    if (!cursor.isNull(cursor.getColumnIndex("user_agent"))){
-                        userAgent = cursor.getString(cursor.getColumnIndex("user_agent"));
+                    if (!cursor.isNull(cursor.getColumnIndexOrThrow("user_agent"))){
+                        userAgent = cursor.getString(cursor.getColumnIndexOrThrow("user_agent"));
                     } else {
                         userAgent = null;
                     }
 
-                    int uTypeCardinal = (int) cursor.getLong(cursor.getColumnIndex("user_type"));
+                    int uTypeCardinal = (int) cursor.getLong(cursor.getColumnIndexOrThrow("user_type"));
                     TracksClient.NosaraUserType userType = TracksClient.NosaraUserType.values()[uTypeCardinal];
 
-                    long timestamp = cursor.getLong(cursor.getColumnIndex("timestamp"));
+                    long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow("timestamp"));
 
                     final String userProps;
-                    if (!cursor.isNull(cursor.getColumnIndex("user_props"))){
-                        userProps = cursor.getString(cursor.getColumnIndex("user_props"));
+                    if (!cursor.isNull(cursor.getColumnIndexOrThrow("user_props"))){
+                        userProps = cursor.getString(cursor.getColumnIndexOrThrow("user_props"));
                     } else {
                         userProps = null;
                     }
 
                     final String deviceInfo;
-                    if (!cursor.isNull(cursor.getColumnIndex("device_info"))){
-                        deviceInfo = cursor.getString(cursor.getColumnIndex("device_info"));
+                    if (!cursor.isNull(cursor.getColumnIndexOrThrow("device_info"))){
+                        deviceInfo = cursor.getString(cursor.getColumnIndexOrThrow("device_info"));
                     } else {
                         deviceInfo = null;
                     }
 
                     final String customProps;
-                    if (!cursor.isNull(cursor.getColumnIndex("custom_props"))){
-                        customProps = cursor.getString(cursor.getColumnIndex("custom_props"));
+                    if (!cursor.isNull(cursor.getColumnIndexOrThrow("custom_props"))){
+                        customProps = cursor.getString(cursor.getColumnIndexOrThrow("custom_props"));
                     } else {
                         customProps = null;
                     }

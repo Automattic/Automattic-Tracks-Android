@@ -7,6 +7,7 @@ import com.automattic.android.tracks.fakes.FakeDataProvider
 import com.automattic.android.tracks.fakes.testUser1
 import com.automattic.android.tracks.fakes.testUser2
 import io.sentry.Breadcrumb
+import io.sentry.Hint
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
@@ -91,7 +92,7 @@ class SentryCrashLoggingTest {
     fun `should not send an event if crash logging is disabled`() {
         initialize(crashLoggingEnabled = false)
 
-        val beforeSendResult = capturedOptions.beforeSend?.execute(SentryEvent(), null)
+        val beforeSendResult = capturedOptions.beforeSend?.execute(SentryEvent(), Hint())
 
         assertThat(beforeSendResult).isEqualTo(null)
     }
@@ -133,7 +134,7 @@ class SentryCrashLoggingTest {
         dataProvider.applicationContext = testApplicationContext
         initialize()
 
-        val event = capturedOptions.beforeSend?.execute(SentryEvent(), null)
+        val event = capturedOptions.beforeSend?.execute(SentryEvent(), Hint())
 
         testApplicationContext.forEach { (key, value) ->
             assertThat(event?.getTag(key)).isEqualTo(value)
@@ -158,7 +159,7 @@ class SentryCrashLoggingTest {
     ) {
         dataProvider.applicationContext = testApplicationContext
 
-        val event: SentryEvent? = options.beforeSend?.execute(SentryEvent(), null)
+        val event: SentryEvent? = options.beforeSend?.execute(SentryEvent(), Hint())
 
         testApplicationContext.forEach { (key, value) ->
             assertThat(event?.getTag(key)).isEqualTo(value)
@@ -293,7 +294,7 @@ class SentryCrashLoggingTest {
         initialize(crashLoggingEnabled = false)
         val testEvent: SentryEvent = mock()
 
-        capturedOptions.beforeSend?.execute(testEvent, null)
+        capturedOptions.beforeSend?.execute(testEvent, Hint())
 
         verifyZeroInteractions(testEvent)
     }
@@ -315,7 +316,7 @@ class SentryCrashLoggingTest {
             )
         }
 
-        capturedOptions.beforeSend?.execute(event, null)
+        capturedOptions.beforeSend?.execute(event, Hint())
 
         verify(mockedShouldDropException, times(1)).invoke("", "", "")
     }
@@ -396,7 +397,7 @@ class SentryCrashLoggingTest {
         options: SentryOptions,
         event: SentryEvent = SentryEvent(),
     ): SentryEvent? {
-        return options.beforeSend?.execute(event, null)
+        return options.beforeSend?.execute(event, Hint())
     }
 
     private fun shouldDrop(exception: SentryException): (String, String, String) -> Boolean =

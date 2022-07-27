@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issues format="5" by="lint 4.0.2" client="gradle" variant="all" version="4.0.2">
+<issues format="5" by="lint 4.0.2" client="gradle" variant="release" version="4.0.2">
 
     <issue
         id="Recycle"
