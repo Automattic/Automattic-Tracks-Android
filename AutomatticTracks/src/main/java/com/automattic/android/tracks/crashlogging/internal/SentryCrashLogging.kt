@@ -14,13 +14,14 @@ import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.android.fragment.FragmentLifecycleIntegration
 import io.sentry.protocol.Message
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 internal class SentryCrashLogging constructor(
     application: Application,
     private val dataProvider: CrashLoggingDataProvider,
     private val sentryWrapper: SentryErrorTrackerWrapper,
+    private val applicationScope: CoroutineScope
 ) : CrashLogging {
 
     init {
@@ -56,7 +57,7 @@ internal class SentryCrashLogging constructor(
                 }
             }
         }
-        GlobalScope.launch {
+        applicationScope.launch {
             dataProvider.user.collect {
                 Sentry.setUser(it.toSentryUser())
             }

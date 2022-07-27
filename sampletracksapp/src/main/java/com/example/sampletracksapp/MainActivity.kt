@@ -9,6 +9,7 @@ import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
 import com.example.sampletracksapp.databinding.ActivityMainBinding
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import java.lang.NullPointerException
@@ -68,7 +69,8 @@ class MainActivity : AppCompatActivity() {
                 ): Map<ExtraKnownKey, String> {
                     return mapOf("extra" to "event value")
                 }
-            }
+            },
+            applicationScope = GlobalScope
         )
 
         ActivityMainBinding.inflate(layoutInflater).apply {
