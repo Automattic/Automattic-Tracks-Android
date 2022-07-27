@@ -41,9 +41,10 @@ internal class SentryCrashLogging constructor(
                     FragmentLifecycleIntegration(
                         application,
                         enableFragmentLifecycleBreadcrumbs = false,
-                        enableAutoFragmentLifecycleTracing = true
+                        enableAutoFragmentLifecycleTracing = false
                     )
                 )
+                isEnableAutoSessionTracking = false
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
 
                     Sentry.setUser(dataProvider.userProvider()?.toSentryUser())
