@@ -9,6 +9,8 @@ import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
 import com.example.sampletracksapp.databinding.ActivityMainBinding
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import java.lang.NullPointerException
 import java.util.Locale
 
@@ -25,6 +27,17 @@ class MainActivity : AppCompatActivity() {
                 override val locale = Locale.US
                 override val enableCrashLoggingLogs = true
                 override val performanceMonitoringConfig = PerformanceMonitoringConfig.Enabled(1.0)
+                override val user: Flow<CrashLoggingUser> = flowOf(
+                    CrashLoggingUser(
+                        userID = "test user id",
+                        email = "test@user.com",
+                        username = "test username"
+                    )
+                )
+                override val applicationContextProvider: Flow<Map<String, String>> = flowOf(
+                    mapOf("extra" to "application context")
+                )
+
                 override fun shouldDropWrappingException(
                     module: String,
                     type: String,
@@ -54,10 +67,6 @@ class MainActivity : AppCompatActivity() {
                     eventLevel: EventLevel
                 ): Map<ExtraKnownKey, String> {
                     return mapOf("extra" to "event value")
-                }
-
-                override fun applicationContextProvider(): Map<String, String> {
-                    return mapOf("extra" to "application context")
                 }
             }
         )

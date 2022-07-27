@@ -1,5 +1,6 @@
 package com.automattic.android.tracks.crashlogging
 
+import kotlinx.coroutines.flow.Flow
 import java.util.Locale
 
 interface CrashLoggingDataProvider {
@@ -32,6 +33,13 @@ interface CrashLoggingDataProvider {
      * Provides configuration for Sentry Performance Monitoring
      */
     val performanceMonitoringConfig: PerformanceMonitoringConfig
+
+    val user: Flow<CrashLoggingUser>
+
+    /**
+     * Provides the {@link CrashLogging} with information about the current application state.
+     */
+    val applicationContextProvider: Flow<Map<String, String>>
 
     /**
      * Provides [CrashLogging] with information about exceptions that should be dropped if is the
@@ -70,11 +78,6 @@ interface CrashLoggingDataProvider {
         currentExtras: Map<ExtraKnownKey, String>,
         eventLevel: EventLevel
     ): Map<ExtraKnownKey, String>
-
-    /**
-     * Provides the {@link CrashLogging} with information about the current application state.
-     */
-    fun applicationContextProvider(): Map<String, String>
 }
 
 typealias ExtraKnownKey = String

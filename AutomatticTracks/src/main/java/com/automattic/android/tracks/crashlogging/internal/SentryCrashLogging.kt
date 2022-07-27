@@ -14,6 +14,8 @@ import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.android.fragment.FragmentLifecycleIntegration
 import io.sentry.protocol.Message
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 internal class SentryCrashLogging constructor(
     application: Application,
@@ -46,17 +48,21 @@ internal class SentryCrashLogging constructor(
                 )
                 isEnableAutoSessionTracking = true
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
-
-                    Sentry.setUser(dataProvider.userProvider()?.toSentryUser())
-                    dataProvider.applicationContextProvider().forEach { (key, value) ->
-                        Sentry.setTag(key, value)
-                    }
-
                     if (!dataProvider.crashLoggingEnabled()) return@BeforeSendCallback null
 
                     dropExceptionIfRequired(event)
                     appendExtra(event)
                     event
+                }
+            }
+        }
+        GlobalScope.launch {
+            dataProvider.user.collect {
+                Sentry.setUser(it.toSentryUser())
+            }
+            dataProvider.applicationContextProvider.collect {
+                it.forEach { (key, value) ->
+                    Sentry.setTag(key, value)
                 }
             }
         }
