@@ -13,19 +13,27 @@ import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.protocol.SentryException
 import io.sentry.protocol.User
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.nullableArgumentCaptor
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyZeroInteractions
 import org.mockito.kotlin.whenever
 import java.util.Locale
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SentryCrashLoggingTest {
 
     private val mockedWrapper: SentryErrorTrackerWrapper = mock()
@@ -35,6 +43,8 @@ class SentryCrashLoggingTest {
 
     private lateinit var crashLogging: SentryCrashLogging
 
+    private val testScope = TestScope(UnconfinedTestDispatcher())
+
     private fun initialize(
         locale: Locale? = dataProvider.locale,
         enableCrashLoggingLogs: Boolean = dataProvider.enableCrashLoggingLogs,
@@ -42,7 +52,7 @@ class SentryCrashLoggingTest {
         shouldDropException: (String, String, String) -> Boolean = dataProvider.shouldDropException,
         extraKeys: List<String> = dataProvider.extraKeys,
         provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = dataProvider.provideExtrasForEvent,
-        applicationContext: Map<String, String> = dataProvider.applicationContext,
+        applicationContext: Map<String, String> = dataProvider.fakeApplicationContextEmitter.value,
     ) {
         dataProvider = FakeDataProvider(
             locale = locale,
@@ -51,13 +61,14 @@ class SentryCrashLoggingTest {
             shouldDropException = shouldDropException,
             extraKeys = extraKeys,
             provideExtrasForEvent = provideExtrasForEvent,
-            applicationContext = applicationContext,
+            initialApplicationContext = applicationContext,
         )
 
         crashLogging = SentryCrashLogging(
             context = mockedContext,
             dataProvider = dataProvider,
             sentryWrapper = mockedWrapper,
+            applicationScope = testScope.backgroundScope
         )
     }
 
@@ -108,7 +119,7 @@ class SentryCrashLoggingTest {
     }
 
     @Test
-    fun `should apply user tracking if user is not null`() {
+    fun `should apply user tracking if user is not null`() = testScope.runTest {
         initialize()
 
         capturedUser.let { user ->
@@ -121,50 +132,34 @@ class SentryCrashLoggingTest {
     }
 
     @Test
-    fun `should not apply user tracking after initialization if user is null`() {
+    fun `should not apply user tracking after initialization if user is null`() = runBlocking {
         initialize()
-        dataProvider.user = null
+        dataProvider.fakeUserEmitter.emit(null)
 
         assertThat(capturedUser).isNull()
     }
 
     @Test
-    fun `should apply application context to event tags`() {
+    fun `should apply application context to event tags`(): Unit = runBlocking {
         val testApplicationContext = mapOf("app" to "context")
-        dataProvider.applicationContext = testApplicationContext
+        dataProvider.fakeApplicationContextEmitter.emit(testApplicationContext)
         initialize()
 
-        val event = capturedOptions.beforeSend?.execute(SentryEvent(), Hint())
-
-        testApplicationContext.forEach { (key, value) ->
-            assertThat(event?.getTag(key)).isEqualTo(value)
-        }
+        assertThat(capturedApplicationContext).isEqualTo(testApplicationContext)
     }
 
     @Test
-    fun `should update application context before sending new event if context has been changed`() {
-        val testApplicationContext = mapOf("app" to "context", "another" to "value")
-        val updatedApplicationContext = mapOf("app" to "updated context", "another" to "value")
-        initialize()
-        val options = capturedOptions
+    fun `should update application context before sending new event if context has been changed`() =
+        testScope.runTest {
+            val testApplicationContext = mapOf("app" to "context", "another" to "value")
+            val updatedApplicationContext = mapOf("app" to "updated context", "another" to "value")
+            initialize()
 
-        assertAppliedTags(testApplicationContext, options)
+            dataProvider.fakeApplicationContextEmitter.emit(testApplicationContext)
+            dataProvider.fakeApplicationContextEmitter.emit(updatedApplicationContext)
 
-        assertAppliedTags(updatedApplicationContext, options)
-    }
-
-    private fun assertAppliedTags(
-        testApplicationContext: Map<String, String>,
-        options: SentryOptions
-    ) {
-        dataProvider.applicationContext = testApplicationContext
-
-        val event: SentryEvent? = options.beforeSend?.execute(SentryEvent(), Hint())
-
-        testApplicationContext.forEach { (key, value) ->
-            assertThat(event?.getTag(key)).isEqualTo(value)
+            assertThat(capturedApplicationContext).isEqualTo(updatedApplicationContext)
         }
-    }
 
     @Test
     fun `should sent a report with exception`() {
@@ -225,13 +220,13 @@ class SentryCrashLoggingTest {
     }
 
     @Test
-    fun `should send event with updated user on user update`() {
+    fun `should send event with updated user on user update`(): Unit = runBlocking {
         initialize()
-        dataProvider.user = testUser1
+        dataProvider.fakeUserEmitter.emit(testUser1)
 
         assertThat(capturedUser?.username).isEqualTo(testUser1.username)
 
-        dataProvider.user = testUser2
+        dataProvider.fakeUserEmitter.emit(testUser2)
         assertThat(capturedUser?.username).isEqualTo(testUser2.username)
     }
 
@@ -356,17 +351,15 @@ class SentryCrashLoggingTest {
     }
 
     @Test
-    fun `should apply both application context and single event tags`() {
+    fun `should apply single event tags`() = runBlocking {
         initialize()
-        val applicationContext = mapOf("application" to "context")
         val eventTags = mapOf("event" to "tags")
-        dataProvider.applicationContext = applicationContext
 
         crashLogging.sendReport(tags = eventTags)
         val updatedEvent = beforeSendModifiedEvent(capturedOptions, event = capturedEvent)
 
         SoftAssertions().apply {
-            (applicationContext + eventTags).forEach { (key, value) ->
+            (eventTags).forEach { (key, value) ->
                 assertThat(updatedEvent?.getTag(key)).isEqualTo(value)
             }
         }.assertAll()
@@ -379,7 +372,16 @@ class SentryCrashLoggingTest {
         }
 
     private val capturedUser: User?
-        get() = beforeSendModifiedEvent(capturedOptions)?.user
+        get() = nullableArgumentCaptor<User>().let { captor ->
+            verify(mockedWrapper, atLeast(0)).setUser(captor.capture())
+            captor.lastValue
+        }
+
+    private val capturedApplicationContext: Map<String, String>
+        get() = argumentCaptor<Map<String, String>>().let { captor ->
+            verify(mockedWrapper, atLeast(0)).setTags(captor.capture())
+            captor.lastValue
+        }
 
     private val capturedEvent: SentryEvent
         get() = argumentCaptor<SentryEvent>().let { captor ->
