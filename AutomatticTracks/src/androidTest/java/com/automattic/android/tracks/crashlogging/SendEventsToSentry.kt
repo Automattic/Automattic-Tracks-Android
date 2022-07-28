@@ -1,5 +1,6 @@
 package com.automattic.android.tracks.crashlogging
 
+import android.app.Application
 import android.database.sqlite.SQLiteOutOfMemoryException
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -40,7 +41,7 @@ class SendEventsToSentry {
     @Before
     fun setUp() {
         crashLogging = CrashLoggingProvider.createInstance(
-            application = ApplicationProvider.getApplicationContext(),
+            context = ApplicationProvider.getApplicationContext<Application>(),
             dataProvider = dataProvider,
             appScope = GlobalScope
         )
