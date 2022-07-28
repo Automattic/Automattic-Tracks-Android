@@ -34,7 +34,12 @@ interface CrashLoggingDataProvider {
      */
     val performanceMonitoringConfig: PerformanceMonitoringConfig
 
-    val user: Flow<CrashLoggingUser>
+    /**
+     * Provides [CrashLogging] with information about the current user.
+     *
+     * @see CrashLoggingUser
+     */
+    val user: Flow<CrashLoggingUser?>
 
     /**
      * Provides the {@link CrashLogging} with information about the current application state.
@@ -50,13 +55,6 @@ interface CrashLoggingDataProvider {
      *
      */
     fun shouldDropWrappingException(module: String, type: String, value: String): Boolean
-
-    /**
-     * Provides [CrashLogging] with information about the current user.
-     *
-     * @see CrashLoggingUser
-     */
-    fun userProvider(): CrashLoggingUser?
 
     /**
      * Provides [CrashLogging] with information on whether the client has enable crash logging

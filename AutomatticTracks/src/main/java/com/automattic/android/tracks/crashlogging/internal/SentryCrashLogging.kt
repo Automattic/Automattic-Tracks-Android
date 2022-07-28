@@ -21,7 +21,7 @@ internal class SentryCrashLogging constructor(
     application: Application,
     private val dataProvider: CrashLoggingDataProvider,
     private val sentryWrapper: SentryErrorTrackerWrapper,
-    private val applicationScope: CoroutineScope
+    applicationScope: CoroutineScope
 ) : CrashLogging {
 
     init {
@@ -57,16 +57,15 @@ internal class SentryCrashLogging constructor(
                 }
             }
         }
+
         applicationScope.launch {
             dataProvider.user.collect {
-                Sentry.setUser(it.toSentryUser())
+                sentryWrapper.setUser(it?.toSentryUser())
             }
         }
         applicationScope.launch {
             dataProvider.applicationContextProvider.collect {
-                it.forEach { (key, value) ->
-                    Sentry.setTag(key, value)
-                }
+                sentryWrapper.setTags(it)
             }
         }
     }

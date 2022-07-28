@@ -7,8 +7,8 @@ import kotlinx.coroutines.CoroutineScope
 
 object CrashLoggingProvider {
     fun createInstance(
-        application: Application,
+        context: Application,
         dataProvider: CrashLoggingDataProvider,
-        applicationScope: CoroutineScope
-    ): CrashLogging = SentryCrashLogging(application, dataProvider, SentryErrorTrackerWrapper(), applicationScope)
+        appScope: CoroutineScope
+    ): CrashLogging = SentryCrashLogging(context, dataProvider, SentryErrorTrackerWrapper(), appScope)
 }

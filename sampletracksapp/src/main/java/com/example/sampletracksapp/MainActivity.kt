@@ -9,11 +9,10 @@ import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
 import com.example.sampletracksapp.databinding.ActivityMainBinding
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import java.lang.NullPointerException
 import java.util.Locale
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.flowOf
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,16 +27,15 @@ class MainActivity : AppCompatActivity() {
                 override val locale = Locale.US
                 override val enableCrashLoggingLogs = true
                 override val performanceMonitoringConfig = PerformanceMonitoringConfig.Enabled(1.0)
-                override val user: Flow<CrashLoggingUser> = flowOf(
+                override val user = flowOf(
                     CrashLoggingUser(
                         userID = "test user id",
                         email = "test@user.com",
                         username = "test username"
                     )
                 )
-                override val applicationContextProvider: Flow<Map<String, String>> = flowOf(
-                    mapOf("extra" to "application context")
-                )
+                override val applicationContextProvider =
+                    flowOf(mapOf("extra" to "application context"))
 
                 override fun shouldDropWrappingException(
                     module: String,
@@ -45,14 +43,6 @@ class MainActivity : AppCompatActivity() {
                     value: String
                 ): Boolean {
                     return false
-                }
-
-                override fun userProvider(): CrashLoggingUser {
-                    return CrashLoggingUser(
-                        userID = "test user id",
-                        email = "test@user.com",
-                        username = "test username"
-                    )
                 }
 
                 override fun crashLoggingEnabled(): Boolean {
@@ -70,7 +60,7 @@ class MainActivity : AppCompatActivity() {
                     return mapOf("extra" to "event value")
                 }
             },
-            applicationScope = GlobalScope
+            appScope = GlobalScope
         )
 
         ActivityMainBinding.inflate(layoutInflater).apply {
@@ -85,11 +75,17 @@ class MainActivity : AppCompatActivity() {
             }
 
             recordBreadcrumbWithMessage.setOnClickListener {
-                crashLogging.recordEvent(message = "Custom breadcrumb", category = "Custom category")
+                crashLogging.recordEvent(
+                    message = "Custom breadcrumb",
+                    category = "Custom category"
+                )
             }
 
             recordBreadcrumbWithException.setOnClickListener {
-                crashLogging.recordException(exception = NullPointerException(), category = "Custom exception category")
+                crashLogging.recordException(
+                    exception = NullPointerException(),
+                    category = "Custom exception category"
+                )
             }
         }
     }
