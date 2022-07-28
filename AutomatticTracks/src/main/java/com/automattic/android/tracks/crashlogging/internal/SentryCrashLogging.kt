@@ -10,11 +10,14 @@ import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.protocol.Message
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 internal class SentryCrashLogging constructor(
     context: Context,
     private val dataProvider: CrashLoggingDataProvider,
     private val sentryWrapper: SentryErrorTrackerWrapper,
+    applicationScope: CoroutineScope
 ) : CrashLogging {
 
     init {
@@ -23,7 +26,7 @@ internal class SentryCrashLogging constructor(
                 dsn = dataProvider.sentryDSN
                 environment = dataProvider.buildType
                 release = dataProvider.releaseName
-                setDebug(dataProvider.enableCrashLoggingLogs)
+                isDebug = dataProvider.enableCrashLoggingLogs
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
 
@@ -31,20 +34,21 @@ internal class SentryCrashLogging constructor(
 
                     dropExceptionIfRequired(event)
                     appendExtra(event)
-                    appendApplicationContext(event)
-                    appendUser(event)
                     event
                 }
             }
         }
-    }
 
-    private fun appendUser(event: SentryEvent) {
-        event.user = dataProvider.userProvider()?.toSentryUser()
-    }
-
-    private fun appendApplicationContext(event: SentryEvent) {
-        event.appendTags(dataProvider.applicationContextProvider())
+        applicationScope.launch {
+            dataProvider.user.collect {
+                sentryWrapper.setUser(it?.toSentryUser())
+            }
+        }
+        applicationScope.launch {
+            dataProvider.applicationContextProvider.collect {
+                sentryWrapper.setTags(it)
+            }
+        }
     }
 
     private fun appendExtra(event: SentryEvent) {

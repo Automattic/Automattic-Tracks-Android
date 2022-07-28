@@ -1,5 +1,6 @@
 package com.automattic.android.tracks.crashlogging
 
+import kotlinx.coroutines.flow.Flow
 import java.util.Locale
 
 interface CrashLoggingDataProvider {
@@ -29,6 +30,18 @@ interface CrashLoggingDataProvider {
     val enableCrashLoggingLogs: Boolean
 
     /**
+     * Provides [CrashLogging] with information about the current user.
+     *
+     * @see CrashLoggingUser
+     */
+    val user: Flow<CrashLoggingUser?>
+
+    /**
+     * Provides the {@link CrashLogging} with information about the current application state.
+     */
+    val applicationContextProvider: Flow<Map<String, String>>
+
+    /**
      * Provides [CrashLogging] with information about exceptions that should be dropped if is the
      * last one on stack trace
      *
@@ -37,13 +50,6 @@ interface CrashLoggingDataProvider {
      *
      */
     fun shouldDropWrappingException(module: String, type: String, value: String): Boolean
-
-    /**
-     * Provides [CrashLogging] with information about the current user.
-     *
-     * @see CrashLoggingUser
-     */
-    fun userProvider(): CrashLoggingUser?
 
     /**
      * Provides [CrashLogging] with information on whether the client has enable crash logging
@@ -65,11 +71,6 @@ interface CrashLoggingDataProvider {
         currentExtras: Map<ExtraKnownKey, String>,
         eventLevel: EventLevel
     ): Map<ExtraKnownKey, String>
-
-    /**
-     * Provides the {@link CrashLogging} with information about the current application state.
-     */
-    fun applicationContextProvider(): Map<String, String>
 }
 
 typealias ExtraKnownKey = String
