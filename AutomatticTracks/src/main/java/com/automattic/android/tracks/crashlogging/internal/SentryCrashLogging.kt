@@ -46,6 +46,7 @@ internal class SentryCrashLogging constructor(
                         enableAutoFragmentLifecycleTracing = true
                     )
                 )
+
                 isEnableAutoSessionTracking = true
                 beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
                     if (!dataProvider.crashLoggingEnabled()) return@BeforeSendCallback null

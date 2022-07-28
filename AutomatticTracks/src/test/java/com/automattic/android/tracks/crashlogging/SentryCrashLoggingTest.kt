@@ -1,6 +1,5 @@
 package com.automattic.android.tracks.crashlogging
 
-import android.app.Activity
 import android.app.Application
 import com.automattic.android.tracks.crashlogging.internal.SentryCrashLogging
 import com.automattic.android.tracks.crashlogging.internal.SentryErrorTrackerWrapper

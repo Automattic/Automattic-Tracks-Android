@@ -9,5 +9,7 @@
         <meta-data
             android:name="io.sentry.auto-init"
             android:value="false" />
+
+        <meta-data android:name="io.sentry.breadcrumbs.user-interaction" android:value="false" />
     </application>
 </manifest>

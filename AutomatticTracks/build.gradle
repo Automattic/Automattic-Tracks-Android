@@ -48,7 +48,6 @@ android {
     }
 
     lintOptions {
-        abortOnError false
         baseline file("lint-baseline.xml")
         warningsAsErrors true
         warning 'GradleDependency'
