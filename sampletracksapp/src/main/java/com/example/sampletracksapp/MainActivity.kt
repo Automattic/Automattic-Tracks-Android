@@ -2,16 +2,27 @@ package com.example.sampletracksapp
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.room.Room
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
+import com.automattic.android.tracks.crashlogging.CrashLoggingOkHttpInterceptorProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
+import com.automattic.android.tracks.crashlogging.RequestFormatter
 import com.example.sampletracksapp.databinding.ActivityMainBinding
+import com.example.sampletracksapp.performance.Track
+import com.example.sampletracksapp.performance.TracksDatabase
+import io.sentry.Sentry
+import io.sentry.SpanStatus
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.flowOf
-import java.lang.NullPointerException
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -86,6 +97,40 @@ class MainActivity : AppCompatActivity() {
                     exception = NullPointerException(),
                     category = "Custom exception category"
                 )
+            }
+
+            val db = Room.databaseBuilder(
+                applicationContext,
+                TracksDatabase::class.java, "database-name"
+            ).build()
+
+            val okHttp = OkHttpClient.Builder().addInterceptor(
+                CrashLoggingOkHttpInterceptorProvider.createInstance(object : RequestFormatter {
+                    override fun formatRequestUrl(request: Request): String {
+                        return "Url formatted by RequestFormatter"
+                    }
+                })
+            ).build()
+
+            executePerformanceTransaction.setOnClickListener {
+                val transaction = Sentry.startTransaction("test name", "test operation", true)
+
+                GlobalScope.launch {
+                    withContext(Dispatchers.IO) {
+                        db.tracksDao().get()
+
+                        val someData = okHttp.newCall(
+                            Request.Builder()
+                                .url("https://jsonplaceholder.typicode.com/posts/1")
+                                .build()
+                        ).execute().let {
+                            it.body?.string().orEmpty()
+                        }
+
+                        db.tracksDao().insert(Track(someData))
+                        transaction.finish(SpanStatus.OK)
+                    }
+                }
             }
         }
     }
