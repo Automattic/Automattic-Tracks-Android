@@ -8,7 +8,8 @@ import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.example.sampletracksapp.databinding.ActivityMainBinding
-import java.lang.NullPointerException
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.flowOf
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -23,20 +24,22 @@ class MainActivity : AppCompatActivity() {
                 override val releaseName = "test"
                 override val locale = Locale.US
                 override val enableCrashLoggingLogs = true
+                override val user = flowOf(
+                    CrashLoggingUser(
+                        userID = "test user id",
+                        email = "test@user.com",
+                        username = "test username"
+                    )
+                )
+                override val applicationContextProvider =
+                    flowOf(mapOf("extra" to "application context"))
+
                 override fun shouldDropWrappingException(
                     module: String,
                     type: String,
                     value: String
                 ): Boolean {
                     return false
-                }
-
-                override fun userProvider(): CrashLoggingUser {
-                    return CrashLoggingUser(
-                        userID = "test user id",
-                        email = "test@user.com",
-                        username = "test username"
-                    )
                 }
 
                 override fun crashLoggingEnabled(): Boolean {
@@ -53,11 +56,8 @@ class MainActivity : AppCompatActivity() {
                 ): Map<ExtraKnownKey, String> {
                     return mapOf("extra" to "event value")
                 }
-
-                override fun applicationContextProvider(): Map<String, String> {
-                    return mapOf("extra" to "application context")
-                }
-            }
+            },
+            appScope = GlobalScope
         )
 
         ActivityMainBinding.inflate(layoutInflater).apply {
@@ -72,11 +72,17 @@ class MainActivity : AppCompatActivity() {
             }
 
             recordBreadcrumbWithMessage.setOnClickListener {
-                crashLogging.recordEvent(message = "Custom breadcrumb", category = "Custom category")
+                crashLogging.recordEvent(
+                    message = "Custom breadcrumb",
+                    category = "Custom category"
+                )
             }
 
             recordBreadcrumbWithException.setOnClickListener {
-                crashLogging.recordException(exception = NullPointerException(), category = "Custom exception category")
+                crashLogging.recordException(
+                    exception = NullPointerException(),
+                    category = "Custom exception category"
+                )
             }
         }
     }
