@@ -8,7 +8,6 @@ import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Di
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Enabled
 import com.automattic.android.tracks.crashlogging.eventLevel
 import io.sentry.Breadcrumb
-import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
