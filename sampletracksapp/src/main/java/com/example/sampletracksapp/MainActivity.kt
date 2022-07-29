@@ -14,6 +14,7 @@ import com.automattic.android.tracks.crashlogging.RequestFormatter
 import com.automattic.android.tracks.crashlogging.performance.PerformanceMonitoringRepositoryProvider
 import com.automattic.android.tracks.crashlogging.performance.TransactionOperation
 import com.automattic.android.tracks.crashlogging.performance.PerformanceTransactionRepository
+import com.automattic.android.tracks.crashlogging.performance.TransactionStatus
 import com.example.sampletracksapp.databinding.ActivityMainBinding
 import com.example.sampletracksapp.performance.Track
 import com.example.sampletracksapp.performance.TracksDatabase
@@ -133,7 +134,7 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         db.tracksDao().insert(Track(someData))
-                        transactionRepository.finishTransaction(transactionId)
+                        transactionRepository.finishTransaction(transactionId, TransactionStatus.SUCCESSFUL)
                     }
                 }
             }
