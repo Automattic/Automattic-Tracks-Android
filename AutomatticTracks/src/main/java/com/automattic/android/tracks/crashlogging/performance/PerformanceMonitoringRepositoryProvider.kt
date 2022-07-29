@@ -4,6 +4,7 @@ import com.automattic.android.tracks.crashlogging.performance.internal.SentryPer
 
 object PerformanceMonitoringRepositoryProvider {
 
-    fun createInstance(): PerformanceTransactionRepository =
-        PerformanceTransactionRepository(SentryPerformanceMonitoringWrapper())
+    private val instance = PerformanceTransactionRepository(SentryPerformanceMonitoringWrapper())
+
+    fun createInstance(): PerformanceTransactionRepository = instance
 }
