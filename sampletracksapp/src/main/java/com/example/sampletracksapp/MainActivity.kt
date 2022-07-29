@@ -11,12 +11,12 @@ import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
 import com.automattic.android.tracks.crashlogging.RequestFormatter
+import com.automattic.android.tracks.crashlogging.performance.PerformanceMonitoringRepositoryProvider
 import com.automattic.android.tracks.crashlogging.performance.TransactionOperation
-import com.automattic.android.tracks.crashlogging.performance.TransactionRepository
+import com.automattic.android.tracks.crashlogging.performance.PerformanceTransactionRepository
 import com.example.sampletracksapp.databinding.ActivityMainBinding
 import com.example.sampletracksapp.performance.Track
 import com.example.sampletracksapp.performance.TracksDatabase
-import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.flowOf
@@ -24,10 +24,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
-    val transactionRepository: TransactionRepository = TransactionRepository()
+    val transactionRepository: PerformanceTransactionRepository = PerformanceMonitoringRepositoryProvider.createInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
