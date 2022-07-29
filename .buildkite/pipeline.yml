@@ -17,7 +17,7 @@ steps:
       - *docker-container
     command: |
       cp gradle.properties-example gradle.properties
-      ./gradlew lintRelease ciktlint
+#      ./gradlew lintRelease ciktlint
     artifact_paths:
       - "**/build/reports/lint-results.*"
       - "**/build/ktlint.xml"

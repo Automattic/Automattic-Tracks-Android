@@ -21,10 +21,3 @@ class TransactionRepository {
         transactions[transactionId]?.finish()
     }
 }
-
-@JvmInline
-value class TransactionId(val value: String)
-
-enum class TransactionOperation(val value: String) {
-    UI_LOAD("ui.load")
-}
