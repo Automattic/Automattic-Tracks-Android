@@ -11,11 +11,12 @@ import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
 import com.automattic.android.tracks.crashlogging.RequestFormatter
+import com.automattic.android.tracks.crashlogging.performance.TransactionOperation
+import com.automattic.android.tracks.crashlogging.performance.TransactionRepository
 import com.example.sampletracksapp.databinding.ActivityMainBinding
 import com.example.sampletracksapp.performance.Track
 import com.example.sampletracksapp.performance.TracksDatabase
-import io.sentry.Sentry
-import io.sentry.SpanStatus
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.flowOf
@@ -23,9 +24,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
+
+    val transactionRepository: TransactionRepository = TransactionRepository()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -113,7 +116,8 @@ class MainActivity : AppCompatActivity() {
             ).build()
 
             executePerformanceTransaction.setOnClickListener {
-                val transaction = Sentry.startTransaction("test name", "test operation", true)
+
+                val transactionId = transactionRepository.startTransaction("test name", TransactionOperation.UI_LOAD)
 
                 GlobalScope.launch {
                     withContext(Dispatchers.IO) {
@@ -128,7 +132,7 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         db.tracksDao().insert(Track(someData))
-                        transaction.finish(SpanStatus.OK)
+                        transactionRepository.finishTransaction(transactionId)
                     }
                 }
             }
