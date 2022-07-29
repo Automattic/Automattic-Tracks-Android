@@ -18,7 +18,7 @@ class PerformanceTransactionRepository internal constructor(private val sentryWr
         }
     }
 
-    fun finishTransaction(transactionId: TransactionId) {
-        transactions[transactionId]?.finish()
+    fun finishTransaction(transactionId: TransactionId, transactionStatus: TransactionStatus) {
+        transactions[transactionId]?.finish(transactionStatus.toSentrySpanStatus())
     }
 }
