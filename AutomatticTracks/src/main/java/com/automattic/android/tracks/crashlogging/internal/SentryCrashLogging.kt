@@ -3,6 +3,7 @@ package com.automattic.android.tracks.crashlogging.internal
 import android.content.Context
 import com.automattic.android.tracks.crashlogging.CrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
+import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.eventLevel
 import io.sentry.Breadcrumb
@@ -10,11 +11,12 @@ import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.protocol.Message
+import io.sentry.protocol.User
 
 internal class SentryCrashLogging constructor(
     context: Context,
     private val dataProvider: CrashLoggingDataProvider,
-    private val sentryWrapper: SentryErrorTrackerWrapper,
+    private val sentryWrapper: SentryErrorTrackerWrapper
 ) : CrashLogging {
 
     init {
@@ -67,7 +69,7 @@ internal class SentryCrashLogging constructor(
             if (dataProvider.shouldDropWrappingException(
                     lastException.module.orEmpty(),
                     lastException.type.orEmpty(),
-                    lastException.value.orEmpty(),
+                    lastException.value.orEmpty()
                 )
             ) {
                 event.exceptions?.remove(lastException)
@@ -102,5 +104,18 @@ internal class SentryCrashLogging constructor(
             this.appendTags(tags)
         }
         sentryWrapper.captureEvent(event)
+    }
+
+    private fun SentryEvent.appendTags(tags: Map<String, String>) {
+        for ((key, value) in tags) {
+            this.setTag(key, value)
+        }
+    }
+
+    private fun CrashLoggingUser.toSentryUser(): User = User().let { sentryUser ->
+        sentryUser.email = email
+        sentryUser.username = username
+        sentryUser.id = userID
+        sentryUser
     }
 }

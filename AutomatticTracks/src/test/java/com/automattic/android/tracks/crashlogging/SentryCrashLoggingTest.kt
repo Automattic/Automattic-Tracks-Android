@@ -42,7 +42,7 @@ class SentryCrashLoggingTest {
         shouldDropException: (String, String, String) -> Boolean = dataProvider.shouldDropException,
         extraKeys: List<String> = dataProvider.extraKeys,
         provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = dataProvider.provideExtrasForEvent,
-        applicationContext: Map<String, String> = dataProvider.applicationContext,
+        applicationContext: Map<String, String> = dataProvider.applicationContext
     ) {
         dataProvider = FakeDataProvider(
             locale = locale,
@@ -51,13 +51,13 @@ class SentryCrashLoggingTest {
             shouldDropException = shouldDropException,
             extraKeys = extraKeys,
             provideExtrasForEvent = provideExtrasForEvent,
-            applicationContext = applicationContext,
+            applicationContext = applicationContext
         )
 
         crashLogging = SentryCrashLogging(
             context = mockedContext,
             dataProvider = dataProvider,
-            sentryWrapper = mockedWrapper,
+            sentryWrapper = mockedWrapper
         )
     }
 
@@ -395,7 +395,7 @@ class SentryCrashLoggingTest {
 
     private fun beforeSendModifiedEvent(
         options: SentryOptions,
-        event: SentryEvent = SentryEvent(),
+        event: SentryEvent = SentryEvent()
     ): SentryEvent? {
         return options.beforeSend?.execute(event, Hint())
     }
