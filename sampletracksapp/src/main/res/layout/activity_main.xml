@@ -48,6 +48,6 @@
         android:id="@+id/executePerformanceTransaction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Measure performance of sample fetch and save workflow" />
+        android:text="Measure performance of sample HTTP fetch" />
 
 </LinearLayout>

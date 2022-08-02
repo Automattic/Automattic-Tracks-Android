@@ -2,7 +2,6 @@ package com.example.sampletracksapp
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.room.Room
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingOkHttpInterceptorProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingProvider
@@ -12,24 +11,24 @@ import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
 import com.automattic.android.tracks.crashlogging.RequestFormatter
 import com.automattic.android.tracks.crashlogging.performance.PerformanceMonitoringRepositoryProvider
-import com.automattic.android.tracks.crashlogging.performance.TransactionOperation
 import com.automattic.android.tracks.crashlogging.performance.PerformanceTransactionRepository
+import com.automattic.android.tracks.crashlogging.performance.TransactionOperation
 import com.automattic.android.tracks.crashlogging.performance.TransactionStatus
 import com.example.sampletracksapp.databinding.ActivityMainBinding
-import com.example.sampletracksapp.performance.Track
-import com.example.sampletracksapp.performance.TracksDatabase
-import kotlinx.coroutines.Dispatchers
+import java.io.IOException
+import java.util.Locale
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.util.Locale
+import okhttp3.Response
 
 class MainActivity : AppCompatActivity() {
 
-    val transactionRepository: PerformanceTransactionRepository = PerformanceMonitoringRepositoryProvider.createInstance()
+    val transactionRepository: PerformanceTransactionRepository =
+        PerformanceMonitoringRepositoryProvider.createInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,11 +103,6 @@ class MainActivity : AppCompatActivity() {
                 )
             }
 
-            val db = Room.databaseBuilder(
-                applicationContext,
-                TracksDatabase::class.java, "database-name"
-            ).build()
-
             val okHttp = OkHttpClient.Builder().addInterceptor(
                 CrashLoggingOkHttpInterceptorProvider.createInstance(object : RequestFormatter {
                     override fun formatRequestUrl(request: Request): String {
@@ -118,25 +112,30 @@ class MainActivity : AppCompatActivity() {
             ).build()
 
             executePerformanceTransaction.setOnClickListener {
+                val transactionId = transactionRepository.startTransaction(
+                    "test name",
+                    TransactionOperation.UI_LOAD
+                )
 
-                val transactionId = transactionRepository.startTransaction("test name", TransactionOperation.UI_LOAD)
-
-                GlobalScope.launch {
-                    withContext(Dispatchers.IO) {
-                        db.tracksDao().get()
-
-                        val someData = okHttp.newCall(
-                            Request.Builder()
-                                .url("https://jsonplaceholder.typicode.com/posts/1")
-                                .build()
-                        ).execute().let {
-                            it.body?.string().orEmpty()
-                        }
-
-                        db.tracksDao().insert(Track(someData))
-                        transactionRepository.finishTransaction(transactionId, TransactionStatus.SUCCESSFUL)
+                okHttp.newCall(
+                    Request.Builder()
+                        .url("https://jsonplaceholder.typicode.com/posts/1")
+                        .build()
+                ).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        transactionRepository.finishTransaction(
+                            transactionId,
+                            TransactionStatus.ABORTED
+                        )
                     }
-                }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        transactionRepository.finishTransaction(
+                            transactionId,
+                            TransactionStatus.SUCCESSFUL
+                        )
+                    }
+                })
             }
         }
     }
