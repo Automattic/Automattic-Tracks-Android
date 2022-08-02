@@ -1,4 +1,4 @@
-package com.automattic.android.tracks.crashlogging.performance // ktlint-disable
+package com.automattic.android.tracks.crashlogging.performance
 
 @JvmInline
 value class TransactionId(

@@ -15,8 +15,6 @@ import com.automattic.android.tracks.crashlogging.performance.PerformanceTransac
 import com.automattic.android.tracks.crashlogging.performance.TransactionOperation
 import com.automattic.android.tracks.crashlogging.performance.TransactionStatus
 import com.example.sampletracksapp.databinding.ActivityMainBinding
-import java.io.IOException
-import java.util.Locale
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.flowOf
 import okhttp3.Call
@@ -24,6 +22,8 @@ import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import java.io.IOException
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 

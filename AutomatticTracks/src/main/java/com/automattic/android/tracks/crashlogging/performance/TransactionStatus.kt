@@ -11,4 +11,3 @@ fun TransactionStatus.toSentrySpanStatus() =
         TransactionStatus.SUCCESSFUL -> SpanStatus.OK
         TransactionStatus.ABORTED -> SpanStatus.ABORTED
     }
-
