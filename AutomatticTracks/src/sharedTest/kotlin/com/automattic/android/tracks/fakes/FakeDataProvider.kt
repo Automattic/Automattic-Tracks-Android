@@ -5,6 +5,8 @@ import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Locale
 
 class FakeDataProvider(
@@ -13,17 +15,21 @@ class FakeDataProvider(
     override val releaseName: String = "testReleaseName",
     override val locale: Locale? = Locale.US,
     override val enableCrashLoggingLogs: Boolean = true,
-    var user: CrashLoggingUser? = testUser1,
     var crashLoggingEnabled: Boolean = true,
     var shouldDropException: (String, String, String) -> Boolean = { _: String, _: String, _: String -> false },
     var extraKeys: List<String> = emptyList(),
     var provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = { currentExtras -> currentExtras },
-    var applicationContext: Map<String, String> = emptyMap()
+    initialUser: CrashLoggingUser? = testUser1,
+    initialApplicationContext: Map<String, String> = emptyMap()
 ) : CrashLoggingDataProvider {
 
-    override fun userProvider(): CrashLoggingUser? {
-        return user
-    }
+    val fakeUserEmitter = MutableStateFlow(initialUser)
+
+    val fakeApplicationContextEmitter = MutableStateFlow(initialApplicationContext)
+
+    override val user: Flow<CrashLoggingUser?> = fakeUserEmitter
+
+    override val applicationContextProvider: Flow<Map<String, String>> = fakeApplicationContextEmitter
 
     override fun crashLoggingEnabled(): Boolean {
         return crashLoggingEnabled
@@ -38,10 +44,6 @@ class FakeDataProvider(
         eventLevel: EventLevel
     ): Map<ExtraKnownKey, String> {
         return provideExtrasForEvent(currentExtras)
-    }
-
-    override fun applicationContextProvider(): Map<String, String> {
-        return applicationContext
     }
 
     override fun shouldDropWrappingException(module: String, type: String, value: String): Boolean {

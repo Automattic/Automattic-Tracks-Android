@@ -6,12 +6,13 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.automattic.android.tracks.fakes.FakeDataProvider
 import com.automattic.android.tracks.fakes.testUser1
 import com.automattic.android.tracks.fakes.testUser2
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.junit.AfterClass
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.NotActiveException
-import java.lang.NullPointerException
 import java.lang.invoke.WrongMethodTypeException
 
 /**
@@ -33,25 +34,28 @@ import java.lang.invoke.WrongMethodTypeException
 @RunWith(AndroidJUnit4::class)
 class SendEventsToSentry {
 
-    private val dataProvider = FakeDataProvider(user = testUser1)
+    private val dataProvider = FakeDataProvider()
     private lateinit var crashLogging: CrashLogging
 
     @Before
     fun setUp() {
         crashLogging = CrashLoggingProvider.createInstance(
             context = InstrumentationRegistry.getInstrumentation().context,
-            dataProvider = dataProvider
+            dataProvider = dataProvider,
+            appScope = GlobalScope
         )
     }
 
     @Test
     fun sendExceptionReportWithTags() {
-        dataProvider.applicationContext = mapOf("application" to "context")
-        crashLogging.sendReport(
-            exception = IllegalThreadStateException(),
-            tags = mapOf("test key" to "test value"),
-            message = "This should report IllegalThreadStateException and add `test key: test value` and `application: context` to tags"
-        )
+        GlobalScope.launch {
+            dataProvider.fakeApplicationContextEmitter.emit(mapOf("application" to "context"))
+            crashLogging.sendReport(
+                exception = IllegalThreadStateException(),
+                tags = mapOf("test key" to "test value"),
+                message = "This should report IllegalThreadStateException and add `test key: test value` and `application: context` to tags"
+            )
+        }
     }
 
     @Test
@@ -61,38 +65,42 @@ class SendEventsToSentry {
 
     @Test
     fun sendTwoReportsAndChangeUserBetween() {
-        dataProvider.user = testUser1
-        crashLogging.sendReport(
-            exception = OutOfMemoryError(),
-            message = "This should apply ${testUser1.userID} user"
-        )
+        GlobalScope.launch {
+            dataProvider.fakeUserEmitter.emit(testUser1)
+            crashLogging.sendReport(
+                exception = OutOfMemoryError(),
+                message = "This should apply ${testUser1.userID} user"
+            )
 
-        dataProvider.user = testUser2
-        crashLogging.sendReport(
-            exception = NullPointerException(),
-            message = "This should apply ${testUser2.userID} user"
-        )
+            dataProvider.fakeUserEmitter.emit(testUser2)
+            crashLogging.sendReport(
+                exception = NullPointerException(),
+                message = "This should apply ${testUser2.userID} user"
+            )
+        }
     }
 
     @Test
     fun sendThreeReportsAndChangeApplicationContextBetween() {
-        dataProvider.applicationContext = mapOf("1 application" to "context")
-        crashLogging.sendReport(
-            exception = NotActiveException(),
-            message = "This should show `1 application: context` tag"
-        )
+        GlobalScope.launch {
+            dataProvider.fakeApplicationContextEmitter.emit(mapOf("1 application" to "context"))
+            crashLogging.sendReport(
+                exception = NotActiveException(),
+                message = "This should show `1 application: context` tag"
+            )
 
-        dataProvider.applicationContext = mapOf("2 application" to "context")
-        crashLogging.sendReport(
-            exception = ExceptionInInitializerError(),
-            message = "This should show `2 application: context` tag"
-        )
+            dataProvider.fakeApplicationContextEmitter.emit(mapOf("2 application" to "context"))
+            crashLogging.sendReport(
+                exception = ExceptionInInitializerError(),
+                message = "This should show `2 application: context` tag"
+            )
 
-        dataProvider.applicationContext = mapOf("1 application" to "updated context")
-        crashLogging.sendReport(
-            exception = WrongMethodTypeException(),
-            message = "This should show `1 application: updated context` tag"
-        )
+            dataProvider.fakeApplicationContextEmitter.emit(mapOf("1 application" to "updated context"))
+            crashLogging.sendReport(
+                exception = WrongMethodTypeException(),
+                message = "This should show `1 application: updated context` tag"
+            )
+        }
     }
 
     @Test

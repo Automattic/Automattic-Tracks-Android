@@ -6,6 +6,7 @@ import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
+import io.sentry.protocol.User
 
 internal class SentryErrorTrackerWrapper {
 
@@ -21,5 +22,15 @@ internal class SentryErrorTrackerWrapper {
 
     fun addBreadcrumb(breadcrumb: Breadcrumb) {
         Sentry.addBreadcrumb(breadcrumb)
+    }
+
+    fun setUser(user: User?) {
+        Sentry.setUser(user)
+    }
+
+    fun setTags(tags: Map<String, String>) {
+        for ((key, value) in tags) {
+            Sentry.setTag(key, value)
+        }
     }
 }
