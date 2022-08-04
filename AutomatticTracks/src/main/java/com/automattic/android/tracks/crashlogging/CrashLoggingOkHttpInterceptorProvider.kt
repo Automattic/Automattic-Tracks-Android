@@ -4,5 +4,10 @@ import io.sentry.android.okhttp.SentryOkHttpInterceptor
 import okhttp3.Interceptor
 
 object CrashLoggingOkHttpInterceptorProvider {
-    fun createInstance(): Interceptor = SentryOkHttpInterceptor()
+    fun createInstance(requestFormatter: RequestFormatter): Interceptor =
+        SentryOkHttpInterceptor { span, request, _ ->
+            span.apply {
+                description = requestFormatter.formatRequestUrl(request)
+            }
+        }
 }

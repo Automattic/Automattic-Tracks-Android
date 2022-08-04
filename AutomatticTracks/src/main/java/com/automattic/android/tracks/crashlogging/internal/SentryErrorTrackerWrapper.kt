@@ -1,6 +1,6 @@
 package com.automattic.android.tracks.crashlogging.internal
 
-import android.content.Context
+import android.app.Application
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryEvent
@@ -10,7 +10,7 @@ import io.sentry.protocol.User
 
 internal class SentryErrorTrackerWrapper {
 
-    fun initialize(context: Context, configure: (SentryOptions) -> Unit) {
+    fun initialize(context: Application, configure: (SentryOptions) -> Unit) {
         SentryAndroid.init(context) { options ->
             configure(options)
         }
