@@ -185,6 +185,18 @@ import java.util.Locale;
             Log.e(LOGTAG, "Exception writing display_density_dpi value in JSON object", e);
         }
         try {
+            // Track font-sizing related values.
+            // - fontScale: user preference for scaling factor. See: https://developer.android.com/reference/android/content/res/Configuration.html#fontScale
+            // - scaledDensity: density * fontScale. See: http://androidxref.com/4.2_r1/xref/packages/apps/Settings/src/com/android/settings/Display.java#99
+            double fontScale = mContext.getResources().getConfiguration().fontScale;
+            double scaledDensity = getDisplayMetrics().scaledDensity;
+            mImmutableDeviceInfoJSON.put("font_scale", fontScale);
+            mImmutableDeviceInfoJSON.put("scaled_density", scaledDensity);
+        } catch (final JSONException e) {
+            Log.e(LOGTAG, "Exception writing font sizing values in JSON object", e);
+        }
+
+        try {
             // Width and height depend on device orientation - to be consistent, always
             // report the shorter dimension as the width.
             // These values represent the 'real' dimensions of the screen, ignoring navigation
