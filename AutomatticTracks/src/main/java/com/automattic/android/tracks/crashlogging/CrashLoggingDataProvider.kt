@@ -1,5 +1,6 @@
 package com.automattic.android.tracks.crashlogging
 
+import com.automattic.android.tracks.crashlogging.performance.PerformanceSampler
 import kotlinx.coroutines.flow.Flow
 import java.util.Locale
 
@@ -30,9 +31,9 @@ interface CrashLoggingDataProvider {
     val enableCrashLoggingLogs: Boolean
 
     /**
-     * Provides configuration for Sentry Performance Monitoring
+     * Provides sampler for Sentry Performance Monitoring transactions
      */
-    val performanceMonitoringConfig: PerformanceMonitoringConfig
+    val performanceSampler: PerformanceSampler
 
     /**
      * Provides [CrashLogging] with information about the current user.

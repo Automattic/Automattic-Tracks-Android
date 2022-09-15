@@ -11,3 +11,9 @@ fun TransactionStatus.toSentrySpanStatus() =
         TransactionStatus.SUCCESSFUL -> SpanStatus.OK
         TransactionStatus.ABORTED -> SpanStatus.ABORTED
     }
+
+fun SpanStatus?.toTracksTransactionStatus(): TransactionStatus =
+    when (this) {
+        SpanStatus.OK -> TransactionStatus.SUCCESSFUL
+        else -> TransactionStatus.ABORTED
+    }
