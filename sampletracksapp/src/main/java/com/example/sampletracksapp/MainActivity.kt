@@ -11,6 +11,7 @@ import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
 import com.automattic.android.tracks.crashlogging.RequestFormatter
 import com.automattic.android.tracks.crashlogging.performance.PerformanceMonitoringRepositoryProvider
+import com.automattic.android.tracks.crashlogging.performance.PerformanceSampler
 import com.automattic.android.tracks.crashlogging.performance.PerformanceTransactionRepository
 import com.automattic.android.tracks.crashlogging.performance.TransactionOperation
 import com.automattic.android.tracks.crashlogging.performance.TransactionStatus
@@ -41,7 +42,15 @@ class MainActivity : AppCompatActivity() {
                 override val releaseName = "test"
                 override val locale = Locale.US
                 override val enableCrashLoggingLogs = true
-                override val performanceMonitoringConfig = PerformanceMonitoringConfig.Enabled(1.0)
+                override val performanceSampler = object : PerformanceSampler{
+                    override fun sample(
+                        transactionName: String,
+                        transactionStatus: TransactionStatus
+                    ): PerformanceMonitoringConfig {
+                        return PerformanceMonitoringConfig.Enabled(1.0)
+                    }
+
+                }
                 override val user = flowOf(
                     CrashLoggingUser(
                         userID = "test user id",
