@@ -6,6 +6,8 @@ import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
+import com.automattic.android.tracks.crashlogging.performance.PerformanceSampler
+import com.automattic.android.tracks.crashlogging.performance.TransactionStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Locale
@@ -21,14 +23,21 @@ class FakeDataProvider(
     var extraKeys: List<String> = emptyList(),
     var provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = { currentExtras -> currentExtras },
     initialUser: CrashLoggingUser? = testUser1,
-    initialApplicationContext: Map<String, String> = emptyMap()
+    initialApplicationContext: Map<String, String> = emptyMap(),
 ) : CrashLoggingDataProvider {
 
     val fakeUserEmitter = MutableStateFlow(initialUser)
 
     val fakeApplicationContextEmitter = MutableStateFlow(initialApplicationContext)
 
-    override val performanceMonitoringConfig = PerformanceMonitoringConfig.Enabled(1.0)
+    override val performanceSampler: PerformanceSampler = object : PerformanceSampler{
+        override fun sample(
+            transactionName: String,
+            transactionStatus: TransactionStatus
+        ): PerformanceMonitoringConfig {
+            return PerformanceMonitoringConfig.Enabled(1.0)
+        }
+    }
 
     override val user: Flow<CrashLoggingUser?> = fakeUserEmitter
 
