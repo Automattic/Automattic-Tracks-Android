@@ -23,14 +23,14 @@ class FakeDataProvider(
     var extraKeys: List<String> = emptyList(),
     var provideExtrasForEvent: (Map<ExtraKnownKey, String>) -> Map<ExtraKnownKey, String> = { currentExtras -> currentExtras },
     initialUser: CrashLoggingUser? = testUser1,
-    initialApplicationContext: Map<String, String> = emptyMap(),
+    initialApplicationContext: Map<String, String> = emptyMap()
 ) : CrashLoggingDataProvider {
 
     val fakeUserEmitter = MutableStateFlow(initialUser)
 
     val fakeApplicationContextEmitter = MutableStateFlow(initialApplicationContext)
 
-    override val performanceSampler: PerformanceSampler = object : PerformanceSampler{
+    override val performanceSampler: PerformanceSampler = object : PerformanceSampler {
         override fun sample(
             transactionName: String,
             transactionStatus: TransactionStatus

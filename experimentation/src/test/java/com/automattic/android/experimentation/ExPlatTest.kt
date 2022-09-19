@@ -13,6 +13,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.wordpress.android.fluxc.model.experiments.Assignments
 import org.wordpress.android.fluxc.model.experiments.Variation
@@ -23,7 +24,6 @@ import org.wordpress.android.fluxc.store.ExperimentStore.OnAssignmentsFetched
 import org.wordpress.android.fluxc.store.ExperimentStore.Platform
 import org.wordpress.android.fluxc.utils.AppLogWrapper
 import java.util.Date
-import org.mockito.kotlin.verifyNoInteractions
 
 @ExperimentalCoroutinesApi
 class ExPlatTest {

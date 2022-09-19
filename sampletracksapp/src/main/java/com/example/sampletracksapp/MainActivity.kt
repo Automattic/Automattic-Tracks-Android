@@ -42,14 +42,13 @@ class MainActivity : AppCompatActivity() {
                 override val releaseName = "test"
                 override val locale = Locale.US
                 override val enableCrashLoggingLogs = true
-                override val performanceSampler = object : PerformanceSampler{
+                override val performanceSampler = object : PerformanceSampler {
                     override fun sample(
                         transactionName: String,
                         transactionStatus: TransactionStatus
                     ): PerformanceMonitoringConfig {
                         return PerformanceMonitoringConfig.Enabled(1.0)
                     }
-
                 }
                 override val user = flowOf(
                     CrashLoggingUser(
