@@ -107,7 +107,7 @@ class MessageBuilder {
                     eventJSON.put(USER_LOGIN_NAME_KEY, event.getUser());
                     eventJSON.put(USER_TYPE_KEY, USER_TYPE_SIMPLENOTE);
                 case POCKETCASTS:
-                    eventJSON.put(USER_LOGIN_NAME_KEY, event.getUser());
+                    eventJSON.put(USER_ID_KEY, event.getUser());
                     eventJSON.put(USER_TYPE_KEY, USER_TYPE_POCKETCASTS);
             }
 
