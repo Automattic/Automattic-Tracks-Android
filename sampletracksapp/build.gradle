@@ -8,13 +8,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.example.sampletracksapp"
         minSdkVersion 21
-        //noinspection OldTargetApi
-        targetSdkVersion 30
+        targetSdkVersion 33
         buildConfigField "String", "SENTRY_TEST_PROJECT_DSN", project.properties.get("sentryTestProjectDSN")
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
