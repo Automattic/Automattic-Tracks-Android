@@ -32,11 +32,11 @@ android {
     compileSdkVersion 30
 
     defaultConfig {
-        versionName "2.1.0"
         minSdkVersion 21
         //noinspection OldTargetApi
         targetSdkVersion 30
         buildConfigField "String", "SENTRY_TEST_PROJECT_DSN", project.properties.get("sentryTestProjectDSN")
+        buildConfigField "String", "VERSION_NAME", "\"2.1.0\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments('notClass': 'com.automattic.android.tracks.crashlogging.SendEventsToSentry')
@@ -59,6 +59,12 @@ android {
         }
         test {
             java.srcDirs += "src/sharedTest/kotlin"
+        }
+    }
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
         }
     }
 }

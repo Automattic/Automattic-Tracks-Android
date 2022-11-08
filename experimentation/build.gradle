@@ -34,6 +34,12 @@ android {
         warningsAsErrors true
         warning 'GradleDependency'
     }
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+        }
+    }
 }
 
 dependencies {
