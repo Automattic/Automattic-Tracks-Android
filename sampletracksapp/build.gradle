@@ -8,13 +8,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.example.sampletracksapp"
         minSdkVersion 21
-        //noinspection OldTargetApi
-        targetSdkVersion 30
+        targetSdkVersion 33
         buildConfigField "String", "SENTRY_TEST_PROJECT_DSN", project.properties.get("sentryTestProjectDSN")
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -29,17 +28,16 @@ android {
 
     lintOptions {
         warningsAsErrors true
-        warning 'GradleDependency'
         disable 'HardcodedText'
     }
 }
 
 dependencies {
-    implementation project(':AutomatticTracks')
-    implementation 'androidx.core:core-ktx:1.3.2'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.3.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
+    implementation project(":AutomatticTracks")
+    implementation "androidx.core:core-ktx:1.3.2"
+    implementation "androidx.appcompat:appcompat:1.2.0"
+    implementation "com.google.android.material:material:1.3.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 
     // For performance showcase
     implementation "com.squareup.okhttp3:okhttp:4.10.0"

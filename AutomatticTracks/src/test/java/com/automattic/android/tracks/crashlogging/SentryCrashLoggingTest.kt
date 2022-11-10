@@ -29,7 +29,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.nullableArgumentCaptor
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyZeroInteractions
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import java.util.Locale
 
@@ -291,7 +291,7 @@ class SentryCrashLoggingTest {
 
         capturedOptions.beforeSend?.execute(testEvent, Hint())
 
-        verifyZeroInteractions(testEvent)
+        verifyNoInteractions(testEvent)
     }
 
     @Test

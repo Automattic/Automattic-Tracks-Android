@@ -13,7 +13,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyZeroInteractions
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.wordpress.android.fluxc.model.experiments.Assignments
 import org.wordpress.android.fluxc.model.experiments.Variation
@@ -181,14 +181,14 @@ class ExPlatTest {
     fun `forceRefresh does not interact with store if experiments is empty`() = runBlockingTest {
         exPlat.forceRefresh()
 
-        verifyZeroInteractions(experimentStore)
+        verifyNoInteractions(experimentStore)
     }
 
     @Test
     fun `refreshIfNeeded does not interact with store if experiments is empty`() = runBlockingTest {
         exPlat.refreshIfNeeded()
 
-        verifyZeroInteractions(experimentStore)
+        verifyNoInteractions(experimentStore)
     }
 
     @Test
@@ -198,7 +198,7 @@ class ExPlatTest {
         } catch (e: IllegalArgumentException) {
             // Do nothing.
         } finally {
-            verifyZeroInteractions(experimentStore)
+            verifyNoInteractions(experimentStore)
         }
     }
 
