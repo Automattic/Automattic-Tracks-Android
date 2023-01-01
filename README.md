@@ -43,3 +43,4 @@ In the following cases, the CI will publish a new version with the following for
 
 Automattic-Tracks-Android is available under the GPL v2 license. See
 the [LICENSE](LICENSE) file for more info.
+test
