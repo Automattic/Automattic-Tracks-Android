@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation platform("io.sentry:sentry-bom:6.3.0")
+    implementation platform("io.sentry:sentry-bom:6.14.0")
     implementation "io.sentry:sentry-android"
     implementation "io.sentry:sentry-android-okhttp"
     implementation "io.sentry:sentry-android-fragment"
