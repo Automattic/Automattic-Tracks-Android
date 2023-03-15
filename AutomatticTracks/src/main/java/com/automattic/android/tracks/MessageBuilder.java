@@ -23,7 +23,6 @@ class MessageBuilder {
     private static final String USER_TYPE_WPCOM = "wpcom:user_id";
     private static final String USER_TYPE_SIMPLENOTE = "simplenote:user_id";
     private static final String USER_TYPE_POCKETCASTS = "pocketcasts:user_id";
-
     private static final String USER_TYPE_DAYONE = "dayone:user_id";
     private static final String USER_ID_KEY = "_ui";
     private static final String USER_LANG_KEY = "_lg";
