@@ -7,7 +7,6 @@ import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
 import com.automattic.android.tracks.crashlogging.performance.PerformanceSampler
-import com.automattic.android.tracks.crashlogging.performance.TransactionStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Locale
@@ -31,10 +30,7 @@ class FakeDataProvider(
     val fakeApplicationContextEmitter = MutableStateFlow(initialApplicationContext)
 
     override val performanceSampler: PerformanceSampler = object : PerformanceSampler {
-        override fun sample(
-            transactionName: String,
-            transactionStatus: TransactionStatus
-        ): PerformanceMonitoringConfig {
+        override fun sample(transactionName: String): PerformanceMonitoringConfig {
             return PerformanceMonitoringConfig.Enabled(1.0)
         }
     }
