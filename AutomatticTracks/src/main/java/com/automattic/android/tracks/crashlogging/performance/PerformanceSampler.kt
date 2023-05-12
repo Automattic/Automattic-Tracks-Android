@@ -4,5 +4,5 @@ import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
 
 interface PerformanceSampler {
 
-    fun sample(transactionName: String, transactionStatus: TransactionStatus): PerformanceMonitoringConfig
+    fun sample(transactionName: String): PerformanceMonitoringConfig
 }

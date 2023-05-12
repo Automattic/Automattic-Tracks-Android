@@ -43,10 +43,7 @@ class MainActivity : AppCompatActivity() {
                 override val locale = Locale.US
                 override val enableCrashLoggingLogs = true
                 override val performanceSampler = object : PerformanceSampler {
-                    override fun sample(
-                        transactionName: String,
-                        transactionStatus: TransactionStatus
-                    ): PerformanceMonitoringConfig {
+                    override fun sample(transactionName: String): PerformanceMonitoringConfig {
                         return PerformanceMonitoringConfig.Enabled(1.0)
                     }
                 }

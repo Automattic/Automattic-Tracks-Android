@@ -8,7 +8,6 @@ import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Disabled
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Enabled
 import com.automattic.android.tracks.crashlogging.eventLevel
-import com.automattic.android.tracks.crashlogging.performance.toTracksTransactionStatus
 import io.sentry.Breadcrumb
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
@@ -39,8 +38,7 @@ internal class SentryCrashLogging constructor(
                 }
                 tracesSampler = SentryOptions.TracesSamplerCallback { samplingContext ->
                     val sampleResult = dataProvider.performanceSampler.sample(
-                        transactionName = samplingContext.transactionContext.name,
-                        transactionStatus = samplingContext.transactionContext.status.toTracksTransactionStatus()
+                        transactionName = samplingContext.transactionContext.name
                     )
                     when (sampleResult) {
                         Disabled -> 0.0
