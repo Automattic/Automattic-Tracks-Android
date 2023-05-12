@@ -38,7 +38,7 @@ public class TracksClient {
     protected static final int DEFAULT_EVENTS_QUEUE_TIMER_MS = 30000;
     protected static final int DEFAULT_EVENT_MAX_AGE = 14 * 24 * 60 * 60 * 1000 ; // 14 days
 
-    public static enum NosaraUserType {ANON, WPCOM, SIMPLENOTE, POCKETCASTS}
+    public static enum NosaraUserType {ANON, WPCOM, SIMPLENOTE, POCKETCASTS, DAYONE}
 
     /**
      * Socket timeout in milliseconds for rest requests
