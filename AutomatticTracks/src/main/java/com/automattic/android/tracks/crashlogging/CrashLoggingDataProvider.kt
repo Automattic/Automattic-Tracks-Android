@@ -32,6 +32,9 @@ interface CrashLoggingDataProvider {
 
     /**
      * Provides sampler for Sentry Performance Monitoring transactions
+     *
+     * Use [com.automattic.android.tracks.crashlogging.performance.NoopPerformanceSampler] if
+     * project doesn't use Performance Monitoring.
      */
     val performanceSampler: PerformanceSampler
 
