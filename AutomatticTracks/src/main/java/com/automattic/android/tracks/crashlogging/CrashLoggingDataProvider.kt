@@ -88,10 +88,18 @@ sealed class PerformanceMonitoringConfig {
          * Provides sample rate for performance monitoring. Indicates how often do we measure performance.
          * Has to be between 0 and 1.
          */
-        val sampleRate: Double
+        val sampleRate: Double,
+        /**
+         * Provides sample rate for recording profiles.
+         * Indicates how often do we record profile for a performance transaction.
+         * Mind that this value is **relative** to [sampleRate] value.
+         * Has to be between 0 and 1.
+         */
+        val profilesSampleRate: Double = 0.0
     ) : PerformanceMonitoringConfig() {
         init {
             assert(sampleRate in 0.0..1.0)
+            assert(profilesSampleRate in 0.0..1.0)
         }
     }
 }
