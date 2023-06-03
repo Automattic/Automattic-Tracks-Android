@@ -27,15 +27,20 @@ internal class SentryCrashLogging constructor(
 
     init {
         sentryWrapper.initialize(application) { options ->
+
+            val (tracesSampleRate, profilesSampleRate) = dataProvider.performanceMonitoringConfig.let {
+                when (it) {
+                    Disabled -> null to null
+                    is Enabled -> it.sampleRate to it.profilesSampleRate
+                }
+            }
+
             options.apply {
                 dsn = dataProvider.sentryDSN
                 environment = dataProvider.buildType
                 release = dataProvider.releaseName
-                tracesSampleRate =
-                    when (val perfConfig = dataProvider.performanceMonitoringConfig) {
-                        Disabled -> null
-                        is Enabled -> perfConfig.sampleRate
-                    }
+                this.tracesSampleRate = tracesSampleRate
+                this.profilesSampleRate = profilesSampleRate
                 isDebug = dataProvider.enableCrashLoggingLogs
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
                 setBeforeBreadcrumb { breadcrumb, _ ->
