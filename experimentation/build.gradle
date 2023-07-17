@@ -46,7 +46,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesExperimentationVersion"
 
     //FluxC
-    implementation "org.wordpress:fluxc:1.36.0"
+    implementation "org.wordpress:fluxc:$wordPressFluxCVersion"
 
     //WordPress utils
     implementation "org.wordpress:utils:2.3.0"
