@@ -25,3 +25,8 @@ ext {
     compileSdkVersion = 33
     targetSdkVersion = 33
 }
+
+
+ext {
+    sentryBomVersion = '6.18.1'
+}
