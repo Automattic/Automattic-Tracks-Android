@@ -28,5 +28,6 @@ ext {
 
 
 ext {
+    androidxAnnotationVersion = "1.1.0"
     sentryBomVersion = '6.18.1'
 }
