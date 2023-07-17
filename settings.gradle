@@ -1,7 +1,9 @@
 pluginManagement {
+    gradle.ext.agpVersion = '7.3.1'
+
     plugins {
-        id 'com.android.library' version '7.3.1'
-        id 'com.android.application' version '7.3.1'
+        id 'com.android.library' version gradle.ext.agpVersion
+        id 'com.android.application' version gradle.ext.agpVersion
         id 'org.jetbrains.kotlin.android' version '1.8.21'
         id 'com.automattic.android.publish-to-s3' version '0.7.0'
     }
