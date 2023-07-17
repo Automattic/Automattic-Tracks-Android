@@ -19,3 +19,9 @@ subprojects {
         ktlint "com.pinterest:ktlint:0.47.1"
     }
 }
+
+ext {
+    minSdkVersion = 21
+    compileSdkVersion = 33
+    targetSdkVersion = 33
+}

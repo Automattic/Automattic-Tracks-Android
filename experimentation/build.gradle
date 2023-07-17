@@ -17,12 +17,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion rootProject.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion rootProject.minSdkVersion
         //noinspection OldTargetApi
-        targetSdkVersion 33
+        targetSdkVersion rootProject.targetSdkVersion
         versionCode 1
         versionName "1.0"
     }
