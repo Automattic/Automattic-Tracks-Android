@@ -26,6 +26,8 @@ dependencies {
 }
 
 android {
+    namespace "com.automattic.android.tracks"
+
     compileSdkVersion rootProject.compileSdkVersion
 
     defaultConfig {

@@ -8,6 +8,8 @@ repositories {
 }
 
 android {
+    namespace "com.example.sampletracksapp"
+
     compileSdkVersion rootProject.compileSdkVersion
 
     defaultConfig {

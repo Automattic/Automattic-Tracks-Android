@@ -17,6 +17,8 @@ repositories {
 }
 
 android {
+    namespace "com.automattic.android.experimentation"
+
     compileSdkVersion rootProject.compileSdkVersion
 
     defaultConfig {
