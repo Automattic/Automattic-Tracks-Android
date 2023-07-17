@@ -34,5 +34,6 @@ ext {
     sentryBomVersion = '6.18.1'
     squareupOkhttpVersion = '4.9.0'
 
+    assertjVersion = '3.19.0'
     junitVersion = '4.13.2'
 }
