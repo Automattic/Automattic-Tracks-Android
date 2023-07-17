@@ -49,7 +49,7 @@ dependencies {
     implementation "org.wordpress:fluxc:$wordPressFluxCVersion"
 
     //WordPress utils
-    implementation "org.wordpress:utils:2.3.0"
+    implementation "org.wordpress:utils:$wordPressUtilsVersion"
 
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesExperimentationVersion"
     testImplementation "junit:junit:$junitVersion"

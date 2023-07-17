@@ -29,6 +29,7 @@ ext {
 
 ext {
     wordPressFluxCVersion = '1.36.0'
+    wordPressUtilsVersion = '2.3.0'
 
     androidxAnnotationVersion = "1.1.0"
     kotlinxCoroutinesVersion = '1.6.4'
