@@ -30,4 +30,5 @@ ext {
 ext {
     androidxAnnotationVersion = "1.1.0"
     sentryBomVersion = '6.18.1'
+    squareupOkhttpVersion = '4.9.0'
 }
