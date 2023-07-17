@@ -38,7 +38,7 @@ dependencies {
     implementation "androidx.core:core-ktx:1.3.2"
     implementation "androidx.appcompat:appcompat:1.2.0"
     implementation "com.google.android.material:material:1.3.0"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
 
     // For performance showcase
     implementation "com.squareup.okhttp3:okhttp:$squareupOkhttpVersion"
