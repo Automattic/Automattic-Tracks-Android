@@ -33,12 +33,6 @@ android {
         warningsAsErrors true
         lintConfig file("${project.rootDir}/config/lint/lint.xml")
     }
-
-    publishing {
-        singleVariant('release') {
-            withSourcesJar()
-        }
-    }
 }
 
 dependencies {
