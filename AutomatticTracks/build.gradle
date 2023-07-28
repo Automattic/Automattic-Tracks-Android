@@ -10,29 +10,35 @@ repositories {
 }
 
 dependencies {
-    implementation platform("io.sentry:sentry-bom:6.18.1")
+    implementation platform("io.sentry:sentry-bom:$sentryBomVersion")
     implementation "io.sentry:sentry-android"
     implementation "io.sentry:sentry-android-okhttp"
     implementation "io.sentry:sentry-android-fragment"
-    implementation "androidx.annotation:annotation:1.1.0"
-    implementation "com.squareup.okhttp3:okhttp:4.9.0"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
+    implementation "com.squareup.okhttp3:okhttp:$squareupOkhttpVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
 
-    testImplementation "junit:junit:4.13.2"
-    testImplementation "org.assertj:assertj-core:3.19.0"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
-    testImplementation "org.mockito:mockito-inline:4.8.1"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4"
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
+    testImplementation "org.mockito:mockito-inline:$mockitoInlineVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesVersion"
 }
 
 android {
-    compileSdkVersion 33
+    namespace "com.automattic.android.tracks"
+
+    compileSdkVersion rootProject.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 33
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
         buildConfigField "String", "SENTRY_TEST_PROJECT_DSN", project.properties.get("sentryTestProjectDSN")
         buildConfigField "String", "VERSION_NAME", "\"2.1.0\""
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     compileOptions {
@@ -40,15 +46,10 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    lintOptions {
-        baseline file("lint-baseline.xml")
+    lint {
         warningsAsErrors true
-    }
-
-    publishing {
-        singleVariant('release') {
-            withSourcesJar()
-        }
+        lintConfig file("${project.rootDir}/config/lint/lint.xml")
+        baseline file("${project.rootDir}/config/lint/baseline.xml")
     }
 }
 

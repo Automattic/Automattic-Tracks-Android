@@ -1,8 +1,13 @@
 pluginManagement {
+    gradle.ext.kotlinVersion = '1.8.21'
+    gradle.ext.agpVersion = '8.1.0'
+    gradle.ext.automatticPublishToS3Version = '0.8.0'
+
     plugins {
-        id 'com.android.library' version '7.3.1'
-        id 'org.jetbrains.kotlin.android' version '1.8.21'
-        id 'com.automattic.android.publish-to-s3' version '0.7.0'
+        id 'com.android.library' version gradle.ext.agpVersion
+        id 'com.android.application' version gradle.ext.agpVersion
+        id 'org.jetbrains.kotlin.android' version gradle.ext.kotlinVersion
+        id 'com.automattic.android.publish-to-s3' version gradle.ext.automatticPublishToS3Version
     }
     repositories {
         maven {
