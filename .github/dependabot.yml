@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "gradle"
-    directory: "AutomatticTracks/"
+    directory: "/"
     schedule:
       interval: "daily"
     allow:
