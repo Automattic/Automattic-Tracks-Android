@@ -32,7 +32,7 @@ subprojects {
 
 ext {
     minSdkVersion = 21
-    compileSdkVersion = 33
+    compileSdkVersion = 34
     targetSdkVersion = 33
 }
 
