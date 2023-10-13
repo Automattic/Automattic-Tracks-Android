@@ -49,7 +49,7 @@ ext {
     googleMaterialVersion = '1.3.0'
     kotlinxCoroutinesVersion = '1.6.4'
     kotlinxCoroutinesExperimentationVersion = '1.4.2' // TODO: Align 'kotlinx coroutines' versions.
-    sentryBomVersion = '6.18.1'
+    sentryBomVersion = '6.31.0'
     squareupOkhttpVersion = '4.9.0'
 
     // test
