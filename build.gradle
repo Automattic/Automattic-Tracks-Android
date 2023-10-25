@@ -57,4 +57,7 @@ ext {
     junitVersion = '4.13.2'
     mockitoInlineVersion = '4.8.1'
     mockitoKotlinVersion = '4.0.0'
+
+    // other
+    wordpressLintVersion = '2.0.0'
 }
