@@ -15,11 +15,6 @@ interface CrashLoggingDataProvider {
     val buildType: String
 
     /**
-     * Provides [CrashLogging] with the name of this release.
-     */
-    val releaseName: String
-
-    /**
      * Provides the [CrashLogging] with information about the user's current locale
      */
     val locale: Locale?

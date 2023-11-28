@@ -13,7 +13,6 @@ import java.util.Locale
 class FakeDataProvider(
     override val sentryDSN: String = BuildConfig.SENTRY_TEST_PROJECT_DSN,
     override val buildType: String = "testBuildType",
-    override val releaseName: String = "testReleaseName",
     override val locale: Locale? = Locale.US,
     override val enableCrashLoggingLogs: Boolean = true,
     var crashLoggingEnabled: Boolean = true,

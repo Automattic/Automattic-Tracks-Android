@@ -80,7 +80,6 @@ class SentryCrashLoggingTest {
             SoftAssertions().apply {
                 assertThat(options.dsn).isEqualTo(dataProvider.sentryDSN)
                 assertThat(options.environment).isEqualTo(dataProvider.buildType)
-                assertThat(options.release).isEqualTo(dataProvider.releaseName)
             }.assertAll()
         }
     }
