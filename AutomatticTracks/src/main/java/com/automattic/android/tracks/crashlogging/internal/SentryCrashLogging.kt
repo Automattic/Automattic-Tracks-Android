@@ -5,6 +5,8 @@ import com.automattic.android.tracks.crashlogging.CrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
+import com.automattic.android.tracks.crashlogging.JsException
+import com.automattic.android.tracks.crashlogging.JsExceptionCallback
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Disabled
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Enabled
 import com.automattic.android.tracks.crashlogging.eventLevel
@@ -24,7 +26,6 @@ internal class SentryCrashLogging constructor(
     private val sentryWrapper: SentryErrorTrackerWrapper,
     applicationScope: CoroutineScope
 ) : CrashLogging {
-
     init {
         sentryWrapper.initialize(application) { options ->
 
@@ -132,6 +133,37 @@ internal class SentryCrashLogging constructor(
             this.appendTags(tags)
         }
         sentryWrapper.captureEvent(event)
+    }
+
+    override fun sendJavaScriptReport(
+        jsException: JsException,
+        callback: JsExceptionCallback
+    ) {
+        val exception = Throwable(jsException.message)
+
+        // @TODO we need to figure out how to send a stack trace element with the column number
+        exception.stackTrace = jsException.stackTrace.map {
+            StackTraceElement(
+                it.fileName, // We probably don't have a class name so we use the file name
+                it.function,
+                it.fileName,
+                it.lineNumber
+            )
+        }.toTypedArray()
+
+        val event = SentryEvent(exception).apply {
+            this.message = Message().apply { this.message = message }
+            this.level =  SentryLevel.FATAL
+            this.platform = "javascript"
+            this.appendTags(jsException.tags)
+        }
+
+        // @TODO figure out mechanism to add isHandled and handledBy
+
+        // @TODO add context i.e. context["react_native_context"] = jsException.context;
+
+        sentryWrapper.captureEvent(event)
+        callback.onReportSent(true)
     }
 
     private fun SentryEvent.appendTags(tags: Map<String, String>) {
