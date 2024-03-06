@@ -1,6 +1,5 @@
 package com.automattic.android.tracks.crashlogging
 
-
 data class JsException(
     val type: String,
     val message: String,
@@ -8,16 +7,16 @@ data class JsException(
     val context: Map<String, Any>,
     val tags: Map<String, String>,
     val isHandled: Boolean,
-    val handledBy: String,
+    val handledBy: String
 )
 
-data class JsExceptionStackTraceElement (
+data class JsExceptionStackTraceElement(
     val fileName: String,
     val lineNumber: Int,
     val colNumber: Int,
-    val function: String,
+    val function: String
 )
 
 interface JsExceptionCallback {
-    fun onReportSent(sent:Boolean)
+    fun onReportSent(sent: Boolean)
 }

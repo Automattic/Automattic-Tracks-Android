@@ -146,7 +146,7 @@ internal class SentryCrashLogging constructor(
         callback: JsExceptionCallback
     ) {
         val frames = jsException.stackTrace.map {
-           SentryStackFrame().apply {
+            SentryStackFrame().apply {
                 this.filename = it.fileName
                 this.function = it.function
                 this.lineno = it.lineNumber
@@ -167,7 +167,7 @@ internal class SentryCrashLogging constructor(
 
         val event = SentryEvent().apply {
             this.message = Message().apply { this.message = message }
-            this.level =  SentryLevel.FATAL
+            this.level = SentryLevel.FATAL
             this.platform = "javascript"
             this.appendTags(jsException.tags)
             this.exceptions = mutableListOf(sentryException)

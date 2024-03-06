@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
             sendReportWithJavaScriptException.setOnClickListener {
                 val callback = object : JsExceptionCallback {
                     override fun onReportSent(sent: Boolean) {
-                       Log.d("JsExceptionCallback", "onReportSent: $sent")
+                        Log.d("JsExceptionCallback", "onReportSent: $sent")
                     }
                 }
                 val jsException = JsException(
