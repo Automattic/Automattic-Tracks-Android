@@ -11,11 +11,17 @@ import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Di
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Enabled
 import com.automattic.android.tracks.crashlogging.eventLevel
 import io.sentry.Breadcrumb
+import io.sentry.Scope
+import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.android.fragment.FragmentLifecycleIntegration
+import io.sentry.protocol.Mechanism
 import io.sentry.protocol.Message
+import io.sentry.protocol.SentryException
+import io.sentry.protocol.SentryStackFrame
+import io.sentry.protocol.SentryStackTrace
 import io.sentry.protocol.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -139,29 +145,37 @@ internal class SentryCrashLogging constructor(
         jsException: JsException,
         callback: JsExceptionCallback
     ) {
-        val exception = Throwable(jsException.message)
+        val frames = jsException.stackTrace.map {
+           SentryStackFrame().apply {
+                this.filename = it.fileName
+                this.function = it.function
+                this.lineno = it.lineNumber
+                this.colno = it.colNumber
+            }
+        }.toMutableList()
 
-        // @TODO we need to figure out how to send a stack trace element with the column number
-        exception.stackTrace = jsException.stackTrace.map {
-            StackTraceElement(
-                it.fileName, // We probably don't have a class name so we use the file name
-                it.function,
-                it.fileName,
-                it.lineNumber
-            )
-        }.toTypedArray()
+        val sentryException = SentryException().apply {
+            this.type = jsException.type
+            this.value = jsException.message
+            this.module = "javascript"
+            this.stacktrace = SentryStackTrace().apply { this.frames = frames }
+            this.mechanism = Mechanism().apply {
+                this.isHandled = jsException.isHandled
+                this.type = jsException.handledBy
+            }
+        }
 
-        val event = SentryEvent(exception).apply {
+        val event = SentryEvent().apply {
             this.message = Message().apply { this.message = message }
             this.level =  SentryLevel.FATAL
             this.platform = "javascript"
             this.appendTags(jsException.tags)
+            this.exceptions = mutableListOf(sentryException)
         }
 
-        // @TODO figure out mechanism to add isHandled and handledBy
-
-        // @TODO add context i.e. context["react_native_context"] = jsException.context;
-
+        Sentry.configureScope { scope: Scope ->
+            scope.setContexts("react_native_context", jsException.context)
+        }
         sentryWrapper.captureEvent(event)
         callback.onReportSent(true)
     }
