@@ -11,9 +11,9 @@ data class JsException(
 )
 
 data class JsExceptionStackTraceElement(
-    val fileName: String,
-    val lineNumber: Int,
-    val colNumber: Int,
+    val fileName: String?,
+    val lineNumber: Int?,
+    val colNumber: Int?,
     val function: String
 )
 
