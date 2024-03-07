@@ -1,6 +1,6 @@
 package com.automattic.android.tracks.crashlogging
 
-import io.sentry.android.okhttp.SentryOkHttpInterceptor
+import io.sentry.okhttp.SentryOkHttpInterceptor
 import okhttp3.Interceptor
 
 object CrashLoggingOkHttpInterceptorProvider {
