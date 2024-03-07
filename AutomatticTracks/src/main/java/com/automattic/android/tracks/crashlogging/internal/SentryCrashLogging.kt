@@ -151,6 +151,7 @@ internal class SentryCrashLogging constructor(
                 this.function = it.function
                 this.lineno = it.lineNumber
                 this.colno = it.colNumber
+                this.isInApp = true
             }
         }.toMutableList()
 
