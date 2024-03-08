@@ -1,7 +1,6 @@
 package com.automattic.android.tracks.crashlogging
 
 interface CrashLogging {
-
     /**
      * Records a breadcrumb during the app lifecycle but doesn't report an event. This basically
      * adds more context for the next reports created and sent by [sendReport] or an unhandled
@@ -39,5 +38,10 @@ interface CrashLogging {
         exception: Throwable? = null,
         tags: Map<String, String> = emptyMap(),
         message: String? = null
+    )
+
+    fun sendJavaScriptReport(
+        jsException: JsException,
+        callback: JsExceptionCallback
     )
 }
