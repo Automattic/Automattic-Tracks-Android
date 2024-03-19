@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
             object : CrashLoggingDataProvider {
                 override val sentryDSN = BuildConfig.SENTRY_TEST_PROJECT_DSN
                 override val buildType = BuildConfig.BUILD_TYPE
-                override val releaseName = "test"
                 override val locale = Locale.US
                 override val enableCrashLoggingLogs = true
                 override val performanceMonitoringConfig = PerformanceMonitoringConfig.Enabled(sampleRate = 1.0, profilesSampleRate = 1.0)
