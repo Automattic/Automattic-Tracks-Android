@@ -17,7 +17,7 @@ interface CrashLoggingDataProvider {
     /**
      * Provides [CrashLogging] with the name of this release.
      */
-    val releaseName: String
+    val releaseName: ReleaseName
 
     /**
      * Provides the [CrashLogging] with information about the user's current locale
@@ -79,6 +79,20 @@ interface CrashLoggingDataProvider {
 }
 
 typealias ExtraKnownKey = String
+
+sealed class ReleaseName {
+    /**
+     * Sets release name attached for every event sent to Sentry. It's indented to use in debug.
+     */
+    class SetByApplication(val name: String) : ReleaseName()
+
+    /**
+     * Delegates setting the release name to the Tracks library. It's indented to use in release
+     * builds. The crash logging framework will single-handledly set the release name based on the
+     * build configuration.
+     */
+    object SetByTracksLibrary : ReleaseName()
+}
 
 sealed class PerformanceMonitoringConfig {
     object Disabled : PerformanceMonitoringConfig()

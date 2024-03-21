@@ -9,6 +9,7 @@ import com.automattic.android.tracks.crashlogging.JsException
 import com.automattic.android.tracks.crashlogging.JsExceptionCallback
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Disabled
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Enabled
+import com.automattic.android.tracks.crashlogging.ReleaseName
 import com.automattic.android.tracks.crashlogging.eventLevel
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -44,7 +45,10 @@ internal class SentryCrashLogging constructor(
             options.apply {
                 dsn = dataProvider.sentryDSN
                 environment = dataProvider.buildType
-                release = dataProvider.releaseName
+                release = when (val releaseName = dataProvider.releaseName) {
+                    is ReleaseName.SetByApplication -> releaseName.name
+                    ReleaseName.SetByTracksLibrary -> null
+                }
                 this.tracesSampleRate = tracesSampleRate
                 this.profilesSampleRate = profilesSampleRate
                 isDebug = dataProvider.enableCrashLoggingLogs
