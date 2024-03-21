@@ -44,6 +44,7 @@ internal class SentryCrashLogging constructor(
             options.apply {
                 dsn = dataProvider.sentryDSN
                 environment = dataProvider.buildType
+                release = dataProvider.releaseName
                 this.tracesSampleRate = tracesSampleRate
                 this.profilesSampleRate = profilesSampleRate
                 isDebug = dataProvider.enableCrashLoggingLogs
