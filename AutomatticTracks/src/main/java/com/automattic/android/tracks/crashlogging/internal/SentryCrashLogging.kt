@@ -5,15 +5,22 @@ import com.automattic.android.tracks.crashlogging.CrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
 import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
+import com.automattic.android.tracks.crashlogging.JsException
+import com.automattic.android.tracks.crashlogging.JsExceptionCallback
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Disabled
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.Enabled
 import com.automattic.android.tracks.crashlogging.eventLevel
 import io.sentry.Breadcrumb
+import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.android.fragment.FragmentLifecycleIntegration
+import io.sentry.protocol.Mechanism
 import io.sentry.protocol.Message
+import io.sentry.protocol.SentryException
+import io.sentry.protocol.SentryStackFrame
+import io.sentry.protocol.SentryStackTrace
 import io.sentry.protocol.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -24,7 +31,6 @@ internal class SentryCrashLogging constructor(
     private val sentryWrapper: SentryErrorTrackerWrapper,
     applicationScope: CoroutineScope
 ) : CrashLogging {
-
     init {
         sentryWrapper.initialize(application) { options ->
 
@@ -132,6 +138,46 @@ internal class SentryCrashLogging constructor(
             this.appendTags(tags)
         }
         sentryWrapper.captureEvent(event)
+    }
+
+    override fun sendJavaScriptReport(
+        jsException: JsException,
+        callback: JsExceptionCallback
+    ) {
+        val frames = jsException.stackTrace.map {
+            SentryStackFrame().apply {
+                this.filename = it.fileName
+                this.function = it.function
+                this.lineno = it.lineNumber
+                this.colno = it.colNumber
+                this.isInApp = true
+            }
+        }.toMutableList()
+
+        val sentryException = SentryException().apply {
+            this.type = jsException.type
+            this.value = jsException.message
+            this.module = "javascript"
+            this.stacktrace = SentryStackTrace().apply { this.frames = frames }
+            this.mechanism = Mechanism().apply {
+                this.isHandled = jsException.isHandled
+                this.type = jsException.handledBy
+            }
+        }
+
+        val event = SentryEvent().apply {
+            this.message = Message().apply { this.message = message }
+            this.level = SentryLevel.FATAL
+            this.platform = "javascript"
+            this.appendTags(jsException.tags)
+            this.exceptions = mutableListOf(sentryException)
+        }
+
+        Sentry.configureScope { scope ->
+            scope.setContexts("react_native_context", jsException.context)
+        }
+        sentryWrapper.captureEvent(event)
+        callback.onReportSent(true)
     }
 
     private fun SentryEvent.appendTags(tags: Map<String, String>) {
