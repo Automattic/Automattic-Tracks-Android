@@ -45,9 +45,8 @@ internal class SentryCrashLogging constructor(
             options.apply {
                 dsn = dataProvider.sentryDSN
                 environment = dataProvider.buildType
-                release = when (val releaseName = dataProvider.releaseName) {
-                    is ReleaseName.SetByApplication -> releaseName.name
-                    ReleaseName.SetByTracksLibrary -> null
+                (dataProvider.releaseName as? ReleaseName.SetByApplication)?.let {
+                    release = it.name
                 }
                 this.tracesSampleRate = tracesSampleRate
                 this.profilesSampleRate = profilesSampleRate
