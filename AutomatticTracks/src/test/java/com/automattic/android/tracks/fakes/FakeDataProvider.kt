@@ -6,6 +6,7 @@ import com.automattic.android.tracks.crashlogging.CrashLoggingUser
 import com.automattic.android.tracks.crashlogging.EventLevel
 import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
+import com.automattic.android.tracks.crashlogging.ReleaseName
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Locale
@@ -13,7 +14,7 @@ import java.util.Locale
 class FakeDataProvider(
     override val sentryDSN: String = BuildConfig.SENTRY_TEST_PROJECT_DSN,
     override val buildType: String = "testBuildType",
-    override val releaseName: String = "testReleaseName",
+    override val releaseName: ReleaseName = ReleaseName.SetByApplication("testReleaseName"),
     override val locale: Locale? = Locale.US,
     override val enableCrashLoggingLogs: Boolean = true,
     var crashLoggingEnabled: Boolean = true,

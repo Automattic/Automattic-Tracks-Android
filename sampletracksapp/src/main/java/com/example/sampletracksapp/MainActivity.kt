@@ -13,6 +13,7 @@ import com.automattic.android.tracks.crashlogging.JsException
 import com.automattic.android.tracks.crashlogging.JsExceptionCallback
 import com.automattic.android.tracks.crashlogging.JsExceptionStackTraceElement
 import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
+import com.automattic.android.tracks.crashlogging.ReleaseName
 import com.automattic.android.tracks.crashlogging.RequestFormatter
 import com.automattic.android.tracks.crashlogging.performance.PerformanceMonitoringRepositoryProvider
 import com.automattic.android.tracks.crashlogging.performance.PerformanceTransactionRepository
@@ -41,7 +42,7 @@ class MainActivity : AppCompatActivity() {
             object : CrashLoggingDataProvider {
                 override val sentryDSN = BuildConfig.SENTRY_TEST_PROJECT_DSN
                 override val buildType = BuildConfig.BUILD_TYPE
-                override val releaseName = "test"
+                override val releaseName = ReleaseName.SetByApplication("test")
                 override val locale = Locale.US
                 override val enableCrashLoggingLogs = true
                 override val performanceMonitoringConfig = PerformanceMonitoringConfig.Enabled(sampleRate = 1.0, profilesSampleRate = 1.0)
