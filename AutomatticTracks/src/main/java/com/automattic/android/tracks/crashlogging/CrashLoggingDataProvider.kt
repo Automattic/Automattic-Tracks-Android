@@ -84,7 +84,7 @@ sealed class ReleaseName {
     /**
      * Sets release name attached for every event sent to Sentry. It's indented to use in debug.
      */
-    class SetByApplication(val name: String) : ReleaseName()
+    data class SetByApplication(val name: String) : ReleaseName()
 
     /**
      * Delegates setting the release name to the Tracks library. It's indented to use in release
