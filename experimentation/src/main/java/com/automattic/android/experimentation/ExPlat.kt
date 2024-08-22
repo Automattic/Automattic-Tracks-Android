@@ -52,7 +52,7 @@ class ExPlat internal constructor(
         val experimentIdentifier = experiment.identifier
         if (!experimentIdentifiers.contains(experimentIdentifier)) {
             val message = "ExPlat: experiment not found: \"${experimentIdentifier}\"! " +
-                "Make sure to include it in the set provided via constructor."
+                    "Make sure to include it in the set provided via constructor."
             appLogWrapper.e(T.API, message)
             if (isDebug) throw IllegalArgumentException(message) else return Control
         }
@@ -90,13 +90,20 @@ class ExPlat internal constructor(
         return cachedAssignments
     }
 
-    private suspend fun fetchAssignments() = experimentStore.fetchAssignments(platform, experimentIdentifiers).also {
-        if (it.isError) {
-            appLogWrapper.d(T.API, "ExPlat: fetching assignments failed with result: ${it.error}")
-        } else {
-            appLogWrapper.d(T.API, "ExPlat: fetching assignments successful with result: ${it.assignments}")
+    private suspend fun fetchAssignments() =
+        experimentStore.fetchAssignments(platform, experimentIdentifiers).also {
+            if (it.isError) {
+                appLogWrapper.d(
+                    T.API,
+                    "ExPlat: fetching assignments failed with result: ${it.error}"
+                )
+            } else {
+                appLogWrapper.d(
+                    T.API,
+                    "ExPlat: fetching assignments successful with result: ${it.assignments}"
+                )
+            }
         }
-    }
 
     private enum class RefreshStrategy { ALWAYS, IF_STALE, NEVER }
 
