@@ -1,8 +1,12 @@
 package com.automattic.android.experimentation
 
+import com.automattic.android.experimentation.domain.Assignments
+import com.automattic.android.experimentation.domain.Variation
+import com.automattic.android.experimentation.domain.Variation.Control
 import com.automattic.android.experimentation.ExPlat.RefreshStrategy.ALWAYS
 import com.automattic.android.experimentation.ExPlat.RefreshStrategy.IF_STALE
 import com.automattic.android.experimentation.ExPlat.RefreshStrategy.NEVER
+import com.automattic.android.experimentation.domain.AssignmentsValidator
 import com.automattic.android.experimentation.domain.SystemClock
 import com.automattic.android.experimentation.local.FileBasedCache
 import com.automattic.android.experimentation.remote.AssignmentsDtoJsonAdapter
@@ -12,11 +16,8 @@ import com.squareup.moshi.Moshi
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import org.wordpress.android.fluxc.model.experiments.Assignments
-import org.wordpress.android.fluxc.model.experiments.Variation
-import org.wordpress.android.fluxc.model.experiments.Variation.Control
-import org.wordpress.android.fluxc.store.ExperimentStore
 import org.wordpress.android.fluxc.store.ExperimentStore.Platform
 import org.wordpress.android.fluxc.utils.AppLogWrapper
 import org.wordpress.android.util.AppLog.T
@@ -24,11 +25,11 @@ import org.wordpress.android.util.AppLog.T
 class ExPlat internal constructor(
     private val platform: Platform,
     private val experiments: Set<Experiment>,
-    private val experimentStore: ExperimentStore,
     private val appLogWrapper: AppLogWrapper,
     private val coroutineScope: CoroutineScope,
     private val isDebug: Boolean,
-    private val assignmentsRepository: AssignmentsRepository
+    private val assignmentsRepository: AssignmentsRepository,
+    private val assignmentsValidator: AssignmentsValidator
 ) {
     private val activeVariations = mutableMapOf<String, Variation>()
     private val experimentIdentifiers: List<String> = experiments.map { it.identifier }
@@ -58,7 +59,7 @@ class ExPlat internal constructor(
         }
         return activeVariations.getOrPut(experimentIdentifier) {
             getAssignments(if (shouldRefreshIfStale) IF_STALE else NEVER)
-                .getVariationForExperiment(experimentIdentifier)
+                .getVariation(experimentIdentifier)
         }
     }
 
@@ -73,7 +74,9 @@ class ExPlat internal constructor(
     fun clear() {
         appLogWrapper.d(T.API, "ExPlat: clearing cached assignments and active variations")
         activeVariations.clear()
-        experimentStore.clearCachedAssignments()
+        runBlocking {
+            assignmentsRepository.clearCachedAssignments()
+        }
     }
 
     private fun refresh(refreshStrategy: RefreshStrategy) {
@@ -83,27 +86,34 @@ class ExPlat internal constructor(
     }
 
     private fun getAssignments(refreshStrategy: RefreshStrategy): Assignments {
-        val cachedAssignments = experimentStore.getCachedAssignments() ?: Assignments()
-        if (refreshStrategy == ALWAYS || (refreshStrategy == IF_STALE && cachedAssignments.isStale())) {
+        val cachedAssignments = runBlocking { assignmentsRepository.getCachedAssignments() }
+
+        if (cachedAssignments == null) return Assignments(emptyMap(), 0, 0)
+
+        if (
+            refreshStrategy == ALWAYS ||
+            (refreshStrategy == IF_STALE && assignmentsValidator.run { cachedAssignments.isStale })
+        ) {
             coroutineScope.launch { fetchAssignments() }
         }
         return cachedAssignments
     }
 
     private suspend fun fetchAssignments() =
-        experimentStore.fetchAssignments(platform, experimentIdentifiers).also {
-            if (it.isError) {
+        assignmentsRepository.fetchAssignments(platform.value, experimentIdentifiers).fold(
+            onFailure = {
                 appLogWrapper.d(
                     T.API,
-                    "ExPlat: fetching assignments failed with result: ${it.error}"
+                    "ExPlat: fetching assignments failed with result: $it"
                 )
-            } else {
+            },
+            onSuccess = {
                 appLogWrapper.d(
                     T.API,
-                    "ExPlat: fetching assignments successful with result: ${it.assignments}"
+                    "ExPlat: fetching assignments successful with result: $it"
                 )
             }
-        }
+        )
 
     private enum class RefreshStrategy { ALWAYS, IF_STALE, NEVER }
 
@@ -111,18 +121,17 @@ class ExPlat internal constructor(
         fun create(
             platform: Platform,
             experiments: Set<Experiment>,
-            experimentStore: ExperimentStore,
             appLogWrapper: AppLogWrapper,
             coroutineScope: CoroutineScope,
             isDebug: Boolean,
-            cacheDir: File
+            cacheDir: File,
         ) {
             val moshi = Moshi.Builder().build()
             val jsonAdapter = AssignmentsDtoJsonAdapter(moshi)
+            val clock = SystemClock()
             ExPlat(
                 platform = platform,
                 experiments = experiments,
-                experimentStore = experimentStore,
                 appLogWrapper = appLogWrapper,
                 coroutineScope = coroutineScope,
                 isDebug = isDebug,
@@ -132,10 +141,11 @@ class ExPlat internal constructor(
                         moshi,
                         jsonAdapter,
                         ExPlatUrlBuilder(),
-                        SystemClock()
+                        clock,
                     ),
-                    FileBasedCache(cacheDir, moshi, jsonAdapter)
-                )
+                    FileBasedCache(cacheDir, moshi, jsonAdapter),
+                ),
+                assignmentsValidator = AssignmentsValidator(clock)
             )
         }
     }

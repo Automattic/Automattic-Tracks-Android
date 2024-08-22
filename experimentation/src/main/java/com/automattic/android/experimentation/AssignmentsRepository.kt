@@ -14,7 +14,7 @@ internal class AssignmentsRepository(
         platform: String,
         experimentNames: List<String>,
         anonymousId: String? = null
-    ): Result<Unit> {
+    ): Result<Assignments> {
         val fetchResult =
             experimentRestClient.fetchAssignments(platform, experimentNames, anonymousId)
 
@@ -24,7 +24,7 @@ internal class AssignmentsRepository(
             },
             onSuccess = { assignments ->
                 cache.saveAssignments(assignments)
-                Result.success(Unit)
+                Result.success(assignments)
             }
         )
     }

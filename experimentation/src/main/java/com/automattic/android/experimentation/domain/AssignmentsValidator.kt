@@ -2,10 +2,11 @@
 
  import java.util.Date
 
- internal class AssignmentsValidator {
+ internal class AssignmentsValidator(private val clock: Clock) {
 
     private val Assignments.expiresAt
         get() = fetchedAt + timeToLive
 
-    fun Assignments.isStale(clock: Clock) = clock.currentTimeSeconds() > expiresAt
+    val Assignments.isStale
+        get() = clock.currentTimeSeconds() > expiresAt
  }
