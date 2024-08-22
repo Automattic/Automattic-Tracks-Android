@@ -1,9 +1,14 @@
 package com.automattic.android.experimentation
 
+import com.automattic.android.experimentation.domain.AssignmentsValidator
+import com.automattic.android.experimentation.domain.Clock
+import com.automattic.android.experimentation.local.FileBasedCache
+import com.automattic.android.experimentation.remote.ExperimentRestClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
+import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -24,9 +29,15 @@ import org.wordpress.android.fluxc.store.ExperimentStore.OnAssignmentsFetched
 import org.wordpress.android.fluxc.store.ExperimentStore.Platform
 import org.wordpress.android.fluxc.utils.AppLogWrapper
 import java.util.Date
+import kotlin.io.path.createTempDirectory
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import okhttp3.mockwebserver.MockResponse
 
 @ExperimentalCoroutinesApi
 class ExPlatTest {
+    private val server: MockWebServer = MockWebServer()
     private val platform = Platform.WORDPRESS_ANDROID
     private val experimentStore: ExperimentStore = mock()
     private val appLogWrapper: AppLogWrapper = mock()
@@ -39,16 +50,27 @@ class ExPlatTest {
     }
 
     @Test
-    fun `refreshIfNeeded fetches assignments if cache is null`() = runBlockingTest {
-        exPlat = createExPlat(
-            isDebug = true,
-            experiments = setOf(dummyExperiment),
+    fun `refreshing assignments in case of empty cache is successful`() = runTest {
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setBody(
+                    """
+                    {
+                        "variations": {
+                            "dummy": "variation1"
+                        },
+                        "ttl": 3600
+                    }
+                    """.trimIndent()
+                )
         )
-        setupAssignments(cachedAssignments = null, fetchedAssignments = buildAssignments())
+        exPlat = createExPlat(experiments = setOf(dummyExperiment))
 
         exPlat.refreshIfNeeded()
 
-        verify(experimentStore, times(1)).fetchAssignments(eq(platform), any(), anyOrNull())
+        val result = exPlat.getVariation(dummyExperiment)
+        assertThat(result).isEqualTo(com.automattic.android.experimentation.domain.Variation.Treatment("variation1"))
     }
 
     @Test
@@ -235,15 +257,21 @@ class ExPlatTest {
         }
     }
 
-    private fun createExPlat(isDebug: Boolean, experiments: Set<Experiment>): ExPlat =
+    private fun createExPlat(isDebug: Boolean = true, experiments: Set<Experiment>): ExPlat =
         ExPlat(
             platform = platform,
             experiments = experiments,
-            experimentStore = experimentStore,
+//            experimentStore = experimentStore,
             appLogWrapper = appLogWrapper,
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             isDebug = isDebug,
-            assignmentsRepository = mock(),
+            assignmentsRepository = AssignmentsRepository(
+                ExperimentRestClient(
+                    urlBuilder = { _, _, _ -> server.url("/").newBuilder().build() },
+                ),
+                FileBasedCache(createTempDirectory().toFile()),
+            ),
+            assignmentsValidator = AssignmentsValidator(Clock { 1 }),
         )
 
     private suspend fun setupAssignments(

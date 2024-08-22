@@ -86,17 +86,21 @@ class ExPlat internal constructor(
     }
 
     private fun getAssignments(refreshStrategy: RefreshStrategy): Assignments {
-        val cachedAssignments = runBlocking { assignmentsRepository.getCachedAssignments() }
-
-        if (cachedAssignments == null) return Assignments(emptyMap(), 0, 0)
-
-        if (
-            refreshStrategy == ALWAYS ||
-            (refreshStrategy == IF_STALE && assignmentsValidator.run { cachedAssignments.isStale })
-        ) {
-            coroutineScope.launch { fetchAssignments() }
+        return runBlocking {
+            val cachedAssignments =
+                assignmentsRepository.getCachedAssignments() ?: Assignments(
+                    emptyMap(), 0, 0
+                )
+            if (
+                refreshStrategy == ALWAYS ||
+                (refreshStrategy == IF_STALE && assignmentsValidator.run { cachedAssignments.isStale })
+            ) {
+                fetchAssignments()
+                assignmentsRepository.getCachedAssignments() ?: cachedAssignments
+            } else {
+                cachedAssignments
+            }
         }
-        return cachedAssignments
     }
 
     private suspend fun fetchAssignments() =
