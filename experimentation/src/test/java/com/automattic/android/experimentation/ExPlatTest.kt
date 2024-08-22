@@ -30,6 +30,7 @@ import org.wordpress.android.fluxc.store.ExperimentStore.Platform
 import org.wordpress.android.fluxc.utils.AppLogWrapper
 import java.util.Date
 import kotlin.io.path.createTempDirectory
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -69,7 +70,7 @@ class ExPlatTest {
 
         exPlat.refreshIfNeeded()
 
-        val result = exPlat.getVariation(dummyExperiment)
+        val result = exPlat.getVariation(dummyExperiment).single()
         assertThat(result).isEqualTo(com.automattic.android.experimentation.domain.Variation.Treatment("variation1"))
     }
 

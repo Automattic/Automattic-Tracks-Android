@@ -15,6 +15,8 @@ import com.automattic.android.experimentation.remote.ExperimentRestClient
 import com.squareup.moshi.Moshi
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
@@ -49,29 +51,35 @@ class ExPlat internal constructor(
     fun getVariation(
         experiment: Experiment,
         shouldRefreshIfStale: Boolean = false,
-    ): Variation {
-        val experimentIdentifier = experiment.identifier
-        if (!experimentIdentifiers.contains(experimentIdentifier)) {
-            val message = "ExPlat: experiment not found: \"${experimentIdentifier}\"! " +
-                    "Make sure to include it in the set provided via constructor."
-            appLogWrapper.e(T.API, message)
-            if (isDebug) throw IllegalArgumentException(message) else return Control
-        }
-        return activeVariations.getOrPut(experimentIdentifier) {
-            getAssignments(if (shouldRefreshIfStale) IF_STALE else NEVER)
-                .getVariation(experimentIdentifier)
+    ): Flow<Variation> {
+        return flow<Variation> {
+            val experimentIdentifier = experiment.identifier
+            if (!experimentIdentifiers.contains(experimentIdentifier)) {
+                val message = "ExPlat: experiment not found: \"${experimentIdentifier}\"! " +
+                        "Make sure to include it in the set provided via constructor."
+                appLogWrapper.e(T.API, message)
+                if (isDebug) throw IllegalArgumentException(message) else emit(Control)
+            }
+
+            emit(
+                activeVariations.getOrPut(experimentIdentifier) {
+                    getAssignments(if (shouldRefreshIfStale) IF_STALE else NEVER)
+                        .getVariation(experimentIdentifier)
+                }
+            )
+
         }
     }
 
-    fun refreshIfNeeded() {
+    suspend fun refreshIfNeeded() {
         refresh(refreshStrategy = IF_STALE)
     }
 
-    fun forceRefresh() {
+    suspend fun forceRefresh() {
         refresh(refreshStrategy = ALWAYS)
     }
 
-    fun clear() {
+    suspend fun clear() {
         appLogWrapper.d(T.API, "ExPlat: clearing cached assignments and active variations")
         activeVariations.clear()
         runBlocking {
@@ -79,27 +87,25 @@ class ExPlat internal constructor(
         }
     }
 
-    private fun refresh(refreshStrategy: RefreshStrategy) {
+    private suspend fun refresh(refreshStrategy: RefreshStrategy) {
         if (experimentIdentifiers.isNotEmpty()) {
             getAssignments(refreshStrategy)
         }
     }
 
-    private fun getAssignments(refreshStrategy: RefreshStrategy): Assignments {
-        return runBlocking {
-            val cachedAssignments =
-                assignmentsRepository.getCachedAssignments() ?: Assignments(
-                    emptyMap(), 0, 0
-                )
-            if (
-                refreshStrategy == ALWAYS ||
-                (refreshStrategy == IF_STALE && assignmentsValidator.run { cachedAssignments.isStale })
-            ) {
-                fetchAssignments()
-                assignmentsRepository.getCachedAssignments() ?: cachedAssignments
-            } else {
-                cachedAssignments
-            }
+    private suspend fun getAssignments(refreshStrategy: RefreshStrategy): Assignments {
+        val cachedAssignments =
+            assignmentsRepository.getCachedAssignments() ?: Assignments(
+                emptyMap(), 0, 0
+            )
+        return if (
+            refreshStrategy == ALWAYS ||
+            (refreshStrategy == IF_STALE && assignmentsValidator.run { cachedAssignments.isStale })
+        ) {
+            fetchAssignments()
+            assignmentsRepository.getCachedAssignments() ?: cachedAssignments
+        } else {
+            cachedAssignments
         }
     }
 
