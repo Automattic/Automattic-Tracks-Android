@@ -205,15 +205,22 @@ class ExPlatTest {
         }
 
     @Test
-    fun `getVariation does not fetch assignments if cache is fresh`() = runBlockingTest {
-        setupAssignments(
-            cachedAssignments = buildAssignments(isStale = false),
-            fetchedAssignments = buildAssignments()
+    fun `getting variations doesn't fetch assignments, if cache is not stale`() = runTest {
+        var time = 0L
+        val fakeClock = Clock { time }
+        exPlat = createExPlat(experiments = setOf(dummyExperiment), clock = fakeClock)
+        enqueue(com.automattic.android.experimentation.domain.Variation.Treatment("variation1"))
+        exPlat.forceRefresh()
+        time += 3600 - 1 // making the cache *not* stale
+        enqueue(com.automattic.android.experimentation.domain.Variation.Treatment("variation2"))
+
+        val result = exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = true).single()
+
+        assertThat(result).isEqualTo(
+            com.automattic.android.experimentation.domain.Variation.Treatment(
+                "variation1"
+            )
         )
-
-        exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = true)
-
-        verify(experimentStore, never()).fetchAssignments(eq(platform), any(), anyOrNull())
     }
 
     @Test
