@@ -152,6 +152,23 @@ class ExPlatTest {
     }
 
     @Test
+    fun `getting variations fetches assignments, if user requested update on stale cache`() {
+        runTest {
+            var time = 0L
+            val fakeClock = Clock { time }
+            exPlat = createExPlat(experiments = setOf(dummyExperiment), clock = fakeClock)
+            enqueue(com.automattic.android.experimentation.domain.Variation.Treatment("variation1"))
+            exPlat.forceRefresh()
+            time += 3600 + 1 // making the cache stale
+            enqueue(com.automattic.android.experimentation.domain.Variation.Treatment("variation2"))
+
+            val result = exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = true).single()
+
+            assertThat(result).isEqualTo(com.automattic.android.experimentation.domain.Variation.Treatment("variation2"))
+        }
+    }
+
+    @Test
     fun `getVariation fetches assignments if cache is null`() = runBlockingTest {
         exPlat = createExPlat(
             isDebug = true,
