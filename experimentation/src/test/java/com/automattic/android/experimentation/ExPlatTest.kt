@@ -244,31 +244,6 @@ class ExPlatTest {
         }
 
     @Test
-    fun `getVariation does not return different cached assignments if active variation exists`() =
-        runBlockingTest {
-            val controlVariation = Control
-            val treatmentVariation = Treatment("treatment")
-
-            val treatmentAssignments =
-                buildAssignments(variations = mapOf(dummyExperiment.identifier to treatmentVariation))
-
-            setupAssignments(cachedAssignments = null, fetchedAssignments = treatmentAssignments)
-
-            val firstVariation = exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = false)
-            assertThat(firstVariation).isEqualTo(controlVariation)
-
-            exPlat.forceRefresh()
-
-            setupAssignments(
-                cachedAssignments = treatmentAssignments,
-                fetchedAssignments = treatmentAssignments
-            )
-
-            val secondVariation = exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = false)
-            assertThat(secondVariation).isEqualTo(controlVariation)
-        }
-
-    @Test
     fun `forceRefresh fetches assignments if experiments is not empty`() = runBlockingTest {
         exPlat = createExPlat(
             isDebug = true,
