@@ -75,6 +75,43 @@ class ExPlatTest {
     }
 
     @Test
+    fun `refreshing assignments in case of stale cache is successful`() = runTest {
+        var time = 0L
+        val fakeClock = Clock { time }
+        exPlat = createExPlat(experiments = setOf(dummyExperiment), clock = fakeClock)
+        enqueue(com.automattic.android.experimentation.domain.Variation.Treatment("variation1"))
+        exPlat.forceRefresh()
+        time += 3600 * 1000 + 1 // making the cache stale
+        enqueue(com.automattic.android.experimentation.domain.Variation.Treatment("variation2"))
+        exPlat.refreshIfNeeded()
+
+        val result = exPlat.getVariation(dummyExperiment).single()
+
+        assertThat(result).isEqualTo(com.automattic.android.experimentation.domain.Variation.Treatment("variation2"))
+    }
+
+    fun enqueue(variation: com.automattic.android.experimentation.domain.Variation) {
+        val variationName = when (variation) {
+            is com.automattic.android.experimentation.domain.Variation.Control -> "control"
+            is com.automattic.android.experimentation.domain.Variation.Treatment -> variation.name
+        }
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setBody(
+                    """
+                    {
+                        "variations": {
+                            "dummy": "$variationName"
+                        },
+                        "ttl": 3600
+                    }
+                    """.trimIndent()
+                )
+        )
+    }
+
+    @Test
     fun `refreshIfNeeded fetches assignments if cache is stale`() = runBlockingTest {
         exPlat = createExPlat(
             isDebug = true,
@@ -258,7 +295,11 @@ class ExPlatTest {
         }
     }
 
-    private fun createExPlat(isDebug: Boolean = true, experiments: Set<Experiment>): ExPlat =
+    private fun createExPlat(
+        isDebug: Boolean = true,
+        experiments: Set<Experiment>,
+        clock: Clock = Clock { 0 }
+    ): ExPlat =
         ExPlat(
             platform = platform,
             experiments = experiments,
@@ -269,10 +310,11 @@ class ExPlatTest {
             assignmentsRepository = AssignmentsRepository(
                 ExperimentRestClient(
                     urlBuilder = { _, _, _ -> server.url("/").newBuilder().build() },
+                    clock = clock
                 ),
                 FileBasedCache(createTempDirectory().toFile()),
             ),
-            assignmentsValidator = AssignmentsValidator(Clock { 1 }),
+            assignmentsValidator = AssignmentsValidator(clock),
         )
 
     private suspend fun setupAssignments(
