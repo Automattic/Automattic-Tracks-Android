@@ -71,7 +71,11 @@ class ExPlatTest {
         exPlat.refreshIfNeeded()
 
         val result = exPlat.getVariation(dummyExperiment).single()
-        assertThat(result).isEqualTo(com.automattic.android.experimentation.domain.Variation.Treatment("variation1"))
+        assertThat(result).isEqualTo(
+            com.automattic.android.experimentation.domain.Variation.Treatment(
+                "variation1"
+            )
+        )
     }
 
     @Test
@@ -87,7 +91,11 @@ class ExPlatTest {
 
         val result = exPlat.getVariation(dummyExperiment).single()
 
-        assertThat(result).isEqualTo(com.automattic.android.experimentation.domain.Variation.Treatment("variation2"))
+        assertThat(result).isEqualTo(
+            com.automattic.android.experimentation.domain.Variation.Treatment(
+                "variation2"
+            )
+        )
     }
 
     fun enqueue(variation: com.automattic.android.experimentation.domain.Variation) {
@@ -124,7 +132,11 @@ class ExPlatTest {
 
         val result = exPlat.getVariation(dummyExperiment).single()
 
-        assertThat(result).isEqualTo(com.automattic.android.experimentation.domain.Variation.Treatment("variation1"))
+        assertThat(result).isEqualTo(
+            com.automattic.android.experimentation.domain.Variation.Treatment(
+                "variation1"
+            )
+        )
     }
 
     @Test
@@ -141,7 +153,11 @@ class ExPlatTest {
 
             val result = exPlat.getVariation(dummyExperiment).single()
 
-            assertThat(result).isEqualTo(com.automattic.android.experimentation.domain.Variation.Treatment("variation2"))
+            assertThat(result).isEqualTo(
+                com.automattic.android.experimentation.domain.Variation.Treatment(
+                    "variation2"
+                )
+            )
         }
 
     @Test
@@ -164,22 +180,29 @@ class ExPlatTest {
 
             val result = exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = true).single()
 
-            assertThat(result).isEqualTo(com.automattic.android.experimentation.domain.Variation.Treatment("variation2"))
+            assertThat(result).isEqualTo(
+                com.automattic.android.experimentation.domain.Variation.Treatment(
+                    "variation2"
+                )
+            )
         }
     }
 
     @Test
-    fun `getVariation fetches assignments if cache is null`() = runBlockingTest {
-        exPlat = createExPlat(
-            isDebug = true,
-            experiments = setOf(dummyExperiment),
-        )
-        setupAssignments(cachedAssignments = null, fetchedAssignments = buildAssignments())
+    fun `getting variations fetches assignments, if user requested update on empty cache`() =
+        runTest {
+            exPlat = createExPlat(experiments = setOf(dummyExperiment))
+            enqueue(com.automattic.android.experimentation.domain.Variation.Treatment("variation1"))
 
-        exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = true)
+            val result = exPlat.getVariation(dummyExperiment, shouldRefreshIfStale = true).single()
 
-        verify(experimentStore, times(1)).fetchAssignments(eq(platform), any(), anyOrNull())
-    }
+            assertThat(result).isEqualTo(
+                com.automattic.android.experimentation.domain.Variation.Treatment(
+                    "variation1"
+                )
+            )
+
+        }
 
     @Test
     fun `getVariation fetches assignments if cache is stale`() = runBlockingTest {
