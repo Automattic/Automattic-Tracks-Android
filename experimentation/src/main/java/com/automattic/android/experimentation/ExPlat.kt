@@ -94,16 +94,15 @@ class ExPlat internal constructor(
     }
 
     private suspend fun getAssignments(refreshStrategy: RefreshStrategy): Assignments {
-        val cachedAssignments =
-            assignmentsRepository.getCachedAssignments() ?: Assignments(
-                emptyMap(), 0, 0
-            )
+        val cachedAssignments = assignmentsRepository.getCachedAssignments()
+
         return if (
+            cachedAssignments == null ||
             refreshStrategy == ALWAYS ||
             (refreshStrategy == IF_STALE && assignmentsValidator.run { cachedAssignments.isStale })
         ) {
             fetchAssignments()
-            assignmentsRepository.getCachedAssignments() ?: cachedAssignments
+            assignmentsRepository.getCachedAssignments() ?: Assignments(emptyMap(), 0, 0)
         } else {
             cachedAssignments
         }
