@@ -221,6 +221,7 @@ class ExPlatTest {
             appLogWrapper = appLogWrapper,
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             isDebug = isDebug,
+            assignmentsRepository = mock(),
         )
 
     private suspend fun setupAssignments(cachedAssignments: Assignments?, fetchedAssignments: Assignments) {

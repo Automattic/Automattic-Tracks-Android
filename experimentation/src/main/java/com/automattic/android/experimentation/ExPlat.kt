@@ -3,8 +3,16 @@ package com.automattic.android.experimentation
 import com.automattic.android.experimentation.ExPlat.RefreshStrategy.ALWAYS
 import com.automattic.android.experimentation.ExPlat.RefreshStrategy.IF_STALE
 import com.automattic.android.experimentation.ExPlat.RefreshStrategy.NEVER
+import com.automattic.android.experimentation.domain.SystemClock
+import com.automattic.android.experimentation.local.FileBasedCache
+import com.automattic.android.experimentation.remote.AssignmentsDtoJsonAdapter
+import com.automattic.android.experimentation.remote.ExPlatUrlBuilder
+import com.automattic.android.experimentation.remote.ExperimentRestClient
+import com.squareup.moshi.Moshi
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import org.wordpress.android.fluxc.model.experiments.Assignments
 import org.wordpress.android.fluxc.model.experiments.Variation
 import org.wordpress.android.fluxc.model.experiments.Variation.Control
@@ -13,13 +21,14 @@ import org.wordpress.android.fluxc.store.ExperimentStore.Platform
 import org.wordpress.android.fluxc.utils.AppLogWrapper
 import org.wordpress.android.util.AppLog.T
 
-class ExPlat(
+class ExPlat internal constructor(
     private val platform: Platform,
     private val experiments: Set<Experiment>,
     private val experimentStore: ExperimentStore,
     private val appLogWrapper: AppLogWrapper,
     private val coroutineScope: CoroutineScope,
     private val isDebug: Boolean,
+    private val assignmentsRepository: AssignmentsRepository
 ) {
     private val activeVariations = mutableMapOf<String, Variation>()
     private val experimentIdentifiers: List<String> = experiments.map { it.identifier }
@@ -90,4 +99,37 @@ class ExPlat(
     }
 
     private enum class RefreshStrategy { ALWAYS, IF_STALE, NEVER }
+
+    companion object {
+        fun create(
+            platform: Platform,
+            experiments: Set<Experiment>,
+            experimentStore: ExperimentStore,
+            appLogWrapper: AppLogWrapper,
+            coroutineScope: CoroutineScope,
+            isDebug: Boolean,
+            cacheDir: File
+        ) {
+            val moshi = Moshi.Builder().build()
+            val jsonAdapter = AssignmentsDtoJsonAdapter(moshi)
+            ExPlat(
+                platform = platform,
+                experiments = experiments,
+                experimentStore = experimentStore,
+                appLogWrapper = appLogWrapper,
+                coroutineScope = coroutineScope,
+                isDebug = isDebug,
+                assignmentsRepository = AssignmentsRepository(
+                    ExperimentRestClient(
+                        OkHttpClient(),
+                        moshi,
+                        jsonAdapter,
+                        ExPlatUrlBuilder(),
+                        SystemClock()
+                    ),
+                    FileBasedCache(cacheDir, moshi, jsonAdapter)
+                )
+            )
+        }
+    }
 }
