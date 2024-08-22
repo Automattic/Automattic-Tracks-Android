@@ -38,7 +38,7 @@ internal class ExperimentRestClient(
                 } else {
                     runCatching {
                         val dto = jsonAdapter.fromJson(response.body!!.source())!!
-                        dto.toAssignments(clock.currentTimeMillis())
+                        dto.toAssignments(clock.currentTimeSeconds())
                     }
                 }
             }

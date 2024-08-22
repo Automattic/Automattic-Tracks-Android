@@ -1,9 +1,9 @@
 package com.automattic.android.experimentation.domain
 
 internal fun interface Clock {
-    fun currentTimeMillis(): Long
+    fun currentTimeSeconds(): Long
 }
 
 internal class SystemClock : Clock {
-    override fun currentTimeMillis(): Long = System.currentTimeMillis()
+    override fun currentTimeSeconds(): Long = System.currentTimeMillis() / 1000
 }
