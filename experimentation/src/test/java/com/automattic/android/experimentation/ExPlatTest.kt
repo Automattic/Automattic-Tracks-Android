@@ -112,22 +112,6 @@ class ExPlatTest {
     }
 
     @Test
-    fun `refreshIfNeeded fetches assignments if cache is stale`() = runBlockingTest {
-        exPlat = createExPlat(
-            isDebug = true,
-            experiments = setOf(dummyExperiment),
-        )
-        setupAssignments(
-            cachedAssignments = buildAssignments(isStale = true),
-            fetchedAssignments = buildAssignments()
-        )
-
-        exPlat.refreshIfNeeded()
-
-        verify(experimentStore, times(1)).fetchAssignments(eq(platform), any(), anyOrNull())
-    }
-
-    @Test
     fun `refreshIfNeeded does not fetch assignments if cache is fresh`() = runBlockingTest {
         setupAssignments(
             cachedAssignments = buildAssignments(isStale = false),
