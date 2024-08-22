@@ -13,7 +13,7 @@ internal object AssignmentsDtoMapper {
                     Variation.Treatment(value)
                 }
             },
-            ttl = ttl,
+            timeToLive = ttl,
             fetchedAt = fetchedAt,
         )
     }
@@ -25,7 +25,7 @@ internal object AssignmentsDtoMapper {
                     is Variation.Treatment -> value.name
                 }
             },
-            ttl = ttl,
+            ttl = timeToLive,
         ) to fetchedAt
     }
 }

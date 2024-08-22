@@ -35,7 +35,7 @@ internal class ExperimentRestClientTest {
                     "experiment1" to Treatment("variation1"),
                     "experiment2" to Treatment("variation2"),
                 ),
-                ttl = 3600,
+                timeToLive = 3600,
                 fetchedAt = TEST_TIMESTAMP,
             ),
         )
