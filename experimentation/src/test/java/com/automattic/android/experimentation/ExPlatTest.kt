@@ -128,20 +128,21 @@ class ExPlatTest {
     }
 
     @Test
-    fun `forceRefresh fetches assignments if cache is fresh`() = runBlockingTest {
-        exPlat = createExPlat(
-            isDebug = true,
-            experiments = setOf(dummyExperiment),
-        )
-        setupAssignments(
-            cachedAssignments = buildAssignments(isStale = true),
-            fetchedAssignments = buildAssignments()
-        )
+    fun `force refreshing fetches new assignments, even when the cache is not stale`() =
+        runTest {
+            var time = 0L
+            val fakeClock = Clock { time }
+            exPlat = createExPlat(experiments = setOf(dummyExperiment), clock = fakeClock)
+            enqueue(com.automattic.android.experimentation.domain.Variation.Treatment("variation1"))
+            exPlat.forceRefresh()
+            time += 3600 - 1 // making the cache *not* stale
+            enqueue(com.automattic.android.experimentation.domain.Variation.Treatment("variation2"))
+            exPlat.forceRefresh()
 
-        exPlat.forceRefresh()
+            val result = exPlat.getVariation(dummyExperiment).single()
 
-        verify(experimentStore, times(1)).fetchAssignments(eq(platform), any(), anyOrNull())
-    }
+            assertThat(result).isEqualTo(com.automattic.android.experimentation.domain.Variation.Treatment("variation2"))
+        }
 
     @Test
     fun `clear calls experiment store`() = runBlockingTest {
