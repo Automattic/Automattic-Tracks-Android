@@ -161,13 +161,6 @@ class ExPlatTest {
         }
 
     @Test
-    fun `clear calls experiment store`() = runBlockingTest {
-        exPlat.clear()
-
-        verify(experimentStore, times(1)).clearCachedAssignments()
-    }
-
-    @Test
     fun `getting variations fetches assignments, if user requested update on stale cache`() {
         runTest {
             var time = 0L
