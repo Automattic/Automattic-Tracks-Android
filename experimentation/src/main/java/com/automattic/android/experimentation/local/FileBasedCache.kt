@@ -47,4 +47,10 @@ internal class FileBasedCache(
             assignmentsFile.writeText(wrapperJson)
         }
     }
+
+    suspend fun clear() {
+        withContext(Dispatchers.IO) {
+            assignmentsFile.delete()
+        }
+    }
 }

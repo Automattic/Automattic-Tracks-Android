@@ -32,4 +32,8 @@ internal class AssignmentsRepository(
     suspend fun getCachedAssignments(): Assignments? {
         return cache.getAssignments()
     }
+
+    suspend fun clearCachedAssignments() {
+        cache.clear()
+    }
 }

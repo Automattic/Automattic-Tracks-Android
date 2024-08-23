@@ -52,6 +52,24 @@ internal class FileBasedCacheTest {
         assertNull(result)
     }
 
+    @Test
+    fun `clearing cache without content doesn't crash`() = runTest {
+        sut = fileBasedCache()
+
+        sut.clear()
+    }
+
+    @Test
+    fun `clearing cache is successful`() = runTest {
+        sut = fileBasedCache()
+        sut.saveAssignments(TEST_ASSIGNMENTS)
+
+        sut.clear()
+
+        val result = sut.getAssignments()
+        assertNull(result)
+    }
+
     private fun fileBasedCache() =
         FileBasedCache(cacheDir = createTempDirectory().toFile())
 

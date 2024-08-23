@@ -67,6 +67,13 @@ class ExPlat internal constructor(
         refresh(refreshStrategy = ALWAYS)
     }
 
+    suspend fun clear() {
+        appLogWrapper.d(T.API, "ExPlat: clearing cached assignments and active variations")
+        runBlocking {
+            assignmentsRepository.clearCachedAssignments()
+        }
+    }
+
     private suspend fun refresh(refreshStrategy: RefreshStrategy) {
         if (experimentIdentifiers.isNotEmpty()) {
             getAssignments(refreshStrategy)
