@@ -33,6 +33,8 @@ class ExPlat internal constructor(
     private val assignmentsRepository: AssignmentsRepository,
     private val assignmentsValidator: AssignmentsValidator
 ) {
+    // Keep track of the active variations for each experiment to avoid potentially
+    // change the variation during the same session.
     private val activeVariations = mutableMapOf<String, Variation>()
     private val experimentIdentifiers: List<String> = experiments.map { it.identifier }
 
