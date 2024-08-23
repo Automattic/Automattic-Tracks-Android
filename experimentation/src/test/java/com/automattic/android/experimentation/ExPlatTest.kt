@@ -272,6 +272,17 @@ class ExPlatTest {
         }
     }
 
+    @Test(expected = IllegalArgumentException::class)
+    fun `getVariation throws IllegalArgumentException if experiment was not found and is debug`() {
+        runBlockingTest {
+            exPlat = createExPlat(
+                isDebug = true,
+                experiments = emptySet(),
+            )
+            exPlat.getVariation(dummyExperiment, false)
+        }
+    }
+
     private fun createExPlat(
         isDebug: Boolean = true,
         experiments: Set<Experiment>,
