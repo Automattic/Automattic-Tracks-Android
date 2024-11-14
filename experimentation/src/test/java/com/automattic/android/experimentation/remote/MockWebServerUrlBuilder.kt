@@ -27,11 +27,11 @@ internal open class MockWebServerUrlBuilder(
 internal class UnknownHostMockWebServerUrlBuilder(
     exPlatUrlBuilder: ExPlatUrlBuilder,
     server: MockWebServer,
-): MockWebServerUrlBuilder(exPlatUrlBuilder, server){
+) : MockWebServerUrlBuilder(exPlatUrlBuilder, server) {
     override fun buildUrl(
         platform: String,
         experimentNames: List<String>,
-        anonymousId: String?
+        anonymousId: String?,
     ): HttpUrl {
         return super.buildUrl(platform, experimentNames, anonymousId).newBuilder()
             .host("unknownhost")

@@ -88,7 +88,7 @@ internal class ExperimentRestClientTest {
     fun `fetching assignments from an unknown host is a failure without crash`() = runTest {
         val sut = buildSut(
             this,
-            UnknownHostMockWebServerUrlBuilder(ExPlatUrlBuilder(), server)
+            UnknownHostMockWebServerUrlBuilder(ExPlatUrlBuilder(), server),
         )
 
         val result = sut.fetchAssignments("", emptyList(), "random_id", oAuthToken = null)
@@ -98,7 +98,7 @@ internal class ExperimentRestClientTest {
 
     private fun buildSut(
         scope: TestScope,
-        urlBuilder: MockWebServerUrlBuilder = MockWebServerUrlBuilder(ExPlatUrlBuilder(), server)
+        urlBuilder: MockWebServerUrlBuilder = MockWebServerUrlBuilder(ExPlatUrlBuilder(), server),
     ) = ExperimentRestClient(
         urlBuilder = urlBuilder,
         clock = { TEST_TIMESTAMP },
