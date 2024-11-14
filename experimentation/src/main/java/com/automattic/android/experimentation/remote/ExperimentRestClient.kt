@@ -35,18 +35,24 @@ internal class ExperimentRestClient(
             .build()
 
         return withContext(dispatcher) {
-            okHttpClient.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    Result.failure(IOException("Unexpected code $response"))
-                } else {
-                    runCatching {
-                        val dto = jsonAdapter.fromJson(response.body!!.source())!!
-                        dto.toAssignments(
-                            fetchedAt = clock.currentTimeSeconds(),
-                            anonymousId = anonymousId,
-                        )
+            try {
+                okHttpClient.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        Result.failure(IOException("Unexpected code $response"))
+                    } else {
+                        runCatching {
+                            val dto = jsonAdapter.fromJson(response.body!!.source())!!
+                            dto.toAssignments(
+                                fetchedAt = clock.currentTimeSeconds(),
+                                anonymousId = anonymousId,
+                            )
+                        }
                     }
                 }
+            } catch (e: IOException) {
+                Result.failure(e)
+            } catch (e: IllegalStateException) {
+                Result.failure(e)
             }
         }
     }
