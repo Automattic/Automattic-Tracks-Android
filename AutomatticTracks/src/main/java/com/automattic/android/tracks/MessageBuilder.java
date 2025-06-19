@@ -24,7 +24,6 @@ class MessageBuilder {
     private static final String USER_TYPE_SIMPLENOTE = "simplenote:user_id";
     private static final String USER_TYPE_POCKETCASTS = "pocketcasts:user_id";
     private static final String USER_TYPE_DAYONE = "dayone:user_id";
-    private static final String USER_TYPE_GRAVATAR = "gravatar:user_id";
     private static final String USER_ID_KEY = "_ui";
     private static final String USER_LANG_KEY = "_lg";
     private static final String USER_LOGIN_NAME_KEY = "_ul";
@@ -116,11 +115,6 @@ class MessageBuilder {
                 case DAYONE:
                     eventJSON.put(USER_ID_KEY, event.getUser());
                     eventJSON.put(USER_TYPE_KEY, USER_TYPE_DAYONE);
-                    break;
-            case GRAVATAR:
-                    eventJSON.put(USER_ID_KEY, event.getUser());
-                    eventJSON.put(USER_TYPE_KEY, USER_TYPE_GRAVATAR);
-                    break;
             }
 
             unfolderPropertiesNotAvailableInCommon(event.getUserProperties(), USER_INFO_PREFIX, eventJSON, commonProps);
