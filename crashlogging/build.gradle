@@ -18,7 +18,7 @@ dependencies {
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
     implementation "com.squareup.okhttp3:okhttp:$squareupOkhttpVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
-    compileOnly 'androidx.compose.ui:ui:1.6.8'
+    compileOnly 'androidx.compose.ui:ui:1.6.0'
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.assertj:assertj-core:$assertjVersion"
@@ -39,8 +39,8 @@ android {
         buildConfigField "String", "SENTRY_TEST_PROJECT_DSN", project.properties.get("sentryTestProjectDSN")
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
     lint {
         warningsAsErrors true
