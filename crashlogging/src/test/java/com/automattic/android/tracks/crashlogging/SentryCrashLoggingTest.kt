@@ -23,15 +23,15 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatIllegalStateException
 import org.assertj.core.api.SoftAssertions
 import org.junit.Test
-import org.mockito.kotlin.any
+import org.mockito.Mockito.atLeast
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoInteractions
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.nullableArgumentCaptor
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import java.util.Locale
 
@@ -308,7 +308,7 @@ class SentryCrashLoggingTest {
     @Test
     fun `should map empty values of last exception bundled with an event`() {
         val mockedShouldDropException = mock<(String, String, String) -> Boolean>()
-        whenever(mockedShouldDropException.invoke(any(), any(), any())).thenReturn(true)
+        whenever(mockedShouldDropException.invoke(anyOrNull(), anyOrNull(), anyOrNull())).thenReturn(true)
         dataProvider.shouldDropException = mockedShouldDropException
         prepareSut()
 
