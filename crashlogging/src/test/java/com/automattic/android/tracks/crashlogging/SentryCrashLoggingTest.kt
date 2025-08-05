@@ -12,6 +12,7 @@ import io.sentry.Hint
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
+import io.sentry.android.core.SentryAndroidOptions
 import io.sentry.protocol.SentryException
 import io.sentry.protocol.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -435,8 +436,8 @@ class SentryCrashLoggingTest {
 
     private val capturedOptions: SentryOptions
         get() = argumentCaptor<(SentryOptions) -> Unit>().let { captor ->
-            verify(mockedWrapper).initialize(any(), captor.capture())
-            SentryOptions().apply(captor.lastValue)
+            verify(mockedWrapper).initialize(anyOrNull(), captor.capture())
+            SentryAndroidOptions().apply(captor.lastValue)
         }
 
     private val capturedUser: User?

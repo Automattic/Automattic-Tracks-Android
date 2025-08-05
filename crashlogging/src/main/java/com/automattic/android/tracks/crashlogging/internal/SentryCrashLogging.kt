@@ -17,6 +17,7 @@ import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.SentryOptions
+import io.sentry.android.core.SentryAndroidOptions
 import io.sentry.android.fragment.FragmentLifecycleIntegration
 import io.sentry.protocol.Mechanism
 import io.sentry.protocol.Message
@@ -38,7 +39,6 @@ internal class SentryCrashLogging constructor(
     private var initialized = false
 
     override fun initialize() {
-        sentryWrapper.initialize(application) { options ->
 
             val (tracesSampleRate, profilesSampleRate) = dataProvider.performanceMonitoringConfig.let {
                 when (it) {
@@ -46,6 +46,7 @@ internal class SentryCrashLogging constructor(
                     is Enabled -> it.sampleRate to it.profilesSampleRate
                 }
             }
+        sentryWrapper.initialize(application) { options: SentryAndroidOptions ->
 
             options.apply {
                 dsn = dataProvider.sentryDSN
@@ -80,6 +81,7 @@ internal class SentryCrashLogging constructor(
                     ErrorSampling.Disabled -> null
                     is ErrorSampling.Enabled -> errorsSampleRate.sampleRate
                 }
+                isAttachAnrThreadDump = true
             }
         }
 
