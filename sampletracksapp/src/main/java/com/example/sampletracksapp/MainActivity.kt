@@ -3,37 +3,31 @@ package com.example.sampletracksapp
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.automattic.android.tracks.crashlogging.CrashLoggingDataProvider
+import com.automattic.android.tracks.crashlogging.CrashLogging
 import com.automattic.android.tracks.crashlogging.CrashLoggingOkHttpInterceptorProvider
-import com.automattic.android.tracks.crashlogging.CrashLoggingProvider
-import com.automattic.android.tracks.crashlogging.CrashLoggingUser
-import com.automattic.android.tracks.crashlogging.EventLevel
-import com.automattic.android.tracks.crashlogging.ExtraKnownKey
 import com.automattic.android.tracks.crashlogging.JsException
 import com.automattic.android.tracks.crashlogging.JsExceptionCallback
 import com.automattic.android.tracks.crashlogging.JsExceptionStackTraceElement
-import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig
-import com.automattic.android.tracks.crashlogging.ReleaseName
 import com.automattic.android.tracks.crashlogging.RequestFormatter
 import com.automattic.android.tracks.crashlogging.performance.PerformanceMonitoringRepositoryProvider
 import com.automattic.android.tracks.crashlogging.performance.PerformanceTransactionRepository
 import com.automattic.android.tracks.crashlogging.performance.TransactionOperation
 import com.automattic.android.tracks.crashlogging.performance.TransactionStatus
 import com.example.sampletracksapp.databinding.ActivityMainBinding
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.flowOf
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
-import java.util.Locale
 import java.util.concurrent.TimeoutException
 
 class MainActivity : AppCompatActivity() {
     val transactionRepository: PerformanceTransactionRepository =
         PerformanceMonitoringRepositoryProvider.createInstance()
+
+    val crashLogging: CrashLogging
+        get() = (application as SampleApp).crashLogging
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
