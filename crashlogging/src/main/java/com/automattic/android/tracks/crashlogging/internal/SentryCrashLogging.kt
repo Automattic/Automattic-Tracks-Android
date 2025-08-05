@@ -13,6 +13,7 @@ import com.automattic.android.tracks.crashlogging.PerformanceMonitoringConfig.En
 import com.automattic.android.tracks.crashlogging.ReleaseName
 import com.automattic.android.tracks.crashlogging.eventLevel
 import io.sentry.Breadcrumb
+import io.sentry.ProfileLifecycle
 import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
@@ -39,13 +40,6 @@ internal class SentryCrashLogging constructor(
     private var initialized = false
 
     override fun initialize() {
-
-            val (tracesSampleRate, profilesSampleRate) = dataProvider.performanceMonitoringConfig.let {
-                when (it) {
-                    Disabled -> null to null
-                    is Enabled -> it.sampleRate to it.profilesSampleRate
-                }
-            }
         sentryWrapper.initialize(application) { options: SentryAndroidOptions ->
 
             options.apply {
@@ -54,8 +48,17 @@ internal class SentryCrashLogging constructor(
                 (dataProvider.releaseName as? ReleaseName.SetByApplication)?.let {
                     release = it.name
                 }
-                this.tracesSampleRate = tracesSampleRate
-                this.profilesSampleRate = profilesSampleRate
+
+                when (val config = dataProvider.performanceMonitoringConfig) {
+                    Disabled -> Unit // no-op
+                    is Enabled -> {
+                        this.tracesSampleRate = config.sampleRate
+                        this.profilesSampleRate = config.profilesSampleRate
+                        profileLifecycle = ProfileLifecycle.TRACE
+                        isStartProfilerOnAppStart = true
+                    }
+                }
+
                 isDebug = dataProvider.enableCrashLoggingLogs
                 setTag("locale", dataProvider.locale?.language ?: "unknown")
                 setBeforeBreadcrumb { breadcrumb, _ ->
