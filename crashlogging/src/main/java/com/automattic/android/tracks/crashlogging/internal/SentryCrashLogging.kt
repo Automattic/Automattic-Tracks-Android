@@ -53,7 +53,7 @@ internal class SentryCrashLogging constructor(
                     Disabled -> Unit // no-op
                     is Enabled -> {
                         this.tracesSampleRate = config.sampleRate
-                        this.profilesSampleRate = config.profilesSampleRate
+                        this.profileSessionSampleRate = config.profileSessionSampleRate
                         profileLifecycle = ProfileLifecycle.TRACE
                         isStartProfilerOnAppStart = true
                     }

@@ -116,11 +116,11 @@ sealed class PerformanceMonitoringConfig {
          * Mind that this value is **relative** to [sampleRate] value.
          * Has to be between 0 and 1.
          */
-        val profilesSampleRate: Double = 0.0,
+        val profileSessionSampleRate: Double = 0.0,
     ) : PerformanceMonitoringConfig() {
         init {
             assert(sampleRate in 0.0..1.0)
-            assert(profilesSampleRate in 0.0..1.0)
+            assert(profileSessionSampleRate in 0.0..1.0)
         }
     }
 }
