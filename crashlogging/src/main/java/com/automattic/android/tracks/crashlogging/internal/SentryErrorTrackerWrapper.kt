@@ -4,14 +4,14 @@ import android.app.Application
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryEvent
-import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
+import io.sentry.android.core.SentryAndroidOptions
 import io.sentry.protocol.User
 
 internal class SentryErrorTrackerWrapper {
 
-    fun initialize(context: Application, configure: (SentryOptions) -> Unit) {
-        SentryAndroid.init(context) { options ->
+    fun initialize(context: Application, configure: (SentryAndroidOptions) -> Unit) {
+        SentryAndroid.init(context) { options: SentryAndroidOptions ->
             configure(options)
         }
     }
