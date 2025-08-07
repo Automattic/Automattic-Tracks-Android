@@ -4,6 +4,7 @@
     <application
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:name=".SampleApp"
         android:supportsRtl="true"
         android:theme="@style/Theme.AutomatticTracksAndroid">
         <activity android:name=".MainActivity"

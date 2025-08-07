@@ -1,10 +1,16 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id "io.sentry.android.gradle" version "5.8.0"
 }
 
 repositories {
     google()
+}
+
+sentry {
+    debug = true
+    autoInstallation.enabled = false
 }
 
 android {
@@ -24,6 +30,12 @@ android {
     buildFeatures {
         buildConfig true
         viewBinding = true
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("debug")
+        }
     }
 
     compileOptions {

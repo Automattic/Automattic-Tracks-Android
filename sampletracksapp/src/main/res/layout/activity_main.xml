@@ -68,4 +68,16 @@
         android:layout_height="wrap_content"
         android:text="Open experimentation tests view" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginVertical="16dp"
+        android:background="@color/black" />
+
+    <Button
+        android:id="@+id/forceAnr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Force ANR" />
+
 </LinearLayout>
