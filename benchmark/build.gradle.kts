@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     id("androidx.benchmark")
     id("org.jetbrains.kotlin.android")
+    id("com.autonomousapps.dependency-analysis")
 }
 
 repositories {

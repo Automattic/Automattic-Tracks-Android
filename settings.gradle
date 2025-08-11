@@ -3,7 +3,7 @@ pluginManagement {
     gradle.ext.kspVersion = '2.0.21-1.0.28'
     gradle.ext.agpVersion = '8.12.0'
     gradle.ext.automatticPublishToS3Version = '0.8.0'
-    gradle.ext.dependencyAnalysisVersion = '1.33.0'
+    gradle.ext.dependencyAnalysisVersion = '2.19.0'
 
     plugins {
         id 'com.android.library' version gradle.ext.agpVersion

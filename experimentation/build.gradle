@@ -4,6 +4,7 @@ plugins {
     id 'com.automattic.android.publish-to-s3'
     id "com.google.devtools.ksp"
     id "org.jetbrains.kotlinx.binary-compatibility-validator"
+    id "com.autonomousapps.dependency-analysis"
 }
 
 repositories {

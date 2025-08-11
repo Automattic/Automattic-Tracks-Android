@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id "io.sentry.android.gradle" version "5.8.0"
+    id "com.autonomousapps.dependency-analysis"
 }
 
 repositories {
