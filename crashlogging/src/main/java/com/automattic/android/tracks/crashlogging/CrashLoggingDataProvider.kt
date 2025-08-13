@@ -116,6 +116,19 @@ sealed class PerformanceMonitoringConfig {
          * Mind that this value is **relative** to [sampleRate] value.
          * Has to be between 0 and 1.
          */
+        @Deprecated(
+            "Use [profileSessionSampleRate] instead. This configuration option is no longer used.",
+            level = DeprecationLevel.HIDDEN
+        )
+        val profilesSampleRate: Double = 0.0,
+        /**
+         * Provides sample rate for recording profiles.
+         * Indicates how often a profiling session is recorded.
+         * This value is evaluated once per session, not per transaction.
+         * Has to be between 0 and 1.
+         * For example, a value of 0.5 means 50% of sessions will have profiling enabled.
+         * Replaces the deprecated [profilesSampleRate] option, which was transaction-scoped.
+         */
         val profileSessionSampleRate: Double = 0.0,
     ) : PerformanceMonitoringConfig() {
         init {
