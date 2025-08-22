@@ -16,7 +16,6 @@ dependencies {
     implementation "io.sentry:sentry-okhttp"
     implementation "io.sentry:sentry-android-fragment"
     implementation "io.sentry:sentry-compose-android"
-    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
     implementation "com.squareup.okhttp3:okhttp:$squareupOkhttpVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
     compileOnly 'androidx.compose.ui:ui:1.6.0'
@@ -25,7 +24,6 @@ dependencies {
     testImplementation "org.assertj:assertj-core:$assertjVersion"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesVersion"
-
 }
 
 android {
