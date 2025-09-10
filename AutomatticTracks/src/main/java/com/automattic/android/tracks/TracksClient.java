@@ -32,7 +32,6 @@ import java.util.List;
 public class TracksClient {
     public static final String LOGTAG = "NosaraClient";
 
-    protected static final String DEFAULT_USER_AGENT = "Nosara Client for Android";
     protected static final String NOSARA_REST_API_ENDPOINT_URL_V1_1 = "https://public-api.wordpress.com/rest/v1.1/";
     protected static final int DEFAULT_EVENTS_QUEUE_THRESHOLD = 9;
     protected static final int DEFAULT_EVENTS_QUEUE_MAX_SIZE = 10000;
@@ -53,7 +52,7 @@ public class TracksClient {
     final static String PROTOCOL_CONTENT_TYPE = String.format("application/json; charset=%s", PROTOCOL_CHARSET);
 
     private final Context mContext;
-    private String mUserAgent = TracksClient.DEFAULT_USER_AGENT;
+    private final String mUserAgent;
     private String mRestApiEndpointURL;
     private final String mTracksRestEndpointURL;
     private DeviceInformation deviceInformation;
@@ -89,6 +88,7 @@ public class TracksClient {
         mRestApiEndpointURL = NOSARA_REST_API_ENDPOINT_URL_V1_1;
         mTracksRestEndpointURL = getAbsoluteURL("tracks/record");
         deviceInformation = new DeviceInformation(ctx);
+        mUserAgent = deviceInformation.getDeviceUserAgent();
 
         // This is the thread that reads from the "fast" (in-memory) input events queue and actually writes data to the DB.
         Thread bufferCopyThread = new Thread(new Runnable() {
@@ -493,11 +493,6 @@ public class TracksClient {
         }
         // prepend the endpoint
         return String.format("%s%s", mRestApiEndpointURL, url);
-    }
-
-    //Sets the User-Agent header to be sent with each future request.
-    public void setUserAgent(String userAgent) {
-        mUserAgent = userAgent;
     }
 
     public String getUserAgent() {
