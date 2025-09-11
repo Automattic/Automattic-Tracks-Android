@@ -63,6 +63,8 @@ import java.util.Locale;
     private final JSONObject mImmutableDeviceInfoJSON;
     private final boolean mIsPortraitDefault;
 
+    private final String deviceUserAgent;
+
     public DeviceInformation(Context context) {
         mContext = context;
 
@@ -144,6 +146,9 @@ import java.util.Locale;
                 Log.w(LOGTAG, "Unable to call getRealSize: " + exception.getMessage());
             }
         }
+
+        // pre-populate Tracks client user agent
+        deviceUserAgent = String.format("Nosara Client for %s; %s/%s", mModel, mOs, mOsVersion);
 
         // pre-populate the JSON version with immutable info here for performance reasons
         mImmutableDeviceInfoJSON = new JSONObject();
@@ -405,5 +410,9 @@ import java.util.Locale;
 
     public String getDeviceLanguage() {
         return mDeviceLanguage;
+    }
+
+    public String getDeviceUserAgent() {
+        return deviceUserAgent;
     }
 }
