@@ -1,0 +1,74 @@
+plugins {
+    id "com.android.library"
+    id "org.jetbrains.kotlin.android"
+    id 'com.automattic.android.publish-to-s3'
+    id "com.autonomousapps.dependency-analysis"
+}
+
+repositories {
+    google()
+    mavenCentral()
+    maven {
+        url 'https://a8c-libs.s3.amazonaws.com/android'
+        content {
+            includeGroup 'com.automattic.android'
+            includeGroup 'com.automattic'
+        }
+    }
+}
+
+dependencies {
+    // OkHttp for interceptor
+    implementation "com.squareup.okhttp3:okhttp:4.12.0"
+
+    // Coroutines for async I/O
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinxCoroutinesVersion"
+
+    // EncryptedLogging for secure upload
+    // TODO: Add version once we know the latest published version
+    // implementation "com.automattic:encryptedlogging:<version>"
+
+    // Test dependencies
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesVersion"
+    testImplementation "com.squareup.okhttp3:mockwebserver:4.12.0"
+}
+
+android {
+    namespace "com.automattic.android.tracks.networklogger"
+    android.buildFeatures.buildConfig = true
+
+    compileSdk rootProject.compileSdkVersion
+    defaultConfig {
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+    lint {
+        warningsAsErrors true
+        lintConfig file("${project.rootDir}/config/lint/lint.xml")
+        disable 'ObsoleteLintCustomCheck'
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from components.release
+
+                groupId 'com.automattic.tracks'
+                artifactId 'networklogger'
+                // version is set by 'publish-to-s3' plugin
+            }
+        }
+    }
+}
