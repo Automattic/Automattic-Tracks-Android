@@ -192,7 +192,7 @@ internal class ExPlatTest {
             urlBuilder = MockWebServerUrlBuilder(ExPlatUrlBuilder(), server),
             dispatcher = dispatcher,
             clock = clock,
-            okHttpClient = OkHttpClient(),
+            callFactory = OkHttpClient(),
         )
         tempCache = FileBasedCache(
             createTempDirectory().toFile(),

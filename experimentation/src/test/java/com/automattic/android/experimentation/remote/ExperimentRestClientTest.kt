@@ -103,7 +103,7 @@ internal class ExperimentRestClientTest {
         urlBuilder = urlBuilder,
         clock = { TEST_TIMESTAMP },
         dispatcher = StandardTestDispatcher(scope.testScheduler),
-        okHttpClient = OkHttpClient(),
+        callFactory = OkHttpClient(),
     )
 
     companion object {
