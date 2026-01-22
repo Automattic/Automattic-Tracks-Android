@@ -7,12 +7,12 @@ import com.automattic.android.experimentation.remote.AssignmentsDtoMapper.toAssi
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
+import okhttp3.Call
 import okhttp3.Request
 import java.io.IOException
 
 internal class ExperimentRestClient(
-    private val okHttpClient: OkHttpClient,
+    private val callFactory: Call.Factory,
     private val moshi: Moshi = Moshi.Builder().build(),
     private val jsonAdapter: AssignmentsDtoJsonAdapter = AssignmentsDtoJsonAdapter(moshi),
     private val urlBuilder: UrlBuilder = ExPlatUrlBuilder(),
@@ -36,7 +36,7 @@ internal class ExperimentRestClient(
 
         return withContext(dispatcher) {
             try {
-                okHttpClient.newCall(request).execute().use { response ->
+                callFactory.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
                         Result.failure(IOException("Unexpected code $response"))
                     } else {

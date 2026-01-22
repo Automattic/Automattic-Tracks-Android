@@ -10,6 +10,7 @@ import com.automattic.android.experimentation.repository.AssignmentsRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import okhttp3.Call
 import okhttp3.OkHttpClient
 import java.io.File
 
@@ -54,7 +55,7 @@ public interface VariationsRepository {
          * @param logger to log errors and debug information.
          * @param failFast If `true`, [getVariation] will throw exceptions if the [VariationsRepository] is not initialized or if the [Experiment] is not found.
          * @param cacheDir Directory to use for caching the [Assignments]. This directory should be private to the application.
-         * @param okhttpClient to use for network operations. Defaults to a new instance of [OkHttpClient].
+         * @param callFactory to use for network operations. Defaults to a new instance of [OkHttpClient].
          * @param coroutineScope to use for async operations. Preferably a [CoroutineScope] that is tied to the lifecycle of the application.
          * @param dispatcher to use for async I/O operations. Defaults to [Dispatchers.IO].
          */
@@ -64,7 +65,7 @@ public interface VariationsRepository {
             logger: ExperimentLogger,
             failFast: Boolean,
             cacheDir: File,
-            okhttpClient: OkHttpClient = OkHttpClient(),
+            callFactory: Call.Factory = OkHttpClient(),
             coroutineScope: CoroutineScope,
             dispatcher: CoroutineDispatcher = Dispatchers.IO,
         ): VariationsRepository {
@@ -76,7 +77,7 @@ public interface VariationsRepository {
                 failFast = failFast,
                 assignmentsValidator = AssignmentsValidator(SystemClock()),
                 repository = AssignmentsRepository(
-                    ExperimentRestClient(dispatcher = dispatcher, okHttpClient = okhttpClient),
+                    ExperimentRestClient(dispatcher = dispatcher, callFactory = callFactory),
                     FileBasedCache(
                         cacheDir,
                         dispatcher = dispatcher,
