@@ -41,6 +41,9 @@ proguard/
 gradle.properties
 !/benchmark/gradle.properties
 
+# Kotlin compiler sessions
+.kotlin/
+
 # OS X generated file
 .DS_Store
 
