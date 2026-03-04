@@ -1,10 +1,10 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to coding agents when working with code in this repository.
 
 ## Project Overview
 
-Android client library for tracking user events (Nosara/Tracks), A/B testing (ExPlat), and crash logging (Sentry). Published to Automattic's S3 Maven repository. Used internally by Automattic mobile apps.
+Android client library for tracking user events (Nosara/Tracks), A/B testing (ExPlat), and crash logging (Sentry). Published to Automattic's S3 Maven repository. Used internally by Automattic mobile apps. Includes a `sampletracksapp` app module that can be used for manual testing.
 
 ## Build Commands
 
@@ -12,9 +12,13 @@ Android client library for tracking user events (Nosara/Tracks), A/B testing (Ex
 ./gradlew assembleDebug              # Build all modules
 ./gradlew testDebugUnitTest          # Run all unit tests
 ./gradlew lintDebug                  # Run lint checks
-./gradlew ciktlint                   # Run ktlint checks
+./gradlew ktlint                     # Check Kotlin code style (custom task from ktlint.gradle)
+./gradlew ktlintFormat               # Fix Kotlin code style deviations (custom task from ktlint.gradle)
+./gradlew ciktlint                   # Same as ktlint but with checkstyle XML output for CI (custom task from ktlint.gradle)
 ./gradlew buildHealth                # Dependency analysis
-./gradlew :experimentation:apiCheck  # Binary compatibility check (experimentation only)
+./gradlew :experimentation:apiCheck  # Binary compatibility check (`experimentation` module only)
+./gradlew :benchmark:assembleDebugAndroidTest    # Build benchmark instrumented tests
+./gradlew :benchmark:connectedDebugAndroidTest   # Run benchmark instrumented tests on a connected device
 ```
 
 To run a single test class:
@@ -36,7 +40,7 @@ Three independently published library modules plus a sample app and benchmark mo
 | `experimentation` | `com.automattic.tracks:experimentation` | Kotlin | ExPlat A/B testing SDK with file-based caching and OkHttp REST client |
 | `crashlogging` | `com.automattic.tracks:crashlogging` | Kotlin | Sentry-based crash logging, performance monitoring, and error tracking |
 | `sampletracksapp` | — | Kotlin | Sample app demonstrating library usage |
-| `benchmark` | — | Kotlin | Performance benchmarking |
+| `benchmark` | — | Kotlin | Performance benchmarking via `androidTest` instrumented tests using `androidx.benchmark` |
 
 ### Key architectural details
 
@@ -54,10 +58,9 @@ Three independently published library modules plus a sample app and benchmark mo
 
 ## Important Gotchas
 
-- Build files use **Groovy** (`build.gradle`, `settings.gradle`), not Kotlin DSL
+- Build files use **Groovy** (`build.gradle`, `settings.gradle`), not Kotlin DSL — except `benchmark/build.gradle.kts` which uses Kotlin DSL
 - Dependency versions are defined as `ext` properties in root `build.gradle`, not a version catalog
 - Lint treats warnings as errors (`warningsAsErrors true`). `AutomatticTracks` uses a lint baseline file
-- CI runs `./gradlew lint ciktlint` (not `lintDebug`) — the `ciktlint` task is from `ktlint.gradle`
 
 ## Publishing
 
