@@ -31,12 +31,6 @@ proguard/
 # Log Files
 *.log
 
-# Intellij project files
-*.iml
-*.ipr
-*.iws
-.idea/
-
 # private config file
 gradle.properties
 !/benchmark/gradle.properties
