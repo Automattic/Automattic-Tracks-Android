@@ -60,7 +60,6 @@ Three independently published library modules plus a sample app and benchmark mo
 
 - Build files use **Groovy** (`build.gradle`, `settings.gradle`), not Kotlin DSL — except `benchmark/build.gradle.kts` which uses Kotlin DSL
 - Dependency versions are defined as `ext` properties in root `build.gradle`, not a version catalog
-- Lint treats warnings as errors (`warningsAsErrors true`). `AutomatticTracks` uses a lint baseline file
 
 ## Publishing
 
