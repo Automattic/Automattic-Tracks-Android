@@ -1,0 +1,9 @@
+.gradle/
+build/
+!build/reports/
+*/build/
+!*/build/reports/
+!*/build/outputs/
+!*/build/test-results/
+local.properties
+gradle.properties
