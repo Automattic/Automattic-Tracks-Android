@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
@@ -64,6 +65,30 @@ internal class FileBasedCacheTest {
         val sut = fileBasedCache(this)
 
         sut.clear()
+    }
+
+    @Test
+    fun `getting assignments from empty file returns null and deletes the file`() = runTest {
+        val cacheDir = tempDir.newFolder()
+        val assignmentsFile = File(cacheDir, "assignments.json").apply { createNewFile() }
+        val sut = fileBasedCache(this, cacheDir = cacheDir)
+
+        val result = sut.getAssignments()
+
+        assertNull(result)
+        assertFalse(assignmentsFile.exists())
+    }
+
+    @Test
+    fun `getting assignments from corrupted file returns null and deletes the file`() = runTest {
+        val cacheDir = tempDir.newFolder()
+        val assignmentsFile = File(cacheDir, "assignments.json").apply { writeText("{corrupted") }
+        val sut = fileBasedCache(this, cacheDir = cacheDir)
+
+        val result = sut.getAssignments()
+
+        assertNull(result)
+        assertFalse(assignmentsFile.exists())
     }
 
     @Test
