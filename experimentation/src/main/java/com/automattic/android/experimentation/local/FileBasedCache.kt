@@ -32,7 +32,7 @@ internal class FileBasedCache(
         scope.launch {
             withContext(context = dispatcher) {
                 runCatching { latestMutable = getAssignments() }
-                    .onFailure { logger.e("Failed to load cached assignments: $it") }
+                    .onFailure { throwable -> logger.e("Failed to load cached assignments", throwable) }
             }
         }
     }
@@ -47,8 +47,8 @@ internal class FileBasedCache(
                     return@withContext null
                 }
                 runCatching { cacheDtoJsonAdapter.fromJson(json) }
-                    .onFailure {
-                        logger.e("Cached assignments file is corrupted, deleting: ${file.path}")
+                    .onFailure { throwable ->
+                        logger.e("Cached assignments file is corrupted, deleting: ${file.path}", throwable)
                         file.delete()
                     }
                     .getOrNull()
