@@ -31,20 +31,33 @@ internal class FileBasedCache(
     init {
         scope.launch {
             withContext(context = dispatcher) {
-                latestMutable = getAssignments()
+                runCatching { latestMutable = getAssignments() }
+                    .onFailure { throwable -> logger.e("Failed to load cached assignments", throwable) }
             }
         }
     }
 
     suspend fun getAssignments(): Assignments? {
         return withContext(dispatcher) {
-            assignmentsFile.takeIf { it.exists() }?.readText()?.let { json: String ->
-                val fromJson = cacheDtoJsonAdapter.fromJson(json) ?: return@let null
-
-                fromJson.assignmentsDto.toAssignments(
-                    fetchedAt = fromJson.fetchedAt,
-                    anonymousId = fromJson.anonymousId,
-                )
+            assignmentsFile.takeIf { it.exists() }?.let { file ->
+                val json = file.readText()
+                if (json.isBlank()) {
+                    logger.e("Cached assignments file is empty, deleting: ${file.path}")
+                    file.delete()
+                    return@withContext null
+                }
+                runCatching { cacheDtoJsonAdapter.fromJson(json) }
+                    .onFailure { throwable ->
+                        logger.e("Cached assignments file is corrupted, deleting: ${file.path}", throwable)
+                        file.delete()
+                    }
+                    .getOrNull()
+                    ?.let { fromJson ->
+                        fromJson.assignmentsDto.toAssignments(
+                            fetchedAt = fromJson.fetchedAt,
+                            anonymousId = fromJson.anonymousId,
+                        )
+                    }
             }
         }
     }
