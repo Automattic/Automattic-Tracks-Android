@@ -65,7 +65,11 @@ class MessageBuilder {
         }
 
         try {
-            commonProps.put(USER_LANG_KEY, ctx.getResources().getConfiguration().locale.toString());
+            // Locale can be transiently null on some Samsung devices during a locale change.
+            Locale locale = ctx.getResources().getConfiguration().locale;
+            if (locale != null) {
+                commonProps.put(USER_LANG_KEY, locale.toString());
+            }
         } catch (JSONException e) {
             Log.e(TracksClient.LOGTAG, "Cannot add the device language property to request commons.");
         }
