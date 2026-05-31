@@ -6,3 +6,14 @@ updates:
       interval: "daily"
     allow:
       - dependency-name: "io.sentry:sentry-bom"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
